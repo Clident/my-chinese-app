@@ -1,27 +1,26 @@
-import { generateText, Output } from 'ai'
+﻿import { generateText, Output } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { z } from 'zod'
-import { getRandomDialogue } from '../../../lib/hsk-fallback-data'
-
-const google = createGoogleGenerativeAI({
-  apiKey: process.env.GEMINI_API_KEY || '',
-})
+import { getRandomDialogue } from '@/lib/hsk-fallback-data'
 
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  let level = 'HSK1-2'
-
-  const body = await request.json().catch(() => ({}))
-  level = body.level || 'HSK1-2'
-
-  if (!process.env.GEMINI_API_KEY) {
-    console.log('No Key, using fallback')
-    return Response.json({ ...getRandomDialogue(level as any), isFallback: true })
-  }
+  let level: any = 'HSK1-2'
 
   try {
+    const body = await request.json().catch(() => ({}))
+    level = body?.level || 'HSK1-2'
+
+    const apiKey = process.env.GEMINI_API_KEY
+    if (!apiKey || apiKey.length < 10) {
+      console.error('API Key Missing or Invalid')
+      return Response.json({ ...getRandomDialogue(level), isFallback: true, msg: 'No Key' })
+    }
+
+    const google = createGoogleGenerativeAI({ apiKey })
+
     const { output } = await generateText({
       model: google('gemini-2.0-flash'),
       output: Output.object({
@@ -43,38 +42,29 @@ export async function POST(request: Request) {
           })),
         }),
       }),
-      prompt: `你是一个中文老师。请严格按照下面的 JSON 结构返回结果，不能有额外解释或文本：
-{
-  "scene": "...",
-  "sceneEmoji": "...",
-  "lines": [
-    {"speaker": "...", "chinese": "...", "pinyin": "...", "japanese": "..."}
-  ],
-  "keyVocabulary": [
-    {"word": "...", "pinyin": "...", "meaning": "...", "writingNote": "...", "usageNote": "..."}
-  ]
-}
-请生成符合 HSK レベル「${level}」的日常会話。writingNote と usageNote は必要に応じて null にしてください。`,
+      prompt: `あなたは中国語教師です。HSK${level}レベルの短い会話を1つ作成してください。JSONで出力。`,
     })
-
-    if (!output || typeof output !== 'object') {
-      throw new Error('AI returned invalid output')
-    }
 
     return Response.json({ ...output, isFallback: false })
 
   } catch (error: any) {
-    console.error('Final Backend Catch:', error?.message ?? error)
+    console.error('CRITICAL_BACKEND_ERROR:', error?.message)
 
-    // 强制返回标准的 JSON 结构兜底数据，确保前端不报 SyntaxError
-    const fallback = getRandomDialogue(level as any)
-    return new Response(JSON.stringify({
-      ...fallback,
-      isFallback: true,
-      error: true,
-    }), {
-      status: 200,
-      headers: { 'Content-Type': 'application/json' },
-    })
+    try {
+      const fallback = getRandomDialogue(level)
+      return new Response(JSON.stringify({
+        ...fallback,
+        isFallback: true,
+        error_info: error?.message,
+      }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    } catch (_innerError) {
+      return new Response(JSON.stringify({ scene: 'Error', lines: [] }), {
+        status: 200,
+        headers: { 'Content-Type': 'application/json' },
+      })
+    }
   }
 }
