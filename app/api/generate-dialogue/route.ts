@@ -1,39 +1,24 @@
 import { generateText, Output } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { z } from 'zod'
-import { NextResponse } from 'next/server'
-import { getRandomDialogue, type HSKLevel } from '@/lib/hsk-fallback-data'
+import { getRandomDialogue } from '../../../lib/hsk-fallback-data'
 
 const google = createGoogleGenerativeAI({
   apiKey: process.env.GEMINI_API_KEY || '',
 })
 
-// 增加一个简单的内存熔断器：如果报错，5分钟内不准再调 API
-let isCircuitBroken = false;
-let lastErrorTime = 0;
+export const runtime = 'nodejs'
+export const dynamic = 'force-dynamic'
 
 export async function POST(request: Request) {
-  // 重点 1: 必须使用 await，且增加 try-catch 防止解析空 body 报错
-  let level: HSKLevel = 'HSK1-2';
-  try {
-    const body = await request.json(); 
-    level = (body.level as HSKLevel) || 'HSK1-2';
-  } catch (e) {
-    console.log('[Server] No JSON body found, using default level');
-  }
+  let level = 'HSK1-2'
 
-  const now = Date.now();
+  const body = await request.json().catch(() => ({}))
+  level = body.level || 'HSK1-2'
 
-  // 1. 熔断保护逻辑
-  if (isCircuitBroken && now - lastErrorTime < 5 * 60 * 1000) {
-    console.log('[Server] Circuit Open: Returning Fallback');
-    return NextResponse.json({ ...getRandomDialogue(level), isFallback: true, offlineMode: true });
-  }
-
-  // 2. 检查环境变量
   if (!process.env.GEMINI_API_KEY) {
-    console.warn('[Server] No API Key found, using Fallback');
-    return NextResponse.json({ ...getRandomDialogue(level), isFallback: true });
+    console.log('No Key, using fallback')
+    return Response.json({ ...getRandomDialogue(level as any), isFallback: true })
   }
 
   try {
@@ -72,19 +57,24 @@ export async function POST(request: Request) {
 请生成符合 HSK レベル「${level}」的日常会話。writingNote と usageNote は必要に応じて null にしてください。`,
     })
 
-    return NextResponse.json({ ...output, isFallback: false })
+    if (!output || typeof output !== 'object') {
+      throw new Error('AI returned invalid output')
+    }
+
+    return Response.json({ ...output, isFallback: false })
 
   } catch (error: any) {
-    console.error('[Server] API Error:', error.message);
-    
-    // 3. 遇到 429 错误时触发熔断
-    if (error.status === 429 || error.message?.includes('429')) {
-      isCircuitBroken = true;
-      lastErrorTime = now;
-    }
-    
-    // 强制返回标准的 JSON 格式兜底数据，确保前端不报 SyntaxError
-    const fallback = getRandomDialogue(level);
-    return NextResponse.json({ ...fallback, isFallback: true, errorReason: error.message }, { status: 200 });
+    console.error('Final Backend Catch:', error?.message ?? error)
+
+    // 强制返回标准的 JSON 结构兜底数据，确保前端不报 SyntaxError
+    const fallback = getRandomDialogue(level as any)
+    return new Response(JSON.stringify({
+      ...fallback,
+      isFallback: true,
+      error: true,
+    }), {
+      status: 200,
+      headers: { 'Content-Type': 'application/json' },
+    })
   }
 }

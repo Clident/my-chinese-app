@@ -58,7 +58,13 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: stri
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level: currentLevel }),
       })
-      
+
+      if (!res.ok) {
+        console.error('Server crashed, using local UI emergency fallback', res.status)
+        setLoadingMessage('AI先生が休憩中...（オフラインデータを使用）')
+        return
+      }
+
       const data = await res.json()
       setDialogue(data)
     } catch (error) {
