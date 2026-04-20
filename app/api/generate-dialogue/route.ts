@@ -1,6 +1,7 @@
 import { generateText, Output } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { z } from 'zod'
+import { NextResponse } from 'next/server'
 import { getRandomDialogue, type HSKLevel } from '@/lib/hsk-fallback-data'
 
 const google = createGoogleGenerativeAI({
@@ -26,13 +27,13 @@ export async function POST(request: Request) {
   // 1. 熔断保护逻辑
   if (isCircuitBroken && now - lastErrorTime < 5 * 60 * 1000) {
     console.log('[Server] Circuit Open: Returning Fallback');
-    return Response.json({ ...getRandomDialogue(level), isFallback: true, offlineMode: true });
+    return NextResponse.json({ ...getRandomDialogue(level), isFallback: true, offlineMode: true });
   }
 
   // 2. 检查环境变量
   if (!process.env.GEMINI_API_KEY) {
     console.warn('[Server] No API Key found, using Fallback');
-    return Response.json({ ...getRandomDialogue(level), isFallback: true });
+    return NextResponse.json({ ...getRandomDialogue(level), isFallback: true });
   }
 
   try {
@@ -57,11 +58,21 @@ export async function POST(request: Request) {
           })),
         }),
       }),
-      // 这里建议把之前写好的 getLevelPrompt 逻辑放回来，或者直接写 Prompt
-      prompt: `あなたは中国語教師です。HSKレベル「${level}」向けに、日常会話を作成してください。`,
+      prompt: `你是一个中文老师。请严格按照下面的 JSON 结构返回结果，不能有额外解释或文本：
+{
+  "scene": "...",
+  "sceneEmoji": "...",
+  "lines": [
+    {"speaker": "...", "chinese": "...", "pinyin": "...", "japanese": "..."}
+  ],
+  "keyVocabulary": [
+    {"word": "...", "pinyin": "...", "meaning": "...", "writingNote": "...", "usageNote": "..."}
+  ]
+}
+请生成符合 HSK レベル「${level}」的日常会話。writingNote と usageNote は必要に応じて null にしてください。`,
     })
 
-    return Response.json({ ...output, isFallback: false })
+    return NextResponse.json({ ...output, isFallback: false })
 
   } catch (error: any) {
     console.error('[Server] API Error:', error.message);
@@ -74,9 +85,6 @@ export async function POST(request: Request) {
     
     // 强制返回标准的 JSON 格式兜底数据，确保前端不报 SyntaxError
     const fallback = getRandomDialogue(level);
-    return new Response(JSON.stringify({ ...fallback, isFallback: true, errorReason: error.message }), {
-      status: 200, // 关键：给前端 200，让它能正常解析 JSON
-      headers: { 'Content-Type': 'application/json' }
-    });
+    return NextResponse.json({ ...fallback, isFallback: true, errorReason: error.message }, { status: 200 });
   }
 }

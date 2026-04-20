@@ -51,7 +51,7 @@ export function SceneDialogue() {
         // Wait and retry once
         await new Promise(resolve => setTimeout(resolve, 3000))
         const retryRes = await fetch('/api/generate-dialogue', { method: 'POST' })
-        const retryData = await retryRes.json()
+        const retryData = retryRes.ok ? await retryRes.json() : { error: 'Server error' }
         if (!retryData.error) {
           setDialogue(retryData)
           // Cache the result
@@ -63,7 +63,7 @@ export function SceneDialogue() {
         return
       }
 
-      const data = await res.json()
+      const data = res.ok ? await res.json() : { error: 'Server error' }
       
       if (data.error) {
         console.warn('API returned error:', data.error)
@@ -111,12 +111,12 @@ export function SceneDialogue() {
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ lines: dialogue.lines, scene: dialogue.scene }),
         })
-        const retryData = await retryRes.json()
+        const retryData = retryRes.ok ? await retryRes.json() : { explanation: 'サービスエラーが発生しました。' }
         setExplanation(retryData.explanation)
         return
       }
       
-      const data = await res.json()
+      const data = res.ok ? await res.json() : { explanation: 'サービスエラーが発生しました。' }
       setExplanation(data.explanation)
     } catch (error) {
       console.error('Failed to get explanation:', error)
