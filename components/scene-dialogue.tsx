@@ -1,11 +1,28 @@
 'use client'
 
-import { useState, useRef, useCallback } from 'react'
+import { useState, useRef, useCallback, useEffect } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { DialogueLine } from './dialogue-line'
 import { RefreshCw, BookOpen, X } from 'lucide-react'
+
+// --- 拼音上色组件 ---
+const PinyinText = ({ pinyin }: { pinyin: string }) => {
+  const words = pinyin.split(' ');
+  return (
+    <div className="flex flex-wrap gap-x-1">
+      {words.map((word, i) => {
+        let color = 'text-slate-500'; 
+        if (/[āēīōūǖ]/.test(word)) color = 'text-red-500';   // 1声
+        else if (/[áéíóúǘ]/.test(word)) color = 'text-orange-500'; // 2声
+        else if (/[ǎěǐǒǔǚ]/.test(word)) color = 'text-green-600';  // 3声
+        else if (/[àèìòùǜ]/.test(word)) color = 'text-blue-500';   // 4声
+        return <span key={i} className={`${color} font-medium`}>{word}</span>;
+      })}
+    </div>
+  );
+};
 
 interface Line {
   speaker: string
@@ -20,77 +37,42 @@ interface Dialogue {
   lines: Line[]
 }
 
-// Client-side cache for dialogues
-const dialogueCache = new Map<string, Dialogue>()
-
-export function SceneDialogue() {
+export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: string }) {
   const [dialogue, setDialogue] = useState<Dialogue | null>(null)
   const [explanation, setExplanation] = useState<string | null>(null)
   const [isLoading, setIsLoading] = useState(false)
   const [isExplaining, setIsExplaining] = useState(false)
   const [showExplanation, setShowExplanation] = useState(false)
   const [loadingMessage, setLoadingMessage] = useState<string>('')
-  const [isRetrying, setIsRetrying] = useState(false)
-  
-  // Track used scenes to avoid immediate repetition
-  const usedScenesRef = useRef<Set<string>>(new Set())
 
+  // 生成对话：加入 [currentLevel] 依赖，确保等级切换时函数能获取最新值
   const generateDialogue = useCallback(async () => {
     setIsLoading(true)
     setExplanation(null)
     setShowExplanation(false)
     setLoadingMessage('AI先生が対話を考え中...')
-    setIsRetrying(false)
 
     try {
-      const res = await fetch('/api/generate-dialogue', { method: 'POST' })
+      const res = await fetch('/api/generate-dialogue', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ level: currentLevel }),
+      })
       
-      if (res.status === 429) {
-        setLoadingMessage('AI先生が考え中です...（稍等片刻）')
-        setIsRetrying(true)
-        // Wait and retry once
-        await new Promise(resolve => setTimeout(resolve, 3000))
-        const retryRes = await fetch('/api/generate-dialogue', { method: 'POST' })
-        const retryData = retryRes.ok ? await retryRes.json() : { error: 'Server error' }
-        if (!retryData.error) {
-          setDialogue(retryData)
-          // Cache the result
-          if (retryData.scene) {
-            dialogueCache.set(retryData.scene, retryData)
-            usedScenesRef.current.add(retryData.scene)
-          }
-        }
-        return
-      }
-
-      const data = res.ok ? await res.json() : { error: 'Server error' }
-      
-      if (data.error) {
-        console.warn('API returned error:', data.error)
-        setLoadingMessage('AI先生が考え中です...（稍等片刻）')
-        return
-      }
-
+      const data = await res.json()
       setDialogue(data)
-      
-      // Cache the dialogue by scene
-      if (data.scene) {
-        dialogueCache.set(data.scene, data)
-        usedScenesRef.current.add(data.scene)
-      }
     } catch (error) {
       console.error('Failed to generate dialogue:', error)
-      setLoadingMessage('接続エラー、もう一度お試しください')
+      setLoadingMessage('接続エラー、オフラインデータを使用中')
     } finally {
       setIsLoading(false)
-      setIsRetrying(false)
     }
-  }, [])
+  }, [currentLevel])
 
-  // Get cached dialogue if available (for potential future use)
-  const getCachedDialogue = useCallback((scene: string): Dialogue | null => {
-    return dialogueCache.get(scene) || null
-  }, [])
+  // 关键：监听 currentLevel，只要用户在外面点了切换按钮，这里就自动刷新
+  useEffect(() => {
+    generateDialogue()
+  }, [currentLevel, generateDialogue])
 
   const explainGrammar = async () => {
     if (!dialogue) return
@@ -102,25 +84,10 @@ export function SceneDialogue() {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ lines: dialogue.lines, scene: dialogue.scene }),
       })
-      
-      if (res.status === 429) {
-        setExplanation('AI先生が考え中です...（稍等片刻）少々お待ちください。')
-        await new Promise(resolve => setTimeout(resolve, 3000))
-        const retryRes = await fetch('/api/explain-grammar', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ lines: dialogue.lines, scene: dialogue.scene }),
-        })
-        const retryData = retryRes.ok ? await retryRes.json() : { explanation: 'サービスエラーが発生しました。' }
-        setExplanation(retryData.explanation)
-        return
-      }
-      
-      const data = res.ok ? await res.json() : { explanation: 'サービスエラーが発生しました。' }
+      const data = await res.json()
       setExplanation(data.explanation)
     } catch (error) {
-      console.error('Failed to get explanation:', error)
-      setExplanation('解説の取得に失敗しました。もう一度お試しください。')
+      setExplanation('解説の取得に失敗しました。')
     } finally {
       setIsExplaining(false)
     }
@@ -128,52 +95,58 @@ export function SceneDialogue() {
 
   return (
     <div className="w-full max-w-md mx-auto space-y-4">
-      <Card className="shadow-sm">
-        <CardHeader className="pb-3">
+      <Card className="shadow-md border-slate-200">
+        <CardHeader className="pb-3 border-b border-slate-100 mb-4">
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
               <span className="text-2xl">{dialogue?.sceneEmoji || '🗣️'}</span>
-              <h2 className="text-lg font-medium text-foreground">
+              <h2 className="text-lg font-bold text-slate-800">
                 {dialogue?.scene || 'シーンを選択'}
               </h2>
             </div>
             <Button
-              variant="outline"
+              variant="default"
               size="sm"
               onClick={generateDialogue}
               disabled={isLoading}
-              className="gap-1.5"
+              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4"
             >
-              {isLoading ? (
-                <Spinner className="h-4 w-4" />
-              ) : (
-                <RefreshCw className="h-4 w-4" />
-              )}
+              {isLoading ? <Spinner className="h-4 w-4" /> : <RefreshCw className="h-4 w-4 mr-1.5" />}
               {dialogue ? '次へ' : '開始'}
             </Button>
           </div>
         </CardHeader>
-        <CardContent className="pt-0">
-          {!dialogue && !isLoading && (
-            <div className="py-12 text-center text-muted-foreground">
-              <p className="text-sm">「開始」をクリックして</p>
-              <p className="text-sm">AI対話を生成しましょう</p>
+        <CardContent>
+          {isLoading ? (
+            <div className="py-16 flex flex-col items-center gap-3">
+              <Spinner className="h-8 w-8 text-blue-500" />
+              <p className="text-slate-500 animate-pulse">{loadingMessage}</p>
             </div>
-          )}
-          {isLoading && (
-            <div className="py-12 flex flex-col items-center gap-3">
-              <Spinner className="h-6 w-6 text-primary" />
-              <p className="text-sm text-muted-foreground">{loadingMessage}</p>
-              {isRetrying && (
-                <p className="text-xs text-muted-foreground/70">リトライ中...</p>
-              )}
-            </div>
-          )}
-          {dialogue && !isLoading && (
-            <div className="space-y-0">
+          ) : dialogue ? (
+            <div className="space-y-6">
               {dialogue.lines.map((line, index) => (
-                <DialogueLine key={index} {...line} />
+                <div key={index} className="flex flex-col gap-1">
+                  <div className="flex items-start gap-2">
+                    <span className="text-xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded mt-1">
+                      {line.speaker}
+                    </span>
+                    <p className="text-xl font-medium text-slate-900">
+                      {line.chinese}
+                    </p>
+                  </div>
+                  <div className="pl-8 text-sm">
+                    {/* 调用拼音上色组件 */}
+                    <PinyinText pinyin={line.pinyin} />
+                  </div>
+                  <p className="pl-8 text-sm text-slate-500 italic">
+                    {line.japanese}
+                  </p>
+                </div>
               ))}
+            </div>
+          ) : (
+            <div className="py-16 text-center text-slate-400">
+              「開始」をクリックしてください
             </div>
           )}
         </CardContent>
@@ -182,47 +155,25 @@ export function SceneDialogue() {
       {dialogue && !isLoading && (
         <Button
           variant="secondary"
-          className="w-full gap-2"
+          className="w-full gap-2 py-6 bg-white border-2 border-slate-100 hover:bg-slate-50 shadow-sm text-slate-700"
           onClick={explainGrammar}
           disabled={isExplaining}
         >
-          {isExplaining ? (
-            <Spinner className="h-4 w-4" />
-          ) : (
-            <BookOpen className="h-4 w-4" />
-          )}
-          解説を見る
+          {isExplaining ? <Spinner className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
+          AI先生の解説を見る
         </Button>
       )}
 
       {showExplanation && (
-        <Card className="shadow-sm">
-          <CardHeader className="pb-2">
-            <div className="flex items-center justify-between">
-              <h3 className="text-base font-medium text-foreground">文法解説</h3>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="h-7 w-7"
-                onClick={() => setShowExplanation(false)}
-              >
-                <X className="h-4 w-4" />
-              </Button>
-            </div>
+        <Card className="shadow-lg border-blue-100 bg-blue-50/30">
+          <CardHeader className="pb-2 flex flex-row items-center justify-between">
+            <h3 className="text-base font-bold text-blue-800">文法・単語解説</h3>
+            <Button variant="ghost" size="icon" onClick={() => setShowExplanation(false)}>
+              <X className="h-4 w-4" />
+            </Button>
           </CardHeader>
-          <CardContent className="pt-0">
-            {isExplaining ? (
-              <div className="py-8 flex flex-col items-center gap-3">
-                <Spinner className="h-5 w-5 text-primary" />
-                <p className="text-sm text-muted-foreground">AI先生が考え中です...（稍等片刻）</p>
-              </div>
-            ) : (
-              <div className="prose prose-sm max-w-none text-foreground">
-                <div className="whitespace-pre-wrap text-sm leading-relaxed">
-                  {explanation}
-                </div>
-              </div>
-            )}
+          <CardContent className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
+            {isExplaining ? 'AI先生が解説を書いています...' : explanation}
           </CardContent>
         </Card>
       )}

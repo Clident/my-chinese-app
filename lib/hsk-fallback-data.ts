@@ -236,10 +236,14 @@ export function getDialoguesByLevel(level: HSKLevel): FallbackDialogue[] {
     default:
       return hsk12Dialogues
   }
+
+
 }
 
 // Get a random dialogue for a specific level
 export function getRandomDialogue(level: HSKLevel): FallbackDialogue {
-  const dialogues = getDialoguesByLevel(level)
-  return dialogues[Math.floor(Math.random() * dialogues.length)]
+  const dialogues = getDialoguesByLevel(level); // 确保拿到了对应等级的数组
+  // 核心：使用 Math.random() 随机抽取
+  const randomIndex = Math.floor(Math.random() * dialogues.length);
+  return dialogues[randomIndex];
 }
