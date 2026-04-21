@@ -1,4 +1,4 @@
-﻿import { generateText, Output } from 'ai'
+import { generateText } from 'ai'
 import { createGoogleGenerativeAI } from '@ai-sdk/google'
 import { z } from 'zod'
 import { getRandomDialogue } from '@/lib/hsk-fallback-data'
@@ -6,65 +6,89 @@ import { getRandomDialogue } from '@/lib/hsk-fallback-data'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+const DialogueSchema = z.object({
+  scene: z.string(),
+  sceneEmoji: z.string(),
+  lines: z.array(z.object({
+    speaker: z.string(),
+    chinese: z.string(),
+    pinyin: z.string(),
+    japanese: z.string(),
+  })),
+  keyVocabulary: z.array(z.object({
+    word: z.string(),
+    pinyin: z.string(),
+    meaning: z.string(),
+    writingNote: z.string().nullable(),
+    usageNote: z.string().nullable(),
+  })).optional(),
+})
+
+const PROMPT_TEMPLATE = (level: string) => `你是中文老师。请生成一个适合 HSK${level} 级别的中文情景对话。
+要求：
+1. 场景真实自然（如：餐厅、机场、公司等）
+2. 4-6句对话
+3. 每句包含：speaker（角色名，如A/B）、chinese（中文句子）、pinyin（拼音）、japanese（对应日语翻译）
+
+请用以下JSON格式输出，不要添加任何解释或额外文字：
+{
+  "scene": "场景名称",
+  "sceneEmoji": "🎯",
+  "lines": [
+    {"speaker": "A", "chinese": "你好！", "pinyin": "Nǐ hǎo!", "japanese": "こんにちは！"}
+  ]
+}`
+
 export async function POST(request: Request) {
-  let level: any = 'HSK1-2'
+  let level = 'HSK1-2'
 
   try {
     const body = await request.json().catch(() => ({}))
     level = body?.level || 'HSK1-2'
+  } catch {
+    // ignore
+  }
 
-    const apiKey = process.env.GEMINI_API_KEY
-    if (!apiKey || apiKey.length < 10) {
-      console.error('API Key Missing or Invalid')
-      return Response.json({ ...getRandomDialogue(level), isFallback: true, msg: 'No Key' })
-    }
+  const apiKey = process.env.GEMINI_API_KEY
 
+  // 无 Key 或 Key 无效 → 直接走离线数据
+  if (!apiKey || apiKey.trim().length < 10) {
+    console.warn('[generate-dialogue] No valid GEMINI_API_KEY, using fallback')
+    return Response.json({ ...getRandomDialogue(level), isFallback: true })
+  }
+
+  try {
     const google = createGoogleGenerativeAI({ apiKey })
 
-    const { output } = await generateText({
+    const { text } = await generateText({
       model: google('gemini-2.0-flash'),
-      output: Output.object({
-        schema: z.object({
-          scene: z.string(),
-          sceneEmoji: z.string(),
-          lines: z.array(z.object({
-            speaker: z.string(),
-            chinese: z.string(),
-            pinyin: z.string(),
-            japanese: z.string(),
-          })),
-          keyVocabulary: z.array(z.object({
-            word: z.string(),
-            pinyin: z.string(),
-            meaning: z.string(),
-            writingNote: z.string().nullable(),
-            usageNote: z.string().nullable(),
-          })),
-        }),
-      }),
-      prompt: `あなたは中国語教師です。HSK${level}レベルの短い会話を1つ作成してください。JSONで出力。`,
+      prompt: PROMPT_TEMPLATE(level),
+      maxOutputTokens: 2048,
     })
 
-    return Response.json({ ...output, isFallback: false })
+    // 尝试从 AI 返回的文本中提取 JSON
+    const trimmed = text.trim()
+    const jsonStart = trimmed.indexOf('{')
+    const jsonEnd = trimmed.lastIndexOf('}')
+
+    if (jsonStart === -1 || jsonEnd === -1) {
+      throw new Error('AI response does not contain valid JSON')
+    }
+
+    const jsonStr = trimmed.slice(jsonStart, jsonEnd + 1)
+    const raw = JSON.parse(jsonStr)
+
+    const parsed = DialogueSchema.safeParse(raw)
+
+    if (!parsed.success) {
+      console.error('[generate-dialogue] Zod parse error:', parsed.error.message)
+      return Response.json({ ...getRandomDialogue(level), isFallback: true })
+    }
+
+    return Response.json({ ...parsed.data, isFallback: false })
 
   } catch (error: any) {
-    console.error('CRITICAL_BACKEND_ERROR:', error?.message)
-
-    try {
-      const fallback = getRandomDialogue(level)
-      return new Response(JSON.stringify({
-        ...fallback,
-        isFallback: true,
-        error_info: error?.message,
-      }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    } catch (_innerError) {
-      return new Response(JSON.stringify({ scene: 'Error', lines: [] }), {
-        status: 200,
-        headers: { 'Content-Type': 'application/json' },
-      })
-    }
+    console.error('[generate-dialogue] AI error:', error?.message)
+    return Response.json({ ...getRandomDialogue(level), isFallback: true })
   }
 }
