@@ -4,24 +4,21 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
-// Simple in-memory rate limiting (resets on cold start, acceptable for Vercel)
-const rateLimitMap = new Map<string, { count: number; resetTime: number }>()
-const RATE_LIMIT = 10
-const RATE_LIMIT_WINDOW = 60 * 1000
+// 限速：和 generate-dialogue 共用逻辑，55s 冷却
+const lastRequestTime = new Map<string, number>()
+const COOLDOWN_MS = 55_000
 
-function checkRateLimit(ip: string): boolean {
-  const now = Date.now()
-  const record = rateLimitMap.get(ip)
-
-  if (!record || now > record.resetTime) {
-    rateLimitMap.set(ip, { count: 1, resetTime: now + RATE_LIMIT_WINDOW })
-    return true
-  }
-
-  if (record.count >= RATE_LIMIT) return false
-
-  record.count++
-  return true
+function getWaitMs(key: string): number {
+  const last = lastRequestTime.get(key) ?? 0
+  return Math.max(0, COOLDOWN_MS - (Date.now() - last))
+}
+function recordRequest(key: string) {
+  lastRequestTime.set(key, Date.now())
+}
+function extractRetryAfter(error: any): number | null {
+  const msg = error?.message ?? ''
+  const match = msg.match(/retry in ([\d.]+)s/i) ?? msg.match(/Please retry in ([\d.]+)/i)
+  return match ? Math.ceil(parseFloat(match[1]) * 1000) : null
 }
 
 const fallbackExplanation = `**文法ポイント**
@@ -41,20 +38,18 @@ const fallbackExplanation = `**文法ポイント**
 ※ 現在AIサーバーに接続できないため、一般的な解説を表示しています。`
 
 export async function POST(req: Request) {
-  const ip = req.headers.get('x-forwarded-for')
-    || req.headers.get('x-real-ip')
-    || 'unknown'
-
-  if (!checkRateLimit(ip)) {
-    return Response.json(
-      { error: 'Too many requests. Please wait a moment.' },
-      { status: 429 }
-    )
-  }
-
   const apiKey = process.env.GEMINI_API_KEY
   if (!apiKey || apiKey.trim().length < 10) {
     return Response.json({ explanation: fallbackExplanation })
+  }
+
+  // 限速检查
+  const waitMs = getWaitMs(apiKey)
+  if (waitMs > 0) {
+    return Response.json(
+      { explanation: fallbackExplanation, retryAfterSec: Math.ceil(waitMs / 1000) },
+      { headers: { 'Retry-After': String(Math.ceil(waitMs / 1000)) } }
+    )
   }
 
   let lines: any[] = []
@@ -72,17 +67,22 @@ export async function POST(req: Request) {
     .map((line) => `${line.speaker}: ${line.chinese} (${line.pinyin}) - ${line.japanese}`)
     .join('\n')
 
-  try {
-    const google = createGoogleGenerativeAI({ apiKey })
+  const MAX_RETRIES = 3
+  let lastError: any = null
 
-    const { text } = await generateText({
-      model: google('gemini-2.0-flash'),
-      prompt: `你是日本人向けの中国語教師です。以下の「${scene}」での対話について、日本語で詳しく解説してください。
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      recordRequest(apiKey)
+
+      const google = createGoogleGenerativeAI({ apiKey })
+      const { text } = await generateText({
+        model: google('gemini-2.0-flash'),
+        prompt: `你是日本人向けの中国語教師です。以下の「${scene}」での対話について、日本語で詳しく解説してください。
 
 対話：
 ${dialogueText}
 
-以下の点？谢邀能く、簡潔に説明してください：
+以下の点について、簡潔に説明してください：
 
 1. **文法ポイント**：この対話で使われている重要な文法構造を説明してください。
 
@@ -91,13 +91,29 @@ ${dialogueText}
 3. **発音のコツ**：特に注意すべき発音やピンインのポイントがあれば説明してください。
 
 4. **使える表現**：この場面で役立つ追加の表現やフレーズがあれば紹介してください。`,
-      maxOutputTokens: 1500,
-    })
+        maxOutputTokens: 1500,
+      })
 
-    return Response.json({ explanation: text })
+      return Response.json({ explanation: text })
 
-  } catch (error: any) {
-    console.error('[explain-grammar] AI error:', error?.message)
-    return Response.json({ explanation: fallbackExplanation })
+    } catch (error: any) {
+      lastError = error
+      const is429 = error?.statusCode === 429 || /quota|rate.?limit|429/i.test(error?.message ?? '')
+
+      if (is429) {
+        const retryMs = extractRetryAfter(error) ?? COOLDOWN_MS
+        console.warn(`[explain-grammar] 429 on attempt ${attempt}/${MAX_RETRIES}, waiting ${Math.ceil(retryMs / 1000)}s`)
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, retryMs))
+          continue
+        }
+      } else {
+        console.error('[explain-grammar] AI error:', error?.message)
+        break
+      }
+    }
   }
+
+  console.error('[explain-grammar] all retries exhausted:', lastError?.message)
+  return Response.json({ explanation: fallbackExplanation })
 }

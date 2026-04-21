@@ -6,6 +6,23 @@ import { getRandomDialogue } from '@/lib/hsk-fallback-data'
 export const runtime = 'nodejs'
 export const dynamic = 'force-dynamic'
 
+// 简单的请求限速（进程内，Railway 单实例场景够用）
+const lastRequestTime = new Map<string, number>()
+const COOLDOWN_MS = 55_000
+
+function getWaitMs(key: string): number {
+  const last = lastRequestTime.get(key) ?? 0
+  return Math.max(0, COOLDOWN_MS - (Date.now() - last))
+}
+function recordRequest(key: string) {
+  lastRequestTime.set(key, Date.now())
+}
+function extractRetryAfter(error: any): number | null {
+  const msg = error?.message ?? ''
+  const match = msg.match(/retry in ([\d.]+)s/i) ?? msg.match(/Please retry in ([\d.]+)/i)
+  return match ? Math.ceil(parseFloat(match[1]) * 1000) : null
+}
+
 const DialogueSchema = z.object({
   scene: z.string(),
   sceneEmoji: z.string(),
@@ -35,21 +52,19 @@ export async function POST(request: Request) {
   }
 
   const apiKey = process.env.GEMINI_API_KEY
-
-  console.log('[generate-dialogue] env check:', {
-    hasKey: !!apiKey,
-    keyLength: apiKey?.length,
-    keyPrefix: apiKey?.substring(0, 4),
-  })
-
-  // 无 Key → 直接走离线数据，不调 AI
   if (!apiKey || apiKey.trim().length < 10) {
     console.log('[generate-dialogue] no valid API key, using fallback')
     return Response.json({ ...getRandomDialogue(level), isFallback: true })
   }
 
-  if (!apiKey.startsWith('AIza')) {
-    console.warn('[generate-dialogue] API key format suspicious:', apiKey.substring(0, 6))
+  // ① 限速检查：距离上次请求不到 55s → 告诉客户端等多久
+  const waitMs = getWaitMs(apiKey)
+  if (waitMs > 0) {
+    console.log(`[generate-dialogue] rate limited, wait ${Math.ceil(waitMs / 1000)}s`)
+    return Response.json(
+      { ...getRandomDialogue(level), isFallback: true, retryAfterSec: Math.ceil(waitMs / 1000) },
+      { headers: { 'Retry-After': String(Math.ceil(waitMs / 1000)) } }
+    )
   }
 
   const PROMPT = `你是中文老师。请生成一个适合 HSK${level} 级别的中文情景对话。
@@ -67,48 +82,62 @@ export async function POST(request: Request) {
   ]
 }`
 
-  try {
-    const google = createGoogleGenerativeAI({ apiKey })
+  const MAX_RETRIES = 3
+  let lastError: any = null
 
-    const { text } = await generateText({
-      model: google('gemini-2.0-flash'),
-      prompt: PROMPT,
-      maxOutputTokens: 2048,
-    })
+  for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+    try {
+      // ② 记录本次请求时间（调 AI 之前就记，防止并发）
+      recordRequest(apiKey)
 
-    // 从 AI 返回文本中手动提取 JSON
-    const trimmed = text.trim()
-    const jsonStart = trimmed.indexOf('{')
-    const jsonEnd = trimmed.lastIndexOf('}')
+      const google = createGoogleGenerativeAI({ apiKey })
+      const { text } = await generateText({
+        model: google('gemini-2.0-flash'),
+        prompt: PROMPT,
+        maxOutputTokens: 2048,
+      })
 
-    if (jsonStart === -1 || jsonEnd === -1) {
-      throw new Error('AI response does not contain valid JSON')
+      // 从 AI 返回文本中手动提取 JSON
+      const trimmed = text.trim()
+      const jsonStart = trimmed.indexOf('{')
+      const jsonEnd = trimmed.lastIndexOf('}')
+
+      if (jsonStart === -1 || jsonEnd === -1) {
+        throw new Error('AI response does not contain valid JSON')
+      }
+
+      const jsonStr = trimmed.slice(jsonStart, jsonEnd + 1)
+      const raw = JSON.parse(jsonStr)
+      const parsed = DialogueSchema.safeParse(raw)
+
+      if (!parsed.success) {
+        console.error('[generate-dialogue] Zod parse error:', parsed.error.message)
+        return Response.json({ ...getRandomDialogue(level), isFallback: true })
+      }
+
+      return Response.json({ ...parsed.data, isFallback: false })
+
+    } catch (error: any) {
+      lastError = error
+      const is429 = error?.statusCode === 429 || /quota|rate.?limit|429/i.test(error?.message ?? '')
+
+      if (is429) {
+        // ③ 遇到限速：提取 Retry-After，等够了再重试
+        const retryMs = extractRetryAfter(error) ?? COOLDOWN_MS
+        console.warn(`[generate-dialogue] 429 on attempt ${attempt}/${MAX_RETRIES}, waiting ${Math.ceil(retryMs / 1000)}s`)
+        if (attempt < MAX_RETRIES) {
+          await new Promise(r => setTimeout(r, retryMs))
+          continue
+        }
+      } else {
+        // 非限速错误不重试
+        console.error('[generate-dialogue] error:', error?.message)
+        break
+      }
     }
-
-    const jsonStr = trimmed.slice(jsonStart, jsonEnd + 1)
-    const raw = JSON.parse(jsonStr)
-    const parsed = DialogueSchema.safeParse(raw)
-
-    if (!parsed.success) {
-      console.error('[generate-dialogue] Zod parse error:', parsed.error.message)
-      return Response.json({ ...getRandomDialogue(level), isFallback: true })
-    }
-
-    return Response.json({ ...parsed.data, isFallback: false })
-
-  } catch (error: any) {
-    console.error('[generate-dialogue] error:', error?.message)
-    return Response.json({ ...getRandomDialogue(level), isFallback: true })
   }
-}
 
-export async function GET() {
-  const key = process.env.GEMINI_API_KEY
-  return Response.json({
-    version: 'v3-with-debug-log',
-    commit: 'railway-v1',
-    hasKey: !!key,
-    keyLength: key?.length,
-    timestamp: new Date().toISOString(),
-  })
+  // 所有重试都失败 → fallback
+  console.error('[generate-dialogue] all retries exhausted:', lastError?.message)
+  return Response.json({ ...getRandomDialogue(level), isFallback: true })
 }
