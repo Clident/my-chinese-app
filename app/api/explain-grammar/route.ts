@@ -21,19 +21,11 @@ function extractRetryAfter(error: any): number | null {
   return match ? Math.ceil(parseFloat(match[1]) * 1000) : null
 }
 
-const fallbackExplanation = `**文法ポイント**
-この対話では基本的な挨拶と依頼の表現が使われています。「请」(qǐng) は丁寧な依頼を表す重要な表現です。
+const fallbackExplanation = `【語源】
+この対話で使われている基本的な語彙について説明します。
 
-**中日漢字の違い**
-「好的」は日本語の「良い」と似ていますが、中国語では同意や了承を表す返事としてよく使われます。日本語の「はい、わかりました」に相当します。
-
-**発音のコツ**
-声調に注意しましょう。特に第3声は低く抑えてから少し上げる発音です。「你好」の「你」(nǐ) は第3声です。
-
-**使える表現**
-- 谢谢 (xièxie) - ありがとう
-- 不客气 (bú kèqi) - どういたしまして
-- 再见 (zàijiàn) - さようなら
+【使い分け】
+丁寧な依頼には「请」(qǐng) を使い、日常会話ではシンプルな表現が好まれます。
 
 ※ 現在AIサーバーに接続できないため、一般的な解説を表示しています。`
 
@@ -67,6 +59,21 @@ export async function POST(req: Request) {
     .map((line) => `${line.speaker}: ${line.chinese} (${line.pinyin}) - ${line.japanese}`)
     .join('\n')
 
+  // 强制人设 system prompt
+  const systemPrompt = `あなたはプロの中国人教師です。日本人学生に中国語を教えています。
+以下のルールを厳守してください：
+1. 解釈は必ず正確な日本語で行うこと
+2. 嘘をつかないこと
+3. 返信は200文字以内の簡潔なものにすること
+4. 形式は必ず【語源】【使い分け】の2点のみ回答すること`
+
+  const userPrompt = `以下の「${scene}」での対話について、重要な単語や表現を簡潔に解説してください。
+
+対話：
+${dialogueText}
+
+【語源】と【使い分け】の2点について、日本語で簡潔に説明してください。`
+
   const MAX_RETRIES = 3
   let lastError: any = null
 
@@ -77,21 +84,9 @@ export async function POST(req: Request) {
       const google = createGoogleGenerativeAI({ apiKey })
       const { text } = await generateText({
         model: google('gemini-2.0-flash'),
-        prompt: `你是日本人向けの中国語教師です。以下の「${scene}」での対話について、日本語で詳しく解説してください。
-
-対話：
-${dialogueText}
-
-以下の点について、簡潔に説明してください：
-
-1. **文法ポイント**：この対話で使われている重要な文法構造を説明してください。
-
-2. **中日漢字の違い**：日本語と中国語で同じ漢字でも意味や使い方が異なるものがあれば、詳しく説明してください。
-
-3. **発音のコツ**：特に注意すべき発音やピンインのポイントがあれば説明してください。
-
-4. **使える表現**：この場面で役立つ追加の表現やフレーズがあれば紹介してください。`,
-        maxOutputTokens: 1500,
+        system: systemPrompt,
+        prompt: userPrompt,
+        maxOutputTokens: 800,
       })
 
       return Response.json({ explanation: text })

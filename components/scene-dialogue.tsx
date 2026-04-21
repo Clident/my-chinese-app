@@ -1,11 +1,24 @@
 'use client'
 
-import { useState, useRef, useCallback, useEffect } from 'react'
+import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { DialogueLine } from './dialogue-line'
-import { RefreshCw, BookOpen, X } from 'lucide-react'
+import { 
+  RefreshCw, 
+  BookOpen, 
+  X, 
+  Sparkles, 
+  ChevronLeft, 
+  ChevronRight 
+} from 'lucide-react'
+import { 
+  getDialoguesByLevel, 
+  type HSKLevel, 
+  type FallbackDialogue,
+  type KeyVocabulary 
+} from '@/lib/hsk-fallback-data'
 
 // --- 拼音声调着色组件（ruby 结构：汉字上标拼音） ---
 const getTone = (syllable: string): number | null => {
@@ -16,11 +29,9 @@ const getTone = (syllable: string): number | null => {
   return null
 }
 
-// 判断是否为汉字
 const isCJK = (ch: string) => /[\u4e00-\u9fff\u3400-\u4dbf]/.test(ch)
 
 const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
-  // 拼音按空格拆分，去掉标点后纯音节列表
   const pinyins = pinyin.trim().split(/\s+/).map(p => p.replace(/[^āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛa-zA-Zü]/g, ''))
   let pyIdx = 0
 
@@ -28,14 +39,12 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
     <span className="ruby-line">
       {chinese.split('').map((char, i) => {
         if (!isCJK(char)) {
-          // 标点、数字等直接渲染，不加 ruby
           return <span key={i}>{char}</span>
         }
         const py = pinyins[pyIdx] || ''
         pyIdx++
         const tone = getTone(py)
         if (!tone) {
-          // 没检测到声调 = 数据有问题，标红警告
           console.warn(`[RubyLine] tone not detected: char="${char}" pinyin="${py}"`)
         }
         return (
@@ -49,111 +58,177 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
   )
 }
 
-interface Line {
-  speaker: string
-  chinese: string
-  pinyin: string
-  japanese: string
+// 扩展类型，支持 AI 生成的对话
+interface DialogueData extends FallbackDialogue {
+  isAIGenerated?: boolean
+  keyVocabulary?: KeyVocabulary[]
 }
 
-interface Dialogue {
-  scene: string
-  sceneEmoji: string
-  lines: Line[]
-}
-
-export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: string }) {
-  const [dialogue, setDialogue] = useState<Dialogue | null>(null)
+export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKLevel }) {
+  // 本地数据状态
+  const [localDialogues, setLocalDialogues] = useState<FallbackDialogue[]>([])
+  const [currentIndex, setCurrentIndex] = useState(0)
+  const [dialogue, setDialogue] = useState<DialogueData | null>(null)
+  
+  // AI 解说状态
   const [explanation, setExplanation] = useState<string | null>(null)
-  const [isLoading, setIsLoading] = useState(false)
   const [isExplaining, setIsExplaining] = useState(false)
   const [showExplanation, setShowExplanation] = useState(false)
-  const [loadingMessage, setLoadingMessage] = useState<string>('')
-
-  // 生成对话：加入 [currentLevel] 依赖，确保等级切换时函数能获取最新值
-  const generateDialogue = useCallback(async () => {
-    setIsLoading(true)
+  
+  // AI 生成对话状态
+  const [isGenerating, setIsGenerating] = useState(false)
+  
+  // 初始化：加载本地数据（0ms 等待）
+  useEffect(() => {
+    const dialogues = getDialoguesByLevel(currentLevel)
+    setLocalDialogues(dialogues)
+    setCurrentIndex(0)
+    setDialogue(dialogues[0] || null)
     setExplanation(null)
     setShowExplanation(false)
-    setLoadingMessage('AI先生が対話を考え中...')
+  }, [currentLevel])
 
+  // 底部导航：上一条
+  const goToPrev = useCallback(() => {
+    if (currentIndex > 0) {
+      const newIndex = currentIndex - 1
+      setCurrentIndex(newIndex)
+      setDialogue(localDialogues[newIndex])
+      setExplanation(null)
+      setShowExplanation(false)
+    }
+  }, [currentIndex, localDialogues])
+
+  // 底部导航：下一条
+  const goToNext = useCallback(() => {
+    if (currentIndex < localDialogues.length - 1) {
+      const newIndex = currentIndex + 1
+      setCurrentIndex(newIndex)
+      setDialogue(localDialogues[newIndex])
+      setExplanation(null)
+      setShowExplanation(false)
+    }
+  }, [currentIndex, localDialogues])
+
+  // AI 解说（Stale-While-Revalidate）
+  const explainGrammar = useCallback(async () => {
+    if (!dialogue) return
+    
+    setIsExplaining(true)
+    setShowExplanation(true)
+    
+    // 立即显示本地 keyVocabulary 的 notes（0ms）
+    const localNotes = (dialogue.keyVocabulary || [])
+      .map(v => {
+        const parts: string[] = [`**${v.word}** (${v.pinyin}) - ${v.meaning}`]
+        if (v.writingNote) parts.push(`📝 ${v.writingNote}`)
+        if (v.usageNote) parts.push(`💬 ${v.usageNote}`)
+        return parts.join('\n')
+      })
+      .join('\n\n')
+    
+    if (localNotes) {
+      setExplanation(localNotes)
+    } else {
+      setExplanation('解説を準備中...')
+    }
+    
+    try {
+      // 带超时的 AI 请求（4秒）
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 4000)
+      
+      const res = await fetch('/api/explain-grammar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          lines: dialogue.lines, 
+          scene: dialogue.scene 
+        }),
+        signal: controller.signal,
+      })
+      
+      clearTimeout(timeoutId)
+      
+      if (res.ok) {
+        const data = await res.json()
+        if (data.explanation) {
+          setExplanation(data.explanation)
+        }
+      }
+    } catch (error: any) {
+      if (error.name === 'AbortError') {
+        console.log('[explainGrammar] AI timeout, using local notes')
+      } else {
+        console.error('[explainGrammar] Error:', error.message)
+      }
+    } finally {
+      setIsExplaining(false)
+    }
+  }, [dialogue])
+
+  // AI 生成新对话
+  const generateNewDialogue = useCallback(async () => {
+    setIsGenerating(true)
     try {
       const res = await fetch('/api/generate-dialogue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level: currentLevel }),
       })
-
-      if (!res.ok) {
-        console.error('Server crashed, using local UI emergency fallback', res.status)
-        setLoadingMessage('AI先生が休憩中...（オフラインデータを使用）')
-        return
+      
+      if (res.ok) {
+        const data = await res.json()
+        // 创建新的对话对象
+        const newDialogue: DialogueData = {
+          scene: data.scene || 'AI生成',
+          sceneEmoji: data.sceneEmoji || '🤖',
+          lines: data.lines || [],
+          keyVocabulary: data.keyVocabulary || [],
+          isAIGenerated: true,
+        }
+        
+        // 添加到列表末尾并切换过去
+        const updatedList = [...localDialogues, newDialogue]
+        setLocalDialogues(updatedList)
+        setCurrentIndex(updatedList.length - 1)
+        setDialogue(newDialogue)
+        setExplanation(null)
+        setShowExplanation(false)
       }
-
-      const data = await res.json()
-      setDialogue(data)
-    } catch (error) {
-      console.error('Failed to generate dialogue:', error)
-      setLoadingMessage('接続エラー、オフラインデータを使用中')
+    } catch (error: any) {
+      console.error('[generateNewDialogue] Error:', error.message)
     } finally {
-      setIsLoading(false)
+      setIsGenerating(false)
     }
-  }, [currentLevel])
-
-  // 关键：监听 currentLevel，只要用户在外面点了切换按钮，这里就自动刷新
-  useEffect(() => {
-    generateDialogue()
-  }, [currentLevel, generateDialogue])
-
-  const explainGrammar = async () => {
-    if (!dialogue) return
-    setIsExplaining(true)
-    setShowExplanation(true)
-    try {
-      const res = await fetch('/api/explain-grammar', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines: dialogue.lines, scene: dialogue.scene }),
-      })
-      const data = await res.json()
-      setExplanation(data.explanation)
-    } catch (error) {
-      setExplanation('解説の取得に失敗しました。')
-    } finally {
-      setIsExplaining(false)
-    }
-  }
+  }, [currentLevel, localDialogues])
 
   return (
     <div className="w-full max-w-md mx-auto space-y-4">
       <Card className="shadow-md border-slate-200">
-        <CardHeader className="pb-3 border-b border-slate-100 mb-4">
+        <CardHeader className="pb-3 border-b border-slate-100">
           <div className="flex items-center justify-between">
+            {/* 左侧：场景信息 */}
             <div className="flex items-center gap-2">
               <span className="text-2xl">{dialogue?.sceneEmoji || '🗣️'}</span>
               <h2 className="text-lg font-bold text-slate-800">
                 {dialogue?.scene || 'シーンを選択'}
               </h2>
+              {dialogue?.isAIGenerated && (
+                <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">AI</span>
+              )}
             </div>
-            <Button
-              variant="default"
-              size="sm"
-              onClick={generateDialogue}
-              disabled={isLoading}
-              className="bg-blue-600 hover:bg-blue-700 text-white rounded-full px-4"
-            >
-              {isLoading ? <Spinner className="h-4 w-4" /> : <RefreshCw className="h-4 w-4 mr-1.5" />}
-              {dialogue ? '次へ' : '開始'}
-            </Button>
+            
+            {/* 右侧：进度 */}
+            <div className="text-sm text-slate-500 font-mono">
+              {currentIndex + 1} / {localDialogues.length}
+            </div>
           </div>
         </CardHeader>
+        
         <CardContent>
-          {isLoading ? (
-            <div className="py-16 flex flex-col items-center gap-3">
-              <Spinner className="h-8 w-8 text-blue-500" />
-              <p className="text-slate-500 animate-pulse">{loadingMessage}</p>
-            </div>
-          ) : dialogue ? (
+          {/* 对话内容：本地数据秒弹（0ms 等待） */}
+          {dialogue ? (
             <div className="space-y-6">
               {dialogue.lines.map((line, index) => (
                 <div key={index} className="flex flex-col gap-0.5">
@@ -173,34 +248,78 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: stri
             </div>
           ) : (
             <div className="py-16 text-center text-slate-400">
-              「開始」をクリックしてください
+              データを読み込み中...
             </div>
           )}
         </CardContent>
       </Card>
 
-      {dialogue && !isLoading && (
+      {/* 底部导航：大按钮（手机友好） */}
+      <div className="flex gap-3">
         <Button
-          variant="secondary"
-          className="w-full gap-2 py-6 bg-white border-2 border-slate-100 hover:bg-slate-50 shadow-sm text-slate-700"
-          onClick={explainGrammar}
-          disabled={isExplaining}
+          variant="outline"
+          size="lg"
+          className="flex-1 h-14 text-base gap-2"
+          onClick={goToPrev}
+          disabled={currentIndex === 0}
         >
-          {isExplaining ? <Spinner className="h-4 w-4" /> : <BookOpen className="h-4 w-4" />}
-          AI先生の解説を見る
+          <ChevronLeft className="h-5 w-5" />
+          前の会話
         </Button>
+        <Button
+          variant="outline"
+          size="lg"
+          className="flex-1 h-14 text-base gap-2"
+          onClick={goToNext}
+          disabled={currentIndex >= localDialogues.length - 1}
+        >
+          次の会話
+          <ChevronRight className="h-5 w-5" />
+        </Button>
+      </div>
+
+      {/* AI 功能按钮 */}
+      {dialogue && (
+        <div className="space-y-3">
+          {/* AI 解说按钮 */}
+          <Button
+            variant="secondary"
+            className="w-full h-14 gap-2 text-base bg-white border-2 border-slate-100 hover:bg-slate-50 shadow-sm text-slate-700"
+            onClick={explainGrammar}
+            disabled={isExplaining}
+          >
+            {isExplaining ? <Spinner className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />}
+            AI先生の解説を見る
+          </Button>
+
+          {/* AI 生成新对话按钮 */}
+          <Button
+            variant="outline"
+            className="w-full h-14 gap-2 text-base bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-100 hover:from-purple-100 hover:to-blue-100 text-purple-700"
+            onClick={generateNewDialogue}
+            disabled={isGenerating}
+          >
+            {isGenerating ? <Spinner className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+            AIで新しい会話を生成
+          </Button>
+        </div>
       )}
 
+      {/* 解说面板 */}
       {showExplanation && (
         <Card className="shadow-lg border-blue-100 bg-blue-50/30">
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <h3 className="text-base font-bold text-blue-800">文法・単語解説</h3>
-            <Button variant="ghost" size="icon" onClick={() => setShowExplanation(false)}>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={() => setShowExplanation(false)}
+            >
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {isExplaining ? 'AI先生が解説を書いています...' : explanation}
+            {isExplaining && !explanation ? '解説を準備中...' : explanation || '解説がありません'}
           </CardContent>
         </Card>
       )}
