@@ -148,6 +148,7 @@
 .ruby-line ruby rt.tone-2 { color: #F97316; } /* 橙 - 2声 */
 .ruby-line ruby rt.tone-3 { color: #16A34A; } /* 緑 - 3声 */
 .ruby-line ruby rt.tone-4 { color: #3B82F6; } /* 青 - 4声 */
+.ruby-line ruby rt.tone-missing { color: #FF0000; text-decoration: underline; } /* 检测失败 - 红色下划线警告 */
 
 /* 兼容：非 ruby 的单独拼音行 */
 .pinyin-tone {

@@ -71,7 +71,9 @@ export async function POST(request: Request) {
 要求：
 1. 场景真实自然（如：餐厅、机场、公司等）
 2. 4-6句对话
-3. 每句包含：speaker（角色名，如A/B）、chinese（中文句子）、pinyin（拼音）、japanese（对应日语翻译）
+3. 每句包含：speaker（角色名，如A/B）、chinese（中文句子）、pinyin（带声调符号的拼音）、japanese（对应日语翻译）
+
+【重要】pinyin 必须使用带声调符号的拼音，例如：Nǐ hǎo（不是 Ni3 hao3），mā（1声），má（2声），mǎ（3声），mà（4声）。每个汉字都必须有对应的带声调拼音。
 
 请用以下JSON格式输出，不要添加任何解释或额外文字：
 {

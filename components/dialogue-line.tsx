@@ -12,18 +12,28 @@ const getTone = (syllable: string): number | null => {
   return null
 }
 
+const isCJK = (ch: string) => /[\u4e00-\u9fff\u3400-\u4dbf]/.test(ch)
+
 const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
-  const chars = chinese.split('')
-  const pinyins = pinyin.trim().split(/\s+/)
+  const pinyins = pinyin.trim().split(/\s+/).map(p => p.replace(/[^āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛa-zA-Zü]/g, ''))
+  let pyIdx = 0
+
   return (
     <span className="ruby-line">
-      {chars.map((char, i) => {
-        const py = pinyins[i] || ''
+      {chinese.split('').map((char, i) => {
+        if (!isCJK(char)) {
+          return <span key={i}>{char}</span>
+        }
+        const py = pinyins[pyIdx] || ''
+        pyIdx++
         const tone = getTone(py)
+        if (!tone) {
+          console.warn(`[RubyLine] tone not detected: char="${char}" pinyin="${py}"`)
+        }
         return (
           <ruby key={i}>
             {char}
-            <rt className={tone ? `tone-${tone}` : ''}>{py}</rt>
+            <rt className={tone ? `tone-${tone}` : 'tone-missing'}>{py}</rt>
           </ruby>
         )
       })}

@@ -16,18 +16,32 @@ const getTone = (syllable: string): number | null => {
   return null
 }
 
+// 判断是否为汉字
+const isCJK = (ch: string) => /[\u4e00-\u9fff\u3400-\u4dbf]/.test(ch)
+
 const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
-  const chars = chinese.split('')
-  const pinyins = pinyin.trim().split(/\s+/)
+  // 拼音按空格拆分，去掉标点后纯音节列表
+  const pinyins = pinyin.trim().split(/\s+/).map(p => p.replace(/[^āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛa-zA-Zü]/g, ''))
+  let pyIdx = 0
+
   return (
     <span className="ruby-line">
-      {chars.map((char, i) => {
-        const py = pinyins[i] || ''
+      {chinese.split('').map((char, i) => {
+        if (!isCJK(char)) {
+          // 标点、数字等直接渲染，不加 ruby
+          return <span key={i}>{char}</span>
+        }
+        const py = pinyins[pyIdx] || ''
+        pyIdx++
         const tone = getTone(py)
+        if (!tone) {
+          // 没检测到声调 = 数据有问题，标红警告
+          console.warn(`[RubyLine] tone not detected: char="${char}" pinyin="${py}"`)
+        }
         return (
           <ruby key={i}>
             {char}
-            <rt className={tone ? `tone-${tone}` : ''}>{py}</rt>
+            <rt className={tone ? `tone-${tone}` : 'tone-missing'}>{py}</rt>
           </ruby>
         )
       })}
