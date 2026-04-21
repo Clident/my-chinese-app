@@ -36,9 +36,20 @@ export async function POST(request: Request) {
 
   const apiKey = process.env.GEMINI_API_KEY
 
+  console.log('[generate-dialogue] env check:', {
+    hasKey: !!apiKey,
+    keyLength: apiKey?.length,
+    keyPrefix: apiKey?.substring(0, 4),
+  })
+
   // 无 Key → 直接走离线数据，不调 AI
   if (!apiKey || apiKey.trim().length < 10) {
+    console.log('[generate-dialogue] no valid API key, using fallback')
     return Response.json({ ...getRandomDialogue(level), isFallback: true })
+  }
+
+  if (!apiKey.startsWith('AIza')) {
+    console.warn('[generate-dialogue] API key format suspicious:', apiKey.substring(0, 6))
   }
 
   const PROMPT = `你是中文老师。请生成一个适合 HSK${level} 级别的中文情景对话。
@@ -92,9 +103,12 @@ export async function POST(request: Request) {
 }
 
 export async function GET() {
+  const key = process.env.GEMINI_API_KEY
   return Response.json({
-    version: 'v2-force-redeploy',
-    commit: 'd1fadf2',
+    version: 'v3-with-debug-log',
+    commit: 'railway-v1',
+    hasKey: !!key,
+    keyLength: key?.length,
     timestamp: new Date().toISOString(),
   })
 }
