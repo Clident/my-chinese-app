@@ -24,7 +24,24 @@ const DialogueSchema = z.object({
   })).optional(),
 })
 
-const PROMPT_TEMPLATE = (level: string) => `你是中文老师。请生成一个适合 HSK${level} 级别的中文情景对话。
+export async function POST(request: Request) {
+  let level = 'HSK1-2'
+
+  try {
+    const body = await request.json().catch(() => ({}))
+    level = body?.level || 'HSK1-2'
+  } catch {
+    // ignore
+  }
+
+  const apiKey = process.env.GEMINI_API_KEY
+
+  // 无 Key → 直接走离线数据，不调 AI
+  if (!apiKey || apiKey.trim().length < 10) {
+    return Response.json({ ...getRandomDialogue(level), isFallback: true })
+  }
+
+  const PROMPT = `你是中文老师。请生成一个适合 HSK${level} 级别的中文情景对话。
 要求：
 1. 场景真实自然（如：餐厅、机场、公司等）
 2. 4-6句对话
@@ -39,34 +56,16 @@ const PROMPT_TEMPLATE = (level: string) => `你是中文老师。请生成一个
   ]
 }`
 
-export async function POST(request: Request) {
-  let level = 'HSK1-2'
-
-  try {
-    const body = await request.json().catch(() => ({}))
-    level = body?.level || 'HSK1-2'
-  } catch {
-    // ignore
-  }
-
-  const apiKey = process.env.GEMINI_API_KEY
-
-  // 无 Key 或 Key 无效 → 直接走离线数据
-  if (!apiKey || apiKey.trim().length < 10) {
-    console.warn('[generate-dialogue] No valid GEMINI_API_KEY, using fallback')
-    return Response.json({ ...getRandomDialogue(level), isFallback: true })
-  }
-
   try {
     const google = createGoogleGenerativeAI({ apiKey })
 
     const { text } = await generateText({
       model: google('gemini-2.0-flash'),
-      prompt: PROMPT_TEMPLATE(level),
+      prompt: PROMPT,
       maxOutputTokens: 2048,
     })
 
-    // 尝试从 AI 返回的文本中提取 JSON
+    // 从 AI 返回文本中手动提取 JSON
     const trimmed = text.trim()
     const jsonStart = trimmed.indexOf('{')
     const jsonEnd = trimmed.lastIndexOf('}')
@@ -77,7 +76,6 @@ export async function POST(request: Request) {
 
     const jsonStr = trimmed.slice(jsonStart, jsonEnd + 1)
     const raw = JSON.parse(jsonStr)
-
     const parsed = DialogueSchema.safeParse(raw)
 
     if (!parsed.success) {
@@ -88,7 +86,7 @@ export async function POST(request: Request) {
     return Response.json({ ...parsed.data, isFallback: false })
 
   } catch (error: any) {
-    console.error('[generate-dialogue] AI error:', error?.message)
+    console.error('[generate-dialogue] error:', error?.message)
     return Response.json({ ...getRandomDialogue(level), isFallback: true })
   }
 }
