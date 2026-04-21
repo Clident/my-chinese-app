@@ -131,49 +131,5 @@
   }
 }
 
-/* ============================================
-   对话行 ruby 布局 — Flexbox 方案
-   ============================================ */
-
-/* 每一行对话的容器 */
-.dialog-line {
-  display: flex;
-  flex-wrap: wrap;        /* 自动换行 */
-  align-items: flex-end; /* 底部对齐 */
-  gap: 8px 4px;          /* 行间距 8px，字间距 4px */
-  margin-bottom: 20px;
-  line-height: 1;
-}
-
-/* 每一个字+拼音的小组 */
-.char-unit {
-  display: flex;
-  flex-direction: column; /* 纵向排列：上拼音下汉字 */
-  align-items: center;    /* 水平居中 */
-  justify-content: flex-end;
-}
-
-/* 拼音样式 */
-.pinyin {
-  font-size: 14px;
-  font-weight: bold;
-  margin-bottom: 4px;     /* 拼音和汉字拉开 4px 距离 */
-  white-space: nowrap;    /* 拼音不换行 */
-  font-family: Arial, 'Helvetica Neue', sans-serif;
-  line-height: 1;
-}
-
-/* 汉字样式 */
-.kanji {
-  font-size: 28px;
-  color: #333;
-  line-height: 1;
-  font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
-}
-
-/* 声调颜色（直接覆盖 .pinyin） */
-.pinyin.t1 { color: #ff4d4f !important; }  /* 1声：红 */
-.pinyin.t2 { color: #ffa940 !important; }  /* 2声：橙 */
-.pinyin.t3 { color: #73d13d !important; }  /* 3声：绿 */
-.pinyin.t4 { color: #40a9ff !important; } /* 4声：蓝 */
-.pinyin.t-missing { color: #ff4d4f !important; text-decoration: underline; }
+/* 标点占位：保持与其他汉字同高 */
+.placeholder-dot { display: inline-block; width: 0.8em; }

@@ -20,41 +20,114 @@ import {
   type KeyVocabulary 
 } from '@/lib/hsk-fallback-data'
 
-// --- 拼音声调着色组件（ruby 结构：汉字上标拼音） ---
-const getTone = (syllable: string): number | null => {
+// ============================================================
+// 类型定义
+// ============================================================
+
+interface CharItem {
+  char: string
+  py: string
+  tone: number // 1-4，或 0 表示轻声/未识别
+}
+
+interface Line {
+  speaker: string
+  chinese: string
+  pinyin: string
+  japanese: string
+}
+
+// ============================================================
+// 核心工具：把两个字符串"缝合"成 CharItem[]，消除 split 对位隐患
+// ============================================================
+
+const getTone = (syllable: string): number => {
   if (/[āēīōūǖĀĒĪŌŪǕ]/.test(syllable)) return 1
   if (/[áéíóúǘÁÉÍÓÚǗ]/.test(syllable)) return 2
   if (/[ǎěǐǒǔǚǍĚǏǑǓǙ]/.test(syllable)) return 3
   if (/[àèìòùǜÀÈÌÒÙǛ]/.test(syllable)) return 4
-  return null
+  return 0
 }
 
 const isCJK = (ch: string) => /[\u4e00-\u9fff\u3400-\u4dbf]/.test(ch)
 
-const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
-  const pinyins = pinyin.trim().split(/\s+/).map(p => p.replace(/[^āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛa-zA-Zü]/g, ''))
-  let pyIdx = 0
+/**
+ * 将 chinese + pinyin 两个字符串合并为 CharItem[]。
+ * 标点符号直接返回 { char, py: '', tone: 0 }，不消耗拼音位。
+ */
+const prepareData = (chinese: string, pinyin: string): CharItem[] => {
+  const pinyins = pinyin
+    .trim()
+    .split(/\s+/)
+    .map(p =>
+      p.replace(/[^āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛa-zA-Zü]/g, '')
+    )
 
+  let pyIdx = 0
+  return chinese.split('').map(char => {
+    if (!isCJK(char)) {
+      // 标点：不消耗拼音位
+      return { char, py: '', tone: 0 }
+    }
+    const py = pinyins[pyIdx] || ''
+    pyIdx++
+    return { char, py, tone: py ? getTone(py) : 0 }
+  })
+}
+
+// ============================================================
+// RubyLine 组件 — 纯展示，只接收 CharItem[]
+// ============================================================
+
+const TONE_COLOR: Record<number, string> = {
+  1: '#ff4d4f',
+  2: '#ffa940',
+  3: '#73d13d',
+  4: '#40a9ff',
+  0: '#8c8c8c',
+}
+
+const RubyLine = ({ items }: { items: CharItem[] }) => {
   return (
-    <span className="dialog-line">
-      {chinese.split('').map((char, i) => {
-        if (!isCJK(char)) {
-          return <span key={i} className="kanji">{char}</span>
+    <span className="flex flex-wrap items-end gap-x-1 gap-y-3">
+      {items.map((item, i) => {
+        // 标点：直接渲染，字号稍小
+        if (!item.py) {
+          return (
+            <span
+              key={i}
+              className="text-[1.6rem] leading-none text-gray-700"
+            >
+              {item.char}
+            </span>
+          )
         }
-        const py = pinyins[pyIdx] || ''
-        pyIdx++
-        const tone = getTone(py)
-        const toneClass = tone ? `t${tone}` : 't-missing'
         return (
-          <span key={i} className="char-unit">
-            <span className={`pinyin ${toneClass}`}>{py}</span>
-            <span className="kanji">{char}</span>
+          <span
+            key={i}
+            className="flex flex-col items-center justify-end leading-none"
+          >
+            {/* 拼音 */}
+            <span
+              className="text-sm font-bold leading-none mb-1 select-none"
+              style={{ color: TONE_COLOR[item.tone] ?? '#8c8c8c' }}
+            >
+              {item.py}
+            </span>
+            {/* 汉字 */}
+            <span className="text-[1.6rem] leading-none text-gray-800">
+              {item.char}
+            </span>
           </span>
         )
       })}
     </span>
   )
 }
+
+// ============================================================
+// 主组件
+// ============================================================
 
 // 扩展类型，支持 AI 生成的对话
 interface DialogueData extends FallbackDialogue {
@@ -235,7 +308,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                       {line.speaker}
                     </span>
                     <p className="font-medium font-chinese">
-                      <RubyLine chinese={line.chinese} pinyin={line.pinyin} />
+                      <RubyLine items={prepareData(line.chinese, line.pinyin)} />
                     </p>
                   </div>
                   <p className="pl-8 text-sm text-slate-500 italic">
