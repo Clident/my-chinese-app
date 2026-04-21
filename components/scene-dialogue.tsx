@@ -5,151 +5,39 @@ import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { DialogueLine } from './dialogue-line'
-import { 
-  RefreshCw, 
-  BookOpen, 
-  X, 
-  Sparkles, 
-  ChevronLeft, 
-  ChevronRight 
+import {
+  BookOpen,
+  X,
+  Sparkles,
+  ChevronLeft,
+  ChevronRight,
 } from 'lucide-react'
-import { 
-  getDialoguesByLevel, 
-  type HSKLevel, 
+import {
+  getDialoguesByLevel,
+  type HSKLevel,
   type FallbackDialogue,
-  type KeyVocabulary 
+  type KeyVocabulary,
 } from '@/lib/hsk-fallback-data'
 
 // ============================================================
-// 类型定义
-// ============================================================
-
-interface CharItem {
-  char: string
-  py: string
-  tone: number // 1-4，或 0 表示轻声/未识别
-}
-
-interface Line {
-  speaker: string
-  chinese: string
-  pinyin: string
-  japanese: string
-}
-
-// ============================================================
-// 核心工具：把两个字符串"缝合"成 CharItem[]，消除 split 对位隐患
-// ============================================================
-
-const getTone = (syllable: string): number => {
-  if (/[āēīōūǖĀĒĪŌŪǕ]/.test(syllable)) return 1
-  if (/[áéíóúǘÁÉÍÓÚǗ]/.test(syllable)) return 2
-  if (/[ǎěǐǒǔǚǍĚǏǑǓǙ]/.test(syllable)) return 3
-  if (/[àèìòùǜÀÈÌÒÙǛ]/.test(syllable)) return 4
-  return 0
-}
-
-const isCJK = (ch: string) => /[\u4e00-\u9fff\u3400-\u4dbf]/.test(ch)
-
-/**
- * 将 chinese + pinyin 两个字符串合并为 CharItem[]。
- * 标点符号直接返回 { char, py: '', tone: 0 }，不消耗拼音位。
- */
-const prepareData = (chinese: string, pinyin: string): CharItem[] => {
-  const pinyins = pinyin
-    .trim()
-    .split(/\s+/)
-    .map(p =>
-      p.replace(/[^āáǎàēéěèīíǐìōóǒòūúǔùǖǘǚǜĀÁǍÀĒÉĚÈĪÍǏÌŌÓǑÒŪÚǓÙǕǗǙǛa-zA-Zü]/g, '')
-    )
-
-  let pyIdx = 0
-  return chinese.split('').map(char => {
-    if (!isCJK(char)) {
-      // 标点：不消耗拼音位
-      return { char, py: '', tone: 0 }
-    }
-    const py = pinyins[pyIdx] || ''
-    pyIdx++
-    return { char, py, tone: py ? getTone(py) : 0 }
-  })
-}
-
-// ============================================================
-// RubyLine 组件 — 纯展示，只接收 CharItem[]
-// ============================================================
-
-const TONE_COLOR: Record<number, string> = {
-  1: '#ff4d4f',
-  2: '#ffa940',
-  3: '#73d13d',
-  4: '#40a9ff',
-  0: '#8c8c8c',
-}
-
-const RubyLine = ({ items }: { items: CharItem[] }) => {
-  return (
-    <span className="flex flex-wrap items-end gap-x-1 gap-y-3">
-      {items.map((item, i) => {
-        // 标点：直接渲染，字号稍小
-        if (!item.py) {
-          return (
-            <span
-              key={i}
-              className="text-[1.6rem] leading-none text-gray-700"
-            >
-              {item.char}
-            </span>
-          )
-        }
-        return (
-          <span
-            key={i}
-            className="flex flex-col items-center justify-end leading-none"
-          >
-            {/* 拼音 */}
-            <span
-              className="text-sm font-bold leading-none mb-1 select-none"
-              style={{ color: TONE_COLOR[item.tone] ?? '#8c8c8c' }}
-            >
-              {item.py}
-            </span>
-            {/* 汉字 */}
-            <span className="text-[1.6rem] leading-none text-gray-800">
-              {item.char}
-            </span>
-          </span>
-        )
-      })}
-    </span>
-  )
-}
-
-// ============================================================
-// 主组件
-// ============================================================
-
 // 扩展类型，支持 AI 生成的对话
+// ============================================================
 interface DialogueData extends FallbackDialogue {
   isAIGenerated?: boolean
-  keyVocabulary?: KeyVocabulary[]
 }
 
 export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKLevel }) {
-  // 本地数据状态
   const [localDialogues, setLocalDialogues] = useState<FallbackDialogue[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [dialogue, setDialogue] = useState<DialogueData | null>(null)
-  
-  // AI 解说状态
+
   const [explanation, setExplanation] = useState<string | null>(null)
   const [isExplaining, setIsExplaining] = useState(false)
   const [showExplanation, setShowExplanation] = useState(false)
-  
-  // AI 生成对话状态
+
   const [isGenerating, setIsGenerating] = useState(false)
-  
-  // 初始化：加载本地数据（0ms 等待）
+
+  // 初始化：加载本地数据
   useEffect(() => {
     const dialogues = getDialoguesByLevel(currentLevel)
     setLocalDialogues(dialogues)
@@ -159,7 +47,6 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     setShowExplanation(false)
   }, [currentLevel])
 
-  // 底部导航：上一条
   const goToPrev = useCallback(() => {
     if (currentIndex > 0) {
       const newIndex = currentIndex - 1
@@ -170,7 +57,6 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     }
   }, [currentIndex, localDialogues])
 
-  // 底部导航：下一条
   const goToNext = useCallback(() => {
     if (currentIndex < localDialogues.length - 1) {
       const newIndex = currentIndex + 1
@@ -181,13 +67,12 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     }
   }, [currentIndex, localDialogues])
 
-  // AI 解说（Stale-While-Revalidate）
   const explainGrammar = useCallback(async () => {
     if (!dialogue) return
-    
+
     setIsExplaining(true)
     setShowExplanation(true)
-    
+
     // 立即显示本地 keyVocabulary 的 notes（0ms）
     const localNotes = (dialogue.keyVocabulary || [])
       .map(v => {
@@ -197,30 +82,29 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         return parts.join('\n')
       })
       .join('\n\n')
-    
+
     if (localNotes) {
       setExplanation(localNotes)
     } else {
       setExplanation('解説を準備中...')
     }
-    
+
     try {
-      // 带超时的 AI 请求（4秒）
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 4000)
-      
+
       const res = await fetch('/api/explain-grammar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          lines: dialogue.lines, 
-          scene: dialogue.scene 
+        body: JSON.stringify({
+          lines: dialogue.lines,
+          scene: dialogue.scene,
         }),
         signal: controller.signal,
       })
-      
+
       clearTimeout(timeoutId)
-      
+
       if (res.ok) {
         const data = await res.json()
         if (data.explanation) {
@@ -228,9 +112,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         }
       }
     } catch (error: any) {
-      if (error.name === 'AbortError') {
-        console.log('[explainGrammar] AI timeout, using local notes')
-      } else {
+      if (error.name !== 'AbortError') {
         console.error('[explainGrammar] Error:', error.message)
       }
     } finally {
@@ -238,7 +120,6 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     }
   }, [dialogue])
 
-  // AI 生成新对话
   const generateNewDialogue = useCallback(async () => {
     setIsGenerating(true)
     try {
@@ -247,10 +128,9 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level: currentLevel }),
       })
-      
+
       if (res.ok) {
         const data = await res.json()
-        // 创建新的对话对象
         const newDialogue: DialogueData = {
           scene: data.scene || 'AI生成',
           sceneEmoji: data.sceneEmoji || '🤖',
@@ -258,8 +138,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
           keyVocabulary: data.keyVocabulary || [],
           isAIGenerated: true,
         }
-        
-        // 添加到列表末尾并切换过去
+
         const updatedList = [...localDialogues, newDialogue]
         setLocalDialogues(updatedList)
         setCurrentIndex(updatedList.length - 1)
@@ -279,42 +158,35 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       <Card className="shadow-md border-slate-200">
         <CardHeader className="pb-3 border-b border-slate-100">
           <div className="flex items-center justify-between">
-            {/* 左侧：场景信息 */}
             <div className="flex items-center gap-2">
               <span className="text-2xl">{dialogue?.sceneEmoji || '🗣️'}</span>
               <h2 className="text-lg font-bold text-slate-800">
                 {dialogue?.scene || 'シーンを選択'}
               </h2>
               {dialogue?.isAIGenerated && (
-                <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">AI</span>
+                <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">
+                  AI
+                </span>
               )}
             </div>
-            
-            {/* 右侧：进度 */}
+
             <div className="text-sm text-slate-500 font-mono">
               {currentIndex + 1} / {localDialogues.length}
             </div>
           </div>
         </CardHeader>
-        
+
         <CardContent>
-          {/* 对话内容：本地数据秒弹（0ms 等待） */}
           {dialogue ? (
             <div className="space-y-6">
+              {/* pinyin-pro 实时生成，无须手动对齐 */}
               {dialogue.lines.map((line, index) => (
-                <div key={index} className="flex flex-col gap-0.5">
-                  <div className="flex items-start gap-2">
-                    <span className="text-xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded mt-2">
-                      {line.speaker}
-                    </span>
-                    <p className="font-medium font-chinese">
-                      <RubyLine items={prepareData(line.chinese, line.pinyin)} />
-                    </p>
-                  </div>
-                  <p className="pl-8 text-sm text-slate-500 italic">
-                    {line.japanese}
-                  </p>
-                </div>
+                <DialogueLine
+                  key={index}
+                  speaker={line.speaker}
+                  chinese={line.chinese}
+                  japanese={line.japanese}
+                />
               ))}
             </div>
           ) : (
@@ -325,7 +197,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         </CardContent>
       </Card>
 
-      {/* 底部导航：大按钮（手机友好） */}
+      {/* 底部导航 */}
       <div className="flex gap-3">
         <Button
           variant="outline"
@@ -352,25 +224,31 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       {/* AI 功能按钮 */}
       {dialogue && (
         <div className="space-y-3">
-          {/* AI 解说按钮 */}
           <Button
             variant="secondary"
             className="w-full h-14 gap-2 text-base bg-white border-2 border-slate-100 hover:bg-slate-50 shadow-sm text-slate-700"
             onClick={explainGrammar}
             disabled={isExplaining}
           >
-            {isExplaining ? <Spinner className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />}
+            {isExplaining ? (
+              <Spinner className="h-5 w-5" />
+            ) : (
+              <BookOpen className="h-5 w-5" />
+            )}
             AI先生の解説を見る
           </Button>
 
-          {/* AI 生成新对话按钮 */}
           <Button
             variant="outline"
             className="w-full h-14 gap-2 text-base bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-100 hover:from-purple-100 hover:to-blue-100 text-purple-700"
             onClick={generateNewDialogue}
             disabled={isGenerating}
           >
-            {isGenerating ? <Spinner className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
+            {isGenerating ? (
+              <Spinner className="h-5 w-5" />
+            ) : (
+              <Sparkles className="h-5 w-5" />
+            )}
             AIで新しい会話を生成
           </Button>
         </div>
@@ -381,16 +259,18 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         <Card className="shadow-lg border-blue-100 bg-blue-50/30">
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <h3 className="text-base font-bold text-blue-800">文法・単語解説</h3>
-            <Button 
-              variant="ghost" 
-              size="icon" 
+            <Button
+              variant="ghost"
+              size="icon"
               onClick={() => setShowExplanation(false)}
             >
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {isExplaining && !explanation ? '解説を準備中...' : explanation || '解説がありません'}
+            {isExplaining && !explanation
+              ? '解説を準備中...'
+              : explanation || '解説がありません'}
           </CardContent>
         </Card>
       )}
