@@ -4,12 +4,12 @@ import { Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 // 声调检测
-const getTone = (syllable: string): number => {
+const getTone = (syllable: string): number | null => {
   if (/[āēīōūǖĀĒĪŌŪǕ]/.test(syllable)) return 1
   if (/[áéíóúǘÁÉÍÓÚǗ]/.test(syllable)) return 2
   if (/[ǎěǐǒǔǚǍĚǏǑǓǙ]/.test(syllable)) return 3
   if (/[àèìòùǜÀÈÌÒÙǛ]/.test(syllable)) return 4
-  return 0
+  return null
 }
 
 const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
@@ -23,7 +23,7 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
         return (
           <ruby key={i}>
             {char}
-            <rt className={`tone-${tone}`}>{py}</rt>
+            <rt className={tone ? `tone-${tone}` : ''}>{py}</rt>
           </ruby>
         )
       })}

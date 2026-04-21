@@ -148,7 +148,6 @@
 .ruby-line ruby rt.tone-2 { color: #F97316; } /* 橙 - 2声 */
 .ruby-line ruby rt.tone-3 { color: #16A34A; } /* 緑 - 3声 */
 .ruby-line ruby rt.tone-4 { color: #3B82F6; } /* 青 - 4声 */
-.ruby-line ruby rt.tone-0 { color: #9CA3AF; } /* 灰 - 轻声 */
 
 /* 兼容：非 ruby 的单独拼音行 */
 .pinyin-tone {
@@ -160,4 +159,3 @@
 .pinyin-tone.tone-2 { color: #F97316; }
 .pinyin-tone.tone-3 { color: #16A34A; }
 .pinyin-tone.tone-4 { color: #3B82F6; }
-.pinyin-tone.tone-0 { color: #9CA3AF; }
