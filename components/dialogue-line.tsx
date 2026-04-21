@@ -5,9 +5,6 @@ import { Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 
 // ============================================================
-// 声调颜色
-// ============================================================
-// ============================================================
 // 声调颜色（饱和度拉高，一眼可辨）
 // ============================================================
 const TONE_COLOR: Record<number, string> = {
@@ -36,17 +33,21 @@ export const PinyinChar = ({ char }: { char: string }) => {
   const tone = isChinese ? (toneMap[py] ?? 0) : 0
 
   if (!isChinese) {
-    // 标点：下沉到底部，小字号，不占拼音高度
     return (
-      <span className="flex items-end justify-center leading-none self-end mb-6 text-[1.1rem] text-gray-500 mx-[2px]">
+      <span
+        className="text-[1.1rem] text-gray-500 mx-[2px] mb-6"
+        style={{ display: 'inline-flex', alignItems: 'flex-end', height: 'calc(1.5rem + 1.5rem + 4px)' }}
+      >
         {char}
       </span>
     )
   }
 
   return (
-    // 每个字音锁在一个盒子里，字间距 mx-1
-    <span className="flex flex-col items-center justify-end leading-none mx-[2px] min-w-[2rem]">
+    <span
+      className="mx-[2px]"
+      style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', width: 'min-content' }}
+    >
       <span
         className="text-[13px] font-bold leading-none mb-1 select-none"
         style={{ color: TONE_COLOR[tone] }}
@@ -87,11 +88,11 @@ export function DialogueLine({ speaker, chinese, japanese }: DialogueLineProps) 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="font-medium font-chinese">
-            <span className="flex flex-wrap items-end gap-x-1 gap-y-3">
-              {chinese.split('').map((char, i) => (
-                <PinyinChar key={i} char={char} />
-              ))}
-            </span>
+              <span className="inline-flex flex-wrap items-end gap-x-1">
+                {chinese.split('').map((char, i) => (
+                  <PinyinChar key={i} char={char} />
+                ))}
+              </span>
           </p>
           <Button
             variant="ghost"
