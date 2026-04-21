@@ -22,16 +22,16 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
     <span className="ruby-line">
       {chinese.split('').map((char, i) => {
         if (!isCJK(char)) {
-          return <span key={i}>{char}</span>
+          return <span key={i} className="whitespace-pre">{char}</span>
         }
         const py = pinyins[pyIdx] || ''
         pyIdx++
         const tone = getTone(py)
         return (
-          <ruby key={i}>
-            {char}
+          <span key={i} className="ruby">
             <rt className={tone ? `tone-${tone}` : 'tone-missing'}>{py}</rt>
-          </ruby>
+            <span>{char}</span>
+          </span>
         )
       })}
     </span>

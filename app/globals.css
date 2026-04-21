@@ -131,23 +131,42 @@
   }
 }
 
-/* 拼音声调着色 — 原生 <ruby> 标签，浏览器负责对齐 */
+/* 拼音声调着色 — 每个字独立 ruby 组 */
 .ruby-line {
-  line-height: 2.4;
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  line-height: 1;
 }
-.ruby-line ruby {
+.ruby {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  width: 1.7em;
+  box-sizing: border-box;
+  margin: 0;
+}
+.rt {
+  font-size: 0.55rem;
+  font-weight: 700;
+  font-family: Arial, sans-serif;
+  line-height: 1;
+  height: 0.7rem;
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  white-space: nowrap;
+  overflow: hidden;
+}
+.ruby span {
+  font-size: 1.4rem;
+  line-height: 1;
   font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
 }
-.ruby-line ruby rt {
-  font-size: 0.4em;
-  font-weight: 600;
-  font-family: Arial, 'Helvetica Neue', sans-serif;
-  font-style: normal;
-  letter-spacing: 0;
-}
 /* 声调颜色 */
-.ruby-line ruby rt.tone-1 { color: #EF4444; }
-.ruby-line ruby rt.tone-2 { color: #F97316; }
-.ruby-line ruby rt.tone-3 { color: #16A34A; }
-.ruby-line ruby rt.tone-4 { color: #3B82F6; }
-.ruby-line ruby rt.tone-missing { color: #FF0000; text-decoration: underline; }
+.rt.tone-1 { color: #DC2626 !important; }
+.rt.tone-2 { color: #EA580C !important; }
+.rt.tone-3 { color: #16A34A !important; }
+.rt.tone-4 { color: #2563EB !important; }
+.rt.tone-missing { color: #DC2626 !important; text-decoration: underline; }
