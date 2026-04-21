@@ -90,3 +90,11 @@ export async function POST(request: Request) {
     return Response.json({ ...getRandomDialogue(level), isFallback: true })
   }
 }
+
+export async function GET() {
+  return Response.json({
+    version: 'v2-force-redeploy',
+    commit: 'd1fadf2',
+    timestamp: new Date().toISOString(),
+  })
+}
