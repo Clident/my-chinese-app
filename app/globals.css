@@ -130,3 +130,34 @@
     font-family: var(--font-chinese);
   }
 }
+
+/* 拼音声调着色（ruby 结构） */
+.ruby-line-container {
+  line-height: 2.2;
+}
+.ruby-line ruby {
+  color: #1e293b; /* 汉字本体颜色 */
+  font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
+}
+.ruby-line ruby rt {
+  font-size: 0.45em;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.ruby-line ruby rt.tone-1 { color: #EF4444; } /* 赤 - 1声 */
+.ruby-line ruby rt.tone-2 { color: #F97316; } /* 橙 - 2声 */
+.ruby-line ruby rt.tone-3 { color: #16A34A; } /* 緑 - 3声 */
+.ruby-line ruby rt.tone-4 { color: #3B82F6; } /* 青 - 4声 */
+.ruby-line ruby rt.tone-0 { color: #9CA3AF; } /* 灰 - 轻声 */
+
+/* 兼容：非 ruby 的单独拼音行 */
+.pinyin-tone {
+  font-weight: 600;
+  font-size: 0.875rem;
+  line-height: 1.25;
+}
+.pinyin-tone.tone-1 { color: #EF4444; }
+.pinyin-tone.tone-2 { color: #F97316; }
+.pinyin-tone.tone-3 { color: #16A34A; }
+.pinyin-tone.tone-4 { color: #3B82F6; }
+.pinyin-tone.tone-0 { color: #9CA3AF; }

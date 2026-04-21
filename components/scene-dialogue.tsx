@@ -7,22 +7,33 @@ import { Spinner } from '@/components/ui/spinner'
 import { DialogueLine } from './dialogue-line'
 import { RefreshCw, BookOpen, X } from 'lucide-react'
 
-// --- 拼音上色组件 ---
-const PinyinText = ({ pinyin }: { pinyin: string }) => {
-  const words = pinyin.split(' ');
+// --- 拼音声调着色组件（ruby 结构：汉字上标拼音） ---
+const getTone = (syllable: string): number => {
+  if (/[āēīōūǖĀĒĪŌŪǕ]/.test(syllable)) return 1
+  if (/[áéíóúǘÁÉÍÓÚǗ]/.test(syllable)) return 2
+  if (/[ǎěǐǒǔǚǍĚǏǑǓǙ]/.test(syllable)) return 3
+  if (/[àèìòùǜÀÈÌÒÙǛ]/.test(syllable)) return 4
+  return 0
+}
+
+const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
+  const chars = chinese.split('')
+  const pinyins = pinyin.trim().split(/\s+/)
   return (
-    <div className="flex flex-wrap gap-x-1">
-      {words.map((word, i) => {
-        let color = 'text-slate-500'; 
-        if (/[āēīōūǖ]/.test(word)) color = 'text-red-500';   // 1声
-        else if (/[áéíóúǘ]/.test(word)) color = 'text-orange-500'; // 2声
-        else if (/[ǎěǐǒǔǚ]/.test(word)) color = 'text-green-600';  // 3声
-        else if (/[àèìòùǜ]/.test(word)) color = 'text-blue-500';   // 4声
-        return <span key={i} className={`${color} font-medium`}>{word}</span>;
+    <span className="ruby-line">
+      {chars.map((char, i) => {
+        const py = pinyins[i] || ''
+        const tone = getTone(py)
+        return (
+          <ruby key={i}>
+            {char}
+            <rt className={`tone-${tone}`}>{py}</rt>
+          </ruby>
+        )
       })}
-    </div>
-  );
-};
+    </span>
+  )
+}
 
 interface Line {
   speaker: string
@@ -131,18 +142,14 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: stri
           ) : dialogue ? (
             <div className="space-y-6">
               {dialogue.lines.map((line, index) => (
-                <div key={index} className="flex flex-col gap-1">
+                <div key={index} className="flex flex-col gap-0.5">
                   <div className="flex items-start gap-2">
-                    <span className="text-xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded mt-1">
+                    <span className="text-xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded mt-2">
                       {line.speaker}
                     </span>
-                    <p className="text-xl font-medium text-slate-900">
-                      {line.chinese}
+                    <p className="text-xl font-medium text-slate-900 font-chinese ruby-line-container">
+                      <RubyLine chinese={line.chinese} pinyin={line.pinyin} />
                     </p>
-                  </div>
-                  <div className="pl-8 text-sm">
-                    {/* 调用拼音上色组件 */}
-                    <PinyinText pinyin={line.pinyin} />
                   </div>
                   <p className="pl-8 text-sm text-slate-500 italic">
                     {line.japanese}

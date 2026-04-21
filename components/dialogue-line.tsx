@@ -2,7 +2,34 @@
 
 import { Volume2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import { ColoredPinyin } from '@/components/colored-pinyin'
+
+// 声调检测
+const getTone = (syllable: string): number => {
+  if (/[āēīōūǖĀĒĪŌŪǕ]/.test(syllable)) return 1
+  if (/[áéíóúǘÁÉÍÓÚǗ]/.test(syllable)) return 2
+  if (/[ǎěǐǒǔǚǍĚǏǑǓǙ]/.test(syllable)) return 3
+  if (/[àèìòùǜÀÈÌÒÙǛ]/.test(syllable)) return 4
+  return 0
+}
+
+const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
+  const chars = chinese.split('')
+  const pinyins = pinyin.trim().split(/\s+/)
+  return (
+    <span className="ruby-line">
+      {chars.map((char, i) => {
+        const py = pinyins[i] || ''
+        const tone = getTone(py)
+        return (
+          <ruby key={i}>
+            {char}
+            <rt className={`tone-${tone}`}>{py}</rt>
+          </ruby>
+        )
+      })}
+    </span>
+  )
+}
 
 interface DialogueLineProps {
   speaker: string
@@ -28,7 +55,9 @@ export function DialogueLine({ speaker, chinese, pinyin, japanese }: DialogueLin
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-xl font-medium text-foreground tracking-wide font-chinese">{chinese}</p>
+          <p className="text-xl font-medium text-foreground tracking-wide font-chinese ruby-line-container">
+            <RubyLine chinese={chinese} pinyin={pinyin} />
+          </p>
           <Button
             variant="ghost"
             size="icon"
@@ -38,7 +67,6 @@ export function DialogueLine({ speaker, chinese, pinyin, japanese }: DialogueLin
             <Volume2 className="h-4 w-4" />
           </Button>
         </div>
-        <ColoredPinyin pinyin={pinyin} className="text-sm mt-1 block font-medium" />
         <p className="text-sm text-muted-foreground mt-1">{japanese}</p>
       </div>
     </div>

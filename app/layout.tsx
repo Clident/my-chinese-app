@@ -36,7 +36,7 @@ export default function RootLayout({
   return (
     <html lang="ja" className="bg-background">
       <body className="font-sans antialiased">
-        {children}}
+        {children}
       </body>
     </html>
   )
