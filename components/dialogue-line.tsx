@@ -7,18 +7,21 @@ import { Button } from '@/components/ui/button'
 // ============================================================
 // 声调颜色
 // ============================================================
+// ============================================================
+// 声调颜色（饱和度拉高，一眼可辨）
+// ============================================================
 const TONE_COLOR: Record<number, string> = {
-  1: '#ff4d4f',
-  2: '#ffa940',
-  3: '#73d13d',
-  4: '#40a9ff',
-  0: '#94a3b8', // 轻声 / 未识别 → 灰色
+  1: '#dc2626', // 深红
+  2: '#ea580c', // 橙
+  3: '#16a34a', // 亮绿
+  4: '#2563eb', // 亮蓝
+  0: '#9ca3af', // 轻声 / 未识别 → 灰色
 }
 
 // ============================================================
 // PinyinChar — 单字 + 拼音（Flex 纵向排列）
 // ============================================================
-const PinyinChar = ({ char }: { char: string }) => {
+export const PinyinChar = ({ char }: { char: string }) => {
   const py = pinyin(char, { toneType: 'symbol' })
 
   // 提取声调数字
@@ -33,22 +36,26 @@ const PinyinChar = ({ char }: { char: string }) => {
   const tone = isChinese ? (toneMap[py] ?? 0) : 0
 
   if (!isChinese) {
+    // 标点：下沉到底部，小字号，不占拼音高度
     return (
-      <span className="flex items-end justify-center leading-none text-[1.6rem] text-gray-700 min-w-[1.2rem]">
+      <span className="flex items-end justify-center leading-none self-end mb-6 text-[1.1rem] text-gray-500 mx-[2px]">
         {char}
       </span>
     )
   }
 
   return (
-    <span className="flex flex-col items-center justify-end leading-none">
+    // 每个字音锁在一个盒子里，字间距 mx-1
+    <span className="flex flex-col items-center justify-end leading-none mx-[2px] min-w-[2rem]">
       <span
-        className="text-sm font-bold leading-none mb-1 select-none"
+        className="text-[13px] font-bold leading-none mb-1 select-none"
         style={{ color: TONE_COLOR[tone] }}
       >
         {py}
       </span>
-      <span className="text-[1.6rem] leading-none text-gray-800">{char}</span>
+      <span className="text-3xl font-medium leading-none text-gray-900">
+        {char}
+      </span>
     </span>
   )
 }
