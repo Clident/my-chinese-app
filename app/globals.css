@@ -131,32 +131,33 @@
   }
 }
 
-/* 拼音声调着色（Flexbox 布局，不用 ruby 标签） */
+/* 拼音声调着色 — Flexbox column 布局 */
 .ruby-line {
   display: inline-flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
   align-items: flex-end;
-  gap: 2px 0;
 }
 .ruby-char {
   display: inline-flex;
-  flex-direction: column-reverse;
+  flex-direction: column;
   align-items: center;
-  vertical-align: bottom;
-  margin: 0 1px;
+  line-height: 1;
+}
+.ruby-pinyin {
+  font-size: 0.55rem;
+  font-weight: 600;
+  line-height: 1;
+  height: 0.8em;       /* 固定高度，保证 kanji 基线对齐 */
+  display: flex;
+  align-items: flex-end;
+  justify-content: center;
+  font-family: Arial, sans-serif;
+  white-space: nowrap;
 }
 .ruby-kanji {
   font-size: 1.5rem;
-  line-height: 1;
-  color: #1e293b;
+  line-height: 1.1;
   font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
-}
-.ruby-pinyin {
-  font-size: 0.65rem;
-  font-weight: 600;
-  line-height: 1.2;
-  margin-bottom: 2px;
-  font-family: Arial, sans-serif;
 }
 .ruby-pinyin.tone-1 { color: #EF4444; } /* 赤 - 1声 */
 .ruby-pinyin.tone-2 { color: #F97316; } /* 橙 - 2声 */
@@ -165,6 +166,5 @@
 .ruby-pinyin.tone-missing { color: #FF0000; text-decoration: underline; } /* 检测失败 */
 .ruby-punct {
   font-size: 1.5rem;
-  line-height: 1;
-  color: #1e293b;
+  line-height: 1.1;
 }

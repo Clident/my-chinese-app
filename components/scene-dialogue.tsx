@@ -44,13 +44,10 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
         const py = pinyins[pyIdx] || ''
         pyIdx++
         const tone = getTone(py)
-        if (!tone) {
-          console.warn(`[RubyLine] tone not detected: char="${char}" pinyin="${py}"`)
-        }
         return (
           <span key={i} className="ruby-char">
-            <span className="ruby-kanji">{char}</span>
             <span className={`ruby-pinyin ${tone ? `tone-${tone}` : 'tone-missing'}`}>{py}</span>
+            <span className="ruby-kanji">{char}</span>
           </span>
         )
       })}
@@ -236,7 +233,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                     <span className="text-xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded mt-2">
                       {line.speaker}
                     </span>
-                    <p className="text-xl font-medium text-slate-900 font-chinese">
+                    <p className="font-medium text-slate-900 font-chinese leading-[2.8rem]">
                       <RubyLine chinese={line.chinese} pinyin={line.pinyin} />
                     </p>
                   </div>
