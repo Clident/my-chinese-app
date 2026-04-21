@@ -1,9 +1,17 @@
 "use client"; // 确保是客户端组件
 import { SceneDialogue } from '@/components/scene-dialogue'
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 
 export default function Home() {
   const [level, setLevel] = useState<'HSK1-2' | 'HSK3-4' | 'HSK5-6'>('HSK1-2');
+  const [deployInfo, setDeployInfo] = useState<{version?: string; timestamp?: string} | null>(null);
+
+  useEffect(() => {
+    fetch('/api/generate-dialogue')
+      .then(r => r.json())
+      .then(d => setDeployInfo({ version: d.version, timestamp: d.timestamp }))
+      .catch(() => {})
+  }, []);
 
   const levels = [
     { id: 'HSK1-2', label: '初級', desc: 'HSK 1-2' },
@@ -44,6 +52,13 @@ export default function Home() {
 
       <footer className="mt-12 text-center text-xs text-slate-400">
         <p>© 2026 毎日中国語 | 拼音の着色: 1声(赤) 2声(橙) 3声(緑) 4声(青)</p>
+        {deployInfo ? (
+          <p className="mt-1 text-green-500 font-mono">
+            ● deployed: {deployInfo.version} @ {deployInfo.timestamp}
+          </p>
+        ) : (
+          <p className="mt-1 text-red-400">● 部署信息加载中...</p>
+        )}
       </footer>
     </main>
   )
