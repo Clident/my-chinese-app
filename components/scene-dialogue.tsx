@@ -39,7 +39,7 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
     <span className="ruby-line">
       {chinese.split('').map((char, i) => {
         if (!isCJK(char)) {
-          return <span key={i}>{char}</span>
+          return <span key={i} className="ruby-punct">{char}</span>
         }
         const py = pinyins[pyIdx] || ''
         pyIdx++
@@ -48,10 +48,10 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
           console.warn(`[RubyLine] tone not detected: char="${char}" pinyin="${py}"`)
         }
         return (
-          <ruby key={i}>
-            {char}
-            <rt className={tone ? `tone-${tone}` : 'tone-missing'}>{py}</rt>
-          </ruby>
+          <span key={i} className="ruby-char">
+            <span className="ruby-kanji">{char}</span>
+            <span className={`ruby-pinyin ${tone ? `tone-${tone}` : 'tone-missing'}`}>{py}</span>
+          </span>
         )
       })}
     </span>
@@ -236,7 +236,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                     <span className="text-xs font-bold bg-slate-100 text-slate-500 px-1.5 py-0.5 rounded mt-2">
                       {line.speaker}
                     </span>
-                    <p className="text-xl font-medium text-slate-900 font-chinese ruby-line-container">
+                    <p className="text-xl font-medium text-slate-900 font-chinese">
                       <RubyLine chinese={line.chinese} pinyin={line.pinyin} />
                     </p>
                   </div>

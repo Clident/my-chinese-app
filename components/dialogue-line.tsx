@@ -22,7 +22,7 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
     <span className="ruby-line">
       {chinese.split('').map((char, i) => {
         if (!isCJK(char)) {
-          return <span key={i}>{char}</span>
+          return <span key={i} className="ruby-punct">{char}</span>
         }
         const py = pinyins[pyIdx] || ''
         pyIdx++
@@ -31,10 +31,10 @@ const RubyLine = ({ chinese, pinyin }: { chinese: string; pinyin: string }) => {
           console.warn(`[RubyLine] tone not detected: char="${char}" pinyin="${py}"`)
         }
         return (
-          <ruby key={i}>
-            {char}
-            <rt className={tone ? `tone-${tone}` : 'tone-missing'}>{py}</rt>
-          </ruby>
+          <span key={i} className="ruby-char">
+            <span className="ruby-kanji">{char}</span>
+            <span className={`ruby-pinyin ${tone ? `tone-${tone}` : 'tone-missing'}`}>{py}</span>
+          </span>
         )
       })}
     </span>
@@ -65,7 +65,7 @@ export function DialogueLine({ speaker, chinese, pinyin, japanese }: DialogueLin
       </div>
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
-          <p className="text-xl font-medium text-foreground tracking-wide font-chinese ruby-line-container">
+          <p className="text-xl font-medium text-foreground tracking-wide font-chinese">
             <RubyLine chinese={chinese} pinyin={pinyin} />
           </p>
           <Button

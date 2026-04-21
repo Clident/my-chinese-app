@@ -131,32 +131,40 @@
   }
 }
 
-/* 拼音声调着色（ruby 结构） */
-.ruby-line-container {
-  line-height: 2.2;
+/* 拼音声调着色（Flexbox 布局，不用 ruby 标签） */
+.ruby-line {
+  display: inline-flex;
+  flex-wrap: wrap;
+  align-items: flex-end;
+  gap: 2px 0;
 }
-.ruby-line ruby {
-  color: #1e293b; /* 汉字本体颜色 */
+.ruby-char {
+  display: inline-flex;
+  flex-direction: column-reverse;
+  align-items: center;
+  vertical-align: bottom;
+  margin: 0 1px;
+}
+.ruby-kanji {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #1e293b;
   font-family: 'PingFang SC', 'Noto Sans SC', 'Microsoft YaHei', 'Hiragino Sans GB', sans-serif;
 }
-.ruby-line ruby rt {
-  font-size: 0.45em;
+.ruby-pinyin {
+  font-size: 0.65rem;
   font-weight: 600;
-  letter-spacing: 0;
+  line-height: 1.2;
+  margin-bottom: 2px;
+  font-family: Arial, sans-serif;
 }
-.ruby-line ruby rt.tone-1 { color: #EF4444; } /* 赤 - 1声 */
-.ruby-line ruby rt.tone-2 { color: #F97316; } /* 橙 - 2声 */
-.ruby-line ruby rt.tone-3 { color: #16A34A; } /* 緑 - 3声 */
-.ruby-line ruby rt.tone-4 { color: #3B82F6; } /* 青 - 4声 */
-.ruby-line ruby rt.tone-missing { color: #FF0000; text-decoration: underline; } /* 检测失败 - 红色下划线警告 */
-
-/* 兼容：非 ruby 的单独拼音行 */
-.pinyin-tone {
-  font-weight: 600;
-  font-size: 0.875rem;
-  line-height: 1.25;
+.ruby-pinyin.tone-1 { color: #EF4444; } /* 赤 - 1声 */
+.ruby-pinyin.tone-2 { color: #F97316; } /* 橙 - 2声 */
+.ruby-pinyin.tone-3 { color: #16A34A; } /* 緑 - 3声 */
+.ruby-pinyin.tone-4 { color: #3B82F6; } /* 青 - 4声 */
+.ruby-pinyin.tone-missing { color: #FF0000; text-decoration: underline; } /* 检测失败 */
+.ruby-punct {
+  font-size: 1.5rem;
+  line-height: 1;
+  color: #1e293b;
 }
-.pinyin-tone.tone-1 { color: #EF4444; }
-.pinyin-tone.tone-2 { color: #F97316; }
-.pinyin-tone.tone-3 { color: #16A34A; }
-.pinyin-tone.tone-4 { color: #3B82F6; }
