@@ -10,14 +10,15 @@ export type PinyinMode = 'show' | 'hidden' | 'hover'
 export type ChallengeState = 'hidden' | 'revealed'
 
 // ============================================================
-// 声调颜色
+// 声调颜色（PM建议）
+// 1声红（高平）、2声绿（上升）、3声蓝（转折）、4声紫（下降）
 // ============================================================
 const TONE_COLOR: Record<number, string> = {
-  1: '#ff4d4f',
-  2: '#ffa940',
-  3: '#73d13d',
-  4: '#40a9ff',
-  0: '#9ca3af',
+  1: '#dc2626', // 红色 - 高平
+  2: '#16a34a', // 绿色 - 上升
+  3: '#2563eb', // 蓝色 - 转折
+  4: '#9333ea', // 紫色 - 下降
+  0: '#6b7280', // 中性/轻声
 }
 
 const TONE_MAP: Record<string, number> = {
@@ -120,9 +121,11 @@ export const CharacterUnit = ({
           lineHeight: '1',
           textAlign: 'center',
           width: '100%',
-          color: showChallengeBlank ? '#fbbf24' : isChinese ? '#111827' : '#9ca3af',
+          // 汉字也根据声调着色
+          color: showChallengeBlank ? '#fbbf24' : isChinese ? color : '#9ca3af',
           display: 'block',
           letterSpacing: showChallengeBlank ? '-1px' : 'normal',
+          fontWeight: '500',
         }}
       >
         {displayChar}
@@ -220,9 +223,10 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
             lineHeight: '1',
             textAlign: 'center',
             width: '100%',
-            color: isRevealed ? '#2563eb' : isChinese ? '#111827' : '#9ca3af',
+            // 汉字也根据声调着色（核心修改）
+            color: isRevealed ? '#2563eb' : isChinese ? color : '#9ca3af',
             display: 'block',
-            fontWeight: isRevealed ? '700' : '400',
+            fontWeight: isRevealed ? '700' : '500',
             transition: 'color 0.3s ease',
           }}
         >
