@@ -409,8 +409,7 @@ export const RubyLine = ({
         flexWrap: 'wrap',
         alignItems: 'flex-end',
         justifyContent: 'flex-start',
-        rowGap: '0.5rem',
-        lineHeight: '2.5',
+        rowGap: '0',
       }}
     >
       {chinese.split('').map((char, i) => {
@@ -431,15 +430,8 @@ export const RubyLine = ({
           return (
             <span
               key={i}
-              style={{
-                fontSize: '1.5rem',
-                fontWeight: '400',
-                color: '#9ca3af',
-                margin: '0 0.05rem',
-                verticalAlign: 'baseline',
-                lineHeight: '1',
-                alignSelf: 'flex-end',
-              }}
+              className="text-3xl text-slate-300 font-light translate-y-2 select-none self-end"
+              style={{ display: 'inline-block', margin: '0 0.02rem' }}
             >
               {char}
             </span>

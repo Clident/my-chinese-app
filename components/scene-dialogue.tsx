@@ -354,25 +354,25 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   return (
     <div className="w-full max-w-md mx-auto space-y-4 pb-32" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
       <Card className="shadow-sm border-none min-h-[60vh] rounded-[2.5rem]" style={{ background: '#fff' }}>
-        <CardHeader className="pb-4 border-b border-slate-100">
+        <CardHeader className="pb-4 border-b border-gray-100">
           {/* 第一层：场景标题 + 进度数字 */}
-          <div className="flex justify-between items-end mb-6 px-2">
+          <div className="flex justify-between items-center pb-4 border-b border-gray-100 mb-4">
             <div className="flex items-center gap-3">
-              <span className="text-4xl">{dialogue?.sceneEmoji || '🗣️'}</span>
-              <h2 className="text-2xl font-bold tracking-tight text-gray-800">
+              <span className="text-3xl">{dialogue?.sceneEmoji || '🗣️'}</span>
+              <h2 className="text-xl font-bold text-slate-800">
                 {dialogue?.scene || 'シーンを選択'}
               </h2>
               {dialogue?.isAIGenerated && (
                 <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">AI</span>
               )}
             </div>
-            <div className="text-sm font-medium text-gray-400 tabular-nums">
-              <span className="text-blue-500 text-lg">{currentIndex + 1}</span> / {localDialogues.length}
+            <div className="text-indigo-600 font-mono font-bold tracking-tighter">
+              {currentIndex + 1} <span className="text-slate-300 mx-1">/</span> {localDialogues.length}
             </div>
           </div>
 
           {/* 第二层：功能按钮组 */}
-          <div className="flex items-center gap-2 bg-gray-50/50 p-1.5 rounded-2xl w-fit">
+          <div className="flex items-center gap-2 bg-gray-50/50 p-1.5 rounded-2xl w-fit mt-4">
             {/* 拼音模式切换 */}
             <div className="flex bg-white rounded-xl shadow-sm p-1 border border-gray-100">
               {MODES.map(({ mode, label, icon }) => (
