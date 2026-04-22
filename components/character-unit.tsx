@@ -4,14 +4,14 @@ import React from 'react'
 import { pinyin } from 'pinyin-pro'
 
 // ============================================================
-// 声调颜色
+// 声调颜色（硬编码，不依赖 CSS 类名）
 // ============================================================
-const TONE_CLASS: Record<number, string> = {
-  1: 't1',
-  2: 't2',
-  3: 't3',
-  4: 't4',
-  0: 't0',
+const TONE_COLOR: Record<number, string> = {
+  1: '#ff4d4f', // 1声 红
+  2: '#ffa940', // 2声 橙
+  3: '#73d13d', // 3声 绿
+  4: '#40a9ff', // 4声 蓝
+  0: '#9ca3af', // 轻声 灰
 }
 
 // ============================================================
@@ -32,7 +32,7 @@ function getTone(py: string): number {
 }
 
 // ============================================================
-// CharacterUnit — 单字盒子
+// CharacterUnit — 单字盒子（纯 inline style，不依赖 Tailwind）
 // ============================================================
 interface CharacterUnitProps {
   char: string
@@ -41,25 +41,36 @@ interface CharacterUnitProps {
 }
 
 export const CharacterUnit = ({ char, py, tone }: CharacterUnitProps) => {
-  const isChinese = /[\u4e00-\u9fff]/.test(char);
+  const isChinese = /[\u4e00-\u9fff]/.test(char)
+  const color = TONE_COLOR[tone] || TONE_COLOR[0]
 
   return (
     <div
-      className="inline-flex flex-col items-center justify-end"
       style={{
-        width: isChinese ? '4.5rem' : '1.5rem',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        width: isChinese ? '3.8rem' : '1.2rem',
         flexShrink: 0,
+        marginRight: '2px',
+        verticalAlign: 'bottom',
       }}
     >
       {/* 拼音层 */}
       <span
-        className={`text-[12px] md:text-[14px] h-[1.5em] leading-none mb-1 text-center font-mono font-bold ${
-          isChinese ? TONE_CLASS[tone] || 't0' : ''
-        }`}
         style={{
+          fontSize: '12px',
+          fontWeight: 'bold',
+          lineHeight: '1',
+          marginBottom: '4px',
+          textAlign: 'center',
           width: '100%',
           whiteSpace: 'nowrap',
-          overflow: 'visible',
+          fontFamily: 'monospace',
+          color: isChinese ? color : 'transparent',
+          height: isChinese ? '1.2em' : '0',
+          overflow: 'hidden',
         }}
       >
         {isChinese ? py : '\u00A0'}
@@ -67,23 +78,23 @@ export const CharacterUnit = ({ char, py, tone }: CharacterUnitProps) => {
 
       {/* 汉字层 */}
       <span
-        className={`text-2xl md:text-4xl font-medium leading-none text-center ${
-          isChinese ? 'text-gray-900' : 'text-gray-400'
-        }`}
         style={{
+          fontSize: '2rem',
+          lineHeight: '1',
+          textAlign: 'center',
           width: '100%',
+          color: isChinese ? '#111827' : '#9ca3af',
           display: 'block',
         }}
       >
         {char}
       </span>
     </div>
-  );
+  )
 }
 
 // ============================================================
 // RubyLine — 整句拼音渲染
-// padding: true 保证 pinyinArray[i] 严格对应 chinese[i]
 // ============================================================
 interface RubyLineProps {
   chinese: string
@@ -97,10 +108,18 @@ export const RubyLine = ({ chinese }: RubyLineProps) => {
   })
 
   return (
-    <div className="flex flex-wrap items-end gap-y-10 justify-start">
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-start',
+        gapTop: '2.5rem',
+      }}
+    >
       {chinese.split('').map((char, i) => {
         const isChinese = /[\u4e00-\u9fff]/.test(char)
-        const py = isChinese ? pinyinArray[i] || '' : ''
+        const py = isChinese ? (pinyinArray[i] || '') : ''
         const tone = isChinese ? getTone(py) : 0
 
         return <CharacterUnit key={i} char={char} py={py} tone={tone} />
@@ -133,24 +152,72 @@ export function DialogueLine({
   }
 
   return (
-    <div className="flex items-start gap-3 py-4 border-b border-border last:border-b-0">
-      <div className="flex-shrink-0 w-8 h-8 rounded-full bg-primary/10 flex items-center justify-center text-sm font-medium text-primary">
+    <div
+      style={{
+        display: 'flex',
+        alignItems: 'flex-start',
+        gap: '0.75rem',
+        paddingTop: '1rem',
+        paddingBottom: '1rem',
+        borderBottom: '1px solid #e5e7eb',
+      }}
+    >
+      <div
+        style={{
+          width: '2rem',
+          height: '2rem',
+          borderRadius: '9999px',
+          backgroundColor: '#eef2ff',
+          display: 'flex',
+          alignItems: 'center',
+          justifyContent: 'center',
+          fontSize: '0.875rem',
+          fontWeight: '500',
+          color: '#6366f1',
+          flexShrink: 0,
+        }}
+      >
         {speaker}
       </div>
-      <div className="flex-1 min-w-0">
-        <div className="flex items-start gap-2">
-          <div className="font-medium font-chinese text-left flex-1">
+      <div style={{ flex: '1', minWidth: 0 }}>
+        <div
+          style={{
+            display: 'flex',
+            alignItems: 'flex-start',
+            gap: '0.5rem',
+          }}
+        >
+          <div style={{ flex: 1, textAlign: 'left' }}>
             <RubyLine chinese={chinese} />
           </div>
           <button
-            className="h-10 w-10 flex-shrink-0 text-muted-foreground hover:text-primary mt-2"
             onClick={speak}
             aria-label="朗读"
+            style={{
+              width: '2.5rem',
+              height: '2.5rem',
+              flexShrink: 0,
+              color: '#9ca3af',
+              background: 'none',
+              border: 'none',
+              cursor: 'pointer',
+              fontSize: '1.25rem',
+              marginTop: '0.5rem',
+            }}
           >
             🔊
           </button>
         </div>
-        <p className="text-sm text-muted-foreground mt-2 pl-1">{japanese}</p>
+        <p
+          style={{
+            fontSize: '0.875rem',
+            color: '#6b7280',
+            fontStyle: 'italic',
+            marginTop: '0.5rem',
+          }}
+        >
+          {japanese}
+        </p>
       </div>
     </div>
   )

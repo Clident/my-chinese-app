@@ -204,9 +204,9 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                         {line.speaker}
                       </span>
                     </div>
-                    <p className="font-medium font-chinese mb-1.5">
+                    <div style={{ textAlign: 'left', fontFamily: 'inherit' }}>
                       <RubyLine chinese={line.chinese} />
-                    </p>
+                    </div>
                     <p className="text-sm text-slate-500 italic">{line.japanese}</p>
                   </div>
                 )
