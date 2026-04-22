@@ -4,14 +4,14 @@ import React from 'react'
 import { pinyin } from 'pinyin-pro'
 
 // ============================================================
-// 声调颜色（CSS 类名 → 全局 CSS 定义）
+// 声调颜色
 // ============================================================
 const TONE_CLASS: Record<number, string> = {
-  1: 't1', // 红
-  2: 't2', // 橙
-  3: 't3', // 绿
-  4: 't4', // 蓝
-  0: 't0', // 灰
+  1: 't1',
+  2: 't2',
+  3: 't3',
+  4: 't4',
+  0: 't0',
 }
 
 // ============================================================
@@ -32,23 +32,20 @@ function getTone(py: string): number {
 }
 
 // ============================================================
-// fixPinyinTokens — 防御性修复：把拆散的复合韵母捏回去
-// pinyin-pro 某些版本/模式下会把 hǎo 拆成 hǎ + o
+// fixPinyinTokens — 把拆散的复合韵母捏回去
 // ============================================================
 function fixPinyinTokens(tokens: string[]): string[] {
   const result: string[] = []
   for (let i = 0; i < tokens.length; i++) {
     const current = tokens[i]
     const next = tokens[i + 1]
-
-    // 如果当前 token 以带调元音结尾，下一个是不带调的 a/e/i/o/u，合并
     if (
       next &&
       /[āēīōūǖáéíóúǘǎěǐǒǔǚàèìòùǜ]$/.test(current) &&
       /^[aeiou]$/.test(next)
     ) {
       result.push(current + next)
-      i++ // 跳过下一个
+      i++
     } else {
       result.push(current)
     }
@@ -57,14 +54,14 @@ function fixPinyinTokens(tokens: string[]): string[] {
 }
 
 // ============================================================
-// isPunc — 标点判断
+// isPunc
 // ============================================================
 function isPunc(char: string): boolean {
   return /^[^\w\u4e00-\u9fa5]+$/.test(char)
 }
 
 // ============================================================
-// CharacterUnit — 单字盒子（用户指定方案）
+// CharacterUnit — 单字盒子
 // ============================================================
 interface CharacterUnitProps {
   char: string
@@ -76,15 +73,32 @@ export const CharacterUnit = ({ char, py, tone }: CharacterUnitProps) => {
   const punc = isPunc(char)
 
   return (
-    <div className={`inline-flex flex-col items-center justify-end ${punc ? 'mx-0.5' : 'mx-1'} mb-4`}>
-      {/* 拼音层：强制单行居中，不换行空格占位防抖动 */}
-      {!punc && (
-        <span className={`text-[13px] font-bold leading-none mb-1.5 select-none text-center whitespace-nowrap ${TONE_CLASS[tone] || 't0'}`}>
+    <div
+      className={`inline-flex flex-col items-center justify-end ${
+        punc ? 'mx-0' : 'mx-[2px]'
+      } min-w-[1.2em] mb-2`}
+    >
+      {/* 拼音层：标点也占位（透明），防止行高抖动 */}
+      {!punc ? (
+        <span
+          className={`text-[12px] md:text-[13px] font-bold leading-none mb-1 select-none text-center whitespace-nowrap ${
+            TONE_CLASS[tone] || 't0'
+          }`}
+        >
           {py || '\u00A0'}
         </span>
+      ) : (
+        <span className="text-[12px] md:text-[13px] leading-none mb-1 opacity-0">
+          {'\u00A0'}
+        </span>
       )}
+
       {/* 汉字层 */}
-      <span className={`text-3xl md:text-4xl font-medium leading-none ${punc ? 'text-gray-400' : 'text-gray-900'}`}>
+      <span
+        className={`text-2xl md:text-3xl font-medium leading-none ${
+          punc ? 'text-gray-400' : 'text-gray-900'
+        }`}
+      >
         {char}
       </span>
     </div>
@@ -92,26 +106,35 @@ export const CharacterUnit = ({ char, py, tone }: CharacterUnitProps) => {
 }
 
 // ============================================================
-// RubyLine — 一整行汉字 + 拼音渲染
+// RubyLine — 整句拼音渲染（整句求拼音 + padding 对齐）
 // ============================================================
 interface RubyLineProps {
   chinese: string
 }
 
 export const RubyLine = ({ chinese }: RubyLineProps) => {
+  // 整句求拼音，padding: true 保证数组长度与原字符串一一对应
+  const pinyinArray = pinyin(chinese, {
+    toneType: 'symbol',
+    type: 'array',
+    padding: true,
+  })
+
+  const fixedPinyins = fixPinyinTokens(pinyinArray)
   const chars = chinese.split('')
 
-  // 逐字获取拼音（单字模式，1字→1音节）
-  const pinyinTokens = fixPinyinTokens(
-    chars.map(c => pinyin(c, { toneType: 'symbol' }))
-  )
-
   return (
-    <div className="flex flex-wrap items-end gap-x-1 gap-y-8 leading-none">
+    <div className="flex flex-wrap items-end gap-y-8 leading-none">
       {chars.map((char, i) => {
+        // 空格：渲染间距，不走 Unit
+        if (char === ' ' || char === '\u3000') {
+          return <span key={i} className="inline-block w-2" />
+        }
+
         const punc = isPunc(char)
-        const py = punc ? '' : (pinyinTokens[i] || '')
+        const py = punc ? '' : fixedPinyins[i] || ''
         const tone = punc ? 0 : getTone(py)
+
         return <CharacterUnit key={i} char={char} py={py} tone={tone} />
       })}
     </div>
@@ -119,7 +142,7 @@ export const RubyLine = ({ chinese }: RubyLineProps) => {
 }
 
 // ============================================================
-// DialogueLine 组件（兼容旧调用）
+// DialogueLine
 // ============================================================
 interface DialogueLineProps {
   speaker: string
@@ -127,7 +150,11 @@ interface DialogueLineProps {
   japanese: string
 }
 
-export function DialogueLine({ speaker, chinese, japanese }: DialogueLineProps) {
+export function DialogueLine({
+  speaker,
+  chinese,
+  japanese,
+}: DialogueLineProps) {
   const speak = () => {
     if ('speechSynthesis' in window) {
       const utterance = new SpeechSynthesisUtterance(chinese)
