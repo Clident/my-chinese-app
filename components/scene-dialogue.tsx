@@ -489,17 +489,15 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                     </span>
 
                     {/* 对话主体：RubyLine + 朗读/解说按钮同排 */}
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', overflow: 'visible', width: '100%' }}>
-                      <div style={{ flex: 1, overflow: 'visible' }}>
-                        <RubyLine
-                          chinese={line.chinese}
-                          mode={pinyinMode}
-                          keyWords={keyWords}
-                          challengeMode={challengeMode}
-                          revealedWords={revealedWords}
-                          onWordReveal={revealWord}
-                        />
-                      </div>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', overflow: 'visible' }}>
+                      <RubyLine
+                        chinese={line.chinese}
+                        mode={pinyinMode}
+                        keyWords={keyWords}
+                        challengeMode={challengeMode}
+                        revealedWords={revealedWords}
+                        onWordReveal={revealWord}
+                      />
 
                       {/* 朗读 */}
                       <button

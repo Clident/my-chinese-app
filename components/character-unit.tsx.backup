@@ -143,31 +143,50 @@ export const CharacterUnit = ({
 
   return (
     <span
-      className={`inline-flex flex-col items-center justify-end min-w-fit mx-0.5 mb-2 ${mode === 'hover' ? 'group' : ''}`}
+      className={mode === 'hover' ? 'group' : ''}
       onClick={showChallengeBlank && onReveal ? onReveal : undefined}
       style={{
-        cursor: showChallengeBlank ? 'pointer' : 'default',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        minWidth: '2.2rem',
+        flexShrink: 0,
+        marginRight: '0.05rem',
+        verticalAlign: 'bottom',
         borderBottom: underline ? '2px solid #fbbf24' : 'none',
         paddingBottom: underline ? '1px' : '0',
+        cursor: showChallengeBlank ? 'pointer' : 'default',
       }}
     >
-      {/* 拼音 */}
       <span
-        className="text-[10px] leading-none text-slate-400 font-sans uppercase mb-1 h-3 flex items-end"
         style={{
+          fontSize: '0.65rem',
+          fontWeight: '400',
+          lineHeight: '1',
+          marginBottom: '3px',
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          color: '#9ca3af',
+          display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          letterSpacing: '0.05em',
+          letterSpacing: '0.1em',
         }}
       >
         {py}
       </span>
-      {/* 汉字 */}
       <span
-        className={`text-3xl font-bold leading-none`}
         style={{
+          fontSize: showChallengeBlank ? '1rem' : '1.875rem',
+          lineHeight: '1',
+          textAlign: 'center',
           color: showChallengeBlank ? '#fbbf24' : color,
+          display: 'block',
           letterSpacing: showChallengeBlank ? '-1px' : 'normal',
+          fontWeight: '600',
         }}
       >
         {displayChar}
@@ -263,38 +282,67 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
 
   return (
     <span
-      className={`inline-flex flex-col items-center justify-end min-w-fit mx-0.5 mb-2`}
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
       onClick={showChallengeBlank && onReveal ? onReveal : undefined}
       style={{
-        cursor: showChallengeBlank ? 'pointer' : 'default',
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        minWidth: '2.2rem',
+        flexShrink: 0,
+        marginRight: '0.05rem',
+        verticalAlign: 'bottom',
         borderBottom: underline && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
         paddingBottom: underline ? '1px' : '0',
+        cursor: showChallengeBlank ? 'pointer' : 'default',
         minHeight: showChallengeBlank ? '2.75rem' : 'auto',
+        position: 'relative',
       }}
     >
-      {/* 拼音 */}
       <span
-        className="text-[10px] leading-none text-slate-400 font-sans uppercase mb-1 h-3 flex items-end"
         style={{
+          fontSize: '0.65rem',
+          fontWeight: '400',
+          lineHeight: '1',
+          marginBottom: '3px',
+          textAlign: 'center',
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          color: '#9ca3af',
+          display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          letterSpacing: '0.05em',
+          letterSpacing: '0.1em',
         }}
       >
         {py}
       </span>
-      {/* 汉字 */}
+
       {showChallengeBlank ? (
         <span
-          className="text-3xl font-bold leading-none text-amber-400"
-          style={{ letterSpacing: '-1px' }}
-        >
-          ____
-        </span>
+          style={{
+            width: '100%',
+            height: '1.875rem',
+            borderBottom: '2px solid #9ca3af',
+            display: 'inline-block',
+            transition: 'all 0.3s ease',
+          }}
+        />
       ) : (
         <span
-          className="text-3xl font-bold leading-none"
-          style={{ color: isRevealed ? '#2563eb' : color }}
+          style={{
+            fontSize: '1.875rem',
+            lineHeight: '1',
+            textAlign: 'center',
+            width: '100%',
+            color: isRevealed ? '#2563eb' : color,
+            display: 'block',
+            fontWeight: '600',
+            transition: 'color 0.3s ease',
+          }}
         >
           {char}
         </span>
@@ -346,10 +394,19 @@ export const RubyLine = ({
   }
 
   return (
-    <div className="flex flex-wrap items-end content-start w-full gap-x-1 gap-y-8 py-2">
+    <div
+      style={{
+        display: 'flex',
+        flexWrap: 'wrap',
+        alignItems: 'flex-end',
+        justifyContent: 'flex-start',
+        overflow: 'visible',
+        width: '100%',
+      }}
+    >
       {chinese.split('').map((char, i) => {
         const isChinese = /[\u4e00-\u9fff]/.test(char)
-        const isPuncChar = /[，。？！、；：]/.test(char)
+        const isPuncChar = /[，。？！；：、""''（）【】《》…—～·]/.test(char)
         const py = isChinese ? (pinyinArray[i] || '') : ''
         const tone = isChinese ? getTone(py) : 0
         const underline = underlineSet.has(i)
@@ -360,43 +417,19 @@ export const RubyLine = ({
           challengeState = revealedWords.has(word) ? 'revealed' : 'hidden'
         }
 
-        // 标点：直接丢出来，不套组件
+        // 标点符号：独立渲染，老老实实待在基准线上
         if (isPuncChar) {
           return (
-            <span key={i} className="text-2xl text-slate-300 px-0.5 self-end mb-1">
+            <span
+              key={i}
+              className="text-3xl text-slate-300 font-light translate-y-2 select-none self-end"
+              style={{ display: 'inline-block', margin: '0 0.02rem' }}
+            >
               {char}
             </span>
           )
         }
 
-        // 英文/数字
-        if (/[a-zA-Z0-9]/.test(char)) {
-          return (
-            <span key={i} className="text-slate-400 font-mono text-base self-end mb-1">
-              {char}
-            </span>
-          )
-        }
-
-        // 日语假名
-        if (/[\u3040-\u309f\u30a0-\u30ff]/.test(char)) {
-          return (
-            <span key={i} className="text-slate-500 self-end mb-1">
-              {char}
-            </span>
-          )
-        }
-
-        // 非汉字其他
-        if (!isChinese) {
-          return (
-            <span key={i} className="text-slate-300 self-end mb-1">
-              {char}
-            </span>
-          )
-        }
-
-        // 汉字：用CharacterUnitHover处理挑战模式
         return (
           <CharacterUnitHover
             key={i}
