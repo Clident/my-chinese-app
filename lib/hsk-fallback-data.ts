@@ -415,7 +415,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
     scene: 'ホテル',
     sceneEmoji: '🏨',
     lines: [
-      { speaker: 'A', chinese: '请问房间里有免费的Wi-Fi吗？', pinyin: 'Qǐ ngwè n fá ngjiā n lǐ yǒ u miǎ nfè i de Wi-Fi ma ?', japanese: 'お部屋に無料のWi-Fiはありますか？' },
+      { speaker: 'A', chinese: '请问房间里有免费的网络吗？', pinyin: 'qǐng wèn fáng jiān lǐ yǒu miǎn fèi de wǎng luò ma ？', japanese: 'お部屋に無料のネットはありますか？' },
       { speaker: 'B', chinese: '有的，密码在房卡上面。退房时间是中午十二点。', pinyin: 'Yǒ u de , mì mǎ zà i fá ngkǎ shà ngmià n . Tuì fá ng shí jiā n shì zhō ngwǔ shí è r diǎ n .', japanese: 'はい、パスワードはルームキーに書いてあります。チェックアウトは正午12時です。' },
     ],
     keyVocabulary: [

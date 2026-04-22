@@ -10,14 +10,14 @@ export type PinyinMode = 'show' | 'hidden' | 'hover'
 export type ChallengeState = 'hidden' | 'revealed'
 
 // ============================================================
-// 声调颜色（PM建议）
-// 1声红（高平）、2声绿（上升）、3声蓝（转折）、4声紫（下降）
+// 声调颜色（莫兰迪高级色系）
+// 1声玫瑰红、2声祖母绿、3声靛蓝、4声琥珀棕
 // ============================================================
 const TONE_COLOR: Record<number, string> = {
-  1: '#dc2626', // 红色 - 高平
-  2: '#16a34a', // 绿色 - 上升
-  3: '#2563eb', // 蓝色 - 转折
-  4: '#9333ea', // 紫色 - 下降
+  1: '#f43f5e', // rose-500 - 高平
+  2: '#059669', // emerald-600 - 上升
+  3: '#4f46e5', // indigo-600 - 转折
+  4: '#d97706', // amber-600 - 下降
   0: '#6b7280', // 中性/轻声
 }
 
@@ -37,6 +37,12 @@ function getTone(py: string): number {
 
 const isPunc = (char: string) => /[，。？！；：、""''（）【】《》…—～·]/.test(char)
 
+// 判断是否是英文或数字
+const isEnglishOrNumber = (char: string) => /[a-zA-Z0-9]/.test(char)
+
+// 判断是否是日语假名（平假名、片假名）
+const isJapaneseKana = (char: string) => /[\u3040-\u309f\u30a0-\u30ff]/.test(char)
+
 // ============================================================
 // CharacterUnit
 // ============================================================
@@ -45,9 +51,9 @@ interface CharacterUnitProps {
   py: string
   tone: number
   mode: PinyinMode
-  underline?: boolean  // keyVocabulary 词组标记
-  challengeState?: ChallengeState  // 挑战模式状态
-  onReveal?: () => void  // 翻牌回调
+  underline?: boolean
+  challengeState?: ChallengeState
+  onReveal?: () => void
 }
 
 export const CharacterUnit = ({
@@ -60,38 +66,99 @@ export const CharacterUnit = ({
   onReveal,
 }: CharacterUnitProps) => {
   const isChinese = /[\u4e00-\u9fff]/.test(char)
-  const isPunctuation = isPunc(char)
   const color = TONE_COLOR[tone] || TONE_COLOR[0]
 
-  // 宽度：汉字 3.5rem，标点 0.8rem，其他（空格等）0.5rem
-  const width = isChinese ? '3.5rem' : isPunctuation ? '0.8rem' : '0.5rem'
+  // 英文/数字：直接渲染，不包裹ruby结构
+  if (isEnglishOrNumber(char)) {
+    return (
+      <span
+        style={{
+          fontSize: '1.25rem',
+          fontWeight: '500',
+          color: '#6b7280',
+          fontFamily: 'ui-monospace, monospace',
+          marginRight: '0.15rem',
+          verticalAlign: 'baseline',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
 
-  // 拼音层透明度
-  const pinyinOpacity = !isChinese ? 0 : mode === 'show' ? 1 : 0
+  // 日语假名：直接渲染
+  if (isJapaneseKana(char)) {
+    return (
+      <span
+        style={{
+          fontSize: '1.5rem',
+          fontWeight: '400',
+          color: '#374151',
+          fontFamily: 'system-ui, sans-serif',
+          marginRight: '0.1rem',
+          verticalAlign: 'baseline',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
 
-  // 挑战模式下隐藏汉字
+  // 标点：压缩渲染
+  if (isPunc(char)) {
+    return (
+      <span
+        style={{
+          fontSize: '1.5rem',
+          fontWeight: '400',
+          color: '#9ca3af',
+          marginRight: '0',
+          verticalAlign: 'baseline',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
+
+  // 非汉字其他字符
+  if (!isChinese) {
+    return (
+      <span
+        style={{
+          fontSize: '1rem',
+          color: '#9ca3af',
+          marginRight: '0.1rem',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
+
+  // 汉字：正常ruby渲染
+  const pinyinOpacity = mode === 'show' ? 1 : 0
   const showChallengeBlank = challengeState === 'hidden' && underline
   const displayChar = showChallengeBlank ? '____' : char
 
   return (
     <div
-      className={mode === 'hover' && isChinese ? 'group' : ''}
+      className={mode === 'hover' ? 'group' : ''}
       onClick={showChallengeBlank && onReveal ? onReveal : undefined}
       style={{
         display: 'inline-flex',
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        width,
+        width: '3.5rem',
         flexShrink: 0,
-        marginRight: isPunctuation ? '0' : '1px',
+        marginRight: '1px',
         verticalAlign: 'bottom',
-        borderBottom: underline && isChinese ? '2px solid #fbbf24' : 'none',
-        paddingBottom: underline && isChinese ? '1px' : '0',
+        borderBottom: underline ? '2px solid #fbbf24' : 'none',
+        paddingBottom: underline ? '1px' : '0',
         cursor: showChallengeBlank ? 'pointer' : 'default',
       }}
     >
-      {/* 拼音层 — 始终占位，opacity 控制显隐 */}
       <span
         style={{
           fontSize: '11px',
@@ -103,26 +170,22 @@ export const CharacterUnit = ({
           whiteSpace: 'nowrap',
           overflow: 'visible',
           fontFamily: 'monospace',
-          color: isChinese ? color : 'transparent',
+          color: color,
           height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          minWidth: 'fit-content',
         }}
       >
-        {isChinese ? py : '\u00A0'}
+        {py}
       </span>
-
-      {/* 汉字层 */}
       <span
         style={{
           fontSize: showChallengeBlank ? '1rem' : '1.875rem',
           lineHeight: '1',
           textAlign: 'center',
           width: '100%',
-          // 汉字也根据声调着色
-          color: showChallengeBlank ? '#fbbf24' : isChinese ? color : '#9ca3af',
+          color: showChallengeBlank ? '#fbbf24' : color,
           display: 'block',
           letterSpacing: showChallengeBlank ? '-1px' : 'normal',
           fontWeight: '500',
@@ -134,31 +197,90 @@ export const CharacterUnit = ({
   )
 }
 
-// hover 模式需要 JS 控制，封装一个带 hover state 的版本
+// ============================================================
+// CharacterUnitHover - hover模式需要JS控制
+// ============================================================
 export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { mode: PinyinMode }) => {
   const [hovered, setHovered] = useState(false)
   const { char, py, tone, mode, underline, challengeState, onReveal } = props
   const isChinese = /[\u4e00-\u9fff]/.test(char)
-  const isPunctuation = isPunc(char)
   const color = TONE_COLOR[tone] || TONE_COLOR[0]
-  const width = isChinese ? '3.5rem' : isPunctuation ? '0.8rem' : '0.5rem'
 
-  const pinyinOpacity = !isChinese
-    ? 0
-    : mode === 'show'
-    ? 1
-    : mode === 'hover'
-    ? (hovered ? 1 : 0)
-    : 0 // hidden
+  // 英文/数字
+  if (isEnglishOrNumber(char)) {
+    return (
+      <span
+        style={{
+          fontSize: '1.25rem',
+          fontWeight: '500',
+          color: '#6b7280',
+          fontFamily: 'ui-monospace, monospace',
+          marginRight: '0.15rem',
+          verticalAlign: 'baseline',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
 
-  // 挑战模式下隐藏汉字
+  // 日语假名
+  if (isJapaneseKana(char)) {
+    return (
+      <span
+        style={{
+          fontSize: '1.5rem',
+          fontWeight: '400',
+          color: '#374151',
+          fontFamily: 'system-ui, sans-serif',
+          marginRight: '0.1rem',
+          verticalAlign: 'baseline',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
+
+  // 标点
+  if (isPunc(char)) {
+    return (
+      <span
+        style={{
+          fontSize: '1.5rem',
+          fontWeight: '400',
+          color: '#9ca3af',
+          marginRight: '0',
+          verticalAlign: 'baseline',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
+
+  // 非汉字其他
+  if (!isChinese) {
+    return (
+      <span
+        style={{
+          fontSize: '1rem',
+          color: '#9ca3af',
+          marginRight: '0.1rem',
+        }}
+      >
+        {char}
+      </span>
+    )
+  }
+
+  // 汉字
+  const pinyinOpacity = mode === 'show' ? 1 : mode === 'hover' ? (hovered ? 1 : 0) : 0
   const showChallengeBlank = challengeState === 'hidden' && underline
   const isRevealed = challengeState === 'revealed' && underline
-  
+
   // 挑战模式下未揭示的词，拼音用灰色
-  const pinyinColorInChallenge = (challengeState === 'hidden' && underline)
-    ? '#6b7280' // 深灰色
-    : isChinese ? color : 'transparent'
+  const pinyinColorInChallenge = showChallengeBlank ? '#6b7280' : color
 
   return (
     <div
@@ -170,18 +292,17 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
         flexDirection: 'column',
         alignItems: 'center',
         justifyContent: 'flex-end',
-        width,
+        width: '3.5rem',
         flexShrink: 0,
-        marginRight: isPunctuation ? '0' : '1px',
+        marginRight: '1px',
         verticalAlign: 'bottom',
-        borderBottom: underline && isChinese && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
-        paddingBottom: underline && isChinese ? '1px' : '0',
+        borderBottom: underline && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
+        paddingBottom: underline ? '1px' : '0',
         cursor: showChallengeBlank ? 'pointer' : 'default',
-        minHeight: showChallengeBlank ? '44px' : 'auto', // 移动端热区
+        minHeight: showChallengeBlank ? '44px' : 'auto',
         position: 'relative',
       }}
     >
-      {/* 拼音层 */}
       <span
         style={{
           fontSize: '11px',
@@ -198,15 +319,12 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          minWidth: 'fit-content',
         }}
       >
-        {isChinese ? py : '\u00A0'}
+        {py}
       </span>
-      
-      {/* 汉字层 */}
+
       {showChallengeBlank ? (
-        // 填空横线
         <span
           style={{
             width: '100%',
@@ -223,8 +341,7 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
             lineHeight: '1',
             textAlign: 'center',
             width: '100%',
-            // 汉字也根据声调着色（核心修改）
-            color: isRevealed ? '#2563eb' : isChinese ? color : '#9ca3af',
+            color: isRevealed ? '#2563eb' : color,
             display: 'block',
             fontWeight: isRevealed ? '700' : '500',
             transition: 'color 0.3s ease',
@@ -238,15 +355,15 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
 }
 
 // ============================================================
-// RubyLine — 支持 mode + keyVocabulary 下划线 + 挑战模式
+// RubyLine
 // ============================================================
 interface RubyLineProps {
   chinese: string
   mode: PinyinMode
-  keyWords?: string[]  // 需要下划线的词列表
-  revealedWords?: Set<string>  // 挑战模式下已揭示的词
-  challengeMode?: boolean  // 是否处于挑战模式
-  onWordReveal?: (word: string) => void  // 揭示词的回调
+  keyWords?: string[]
+  revealedWords?: Set<string>
+  challengeMode?: boolean
+  onWordReveal?: (word: string) => void
 }
 
 export const RubyLine = ({
@@ -263,10 +380,9 @@ export const RubyLine = ({
     padding: true,
   })
 
-  // 构建下划线 index set + 词到索引的映射
   const underlineSet = new Set<number>()
   const indexToWord = new Map<number, string>()
-  
+
   for (const word of keyWords) {
     let idx = 0
     while (idx < chinese.length) {
@@ -296,8 +412,7 @@ export const RubyLine = ({
         const tone = isChinese ? getTone(py) : 0
         const underline = underlineSet.has(i)
         const word = indexToWord.get(i)
-        
-        // 挑战模式状态：如果该字属于某个词，根据是否揭示决定状态
+
         let challengeState: ChallengeState | undefined
         if (challengeMode && underline && word) {
           challengeState = revealedWords.has(word) ? 'revealed' : 'hidden'
@@ -321,7 +436,7 @@ export const RubyLine = ({
 }
 
 // ============================================================
-// DialogueLine — 带灯泡按钮（per-line AI 解析）
+// DialogueLine
 // ============================================================
 interface DialogueLineProps {
   speaker: string
@@ -345,9 +460,7 @@ export function DialogueLine({
   const speak = () => {
     if ('speechSynthesis' in window) {
       const voices = window.speechSynthesis.getVoices()
-      
-      // 优选 Xiaoxiao 或 Google 神经语音
-      const preferredVoice = voices.find(v => 
+      const preferredVoice = voices.find(v =>
         (v.name.includes('Xiaoxiao') || v.name.includes('Google')) && v.lang.includes('zh-CN')
       ) || voices.find(v => v.lang.includes('zh-CN'))
 
@@ -372,7 +485,6 @@ export function DialogueLine({
         borderBottom: '1px solid #e5e7eb',
       }}
     >
-      {/* 说话人头像 */}
       <div
         style={{
           width: '2rem',
@@ -386,21 +498,18 @@ export function DialogueLine({
           fontWeight: '500',
           color: '#6366f1',
           flexShrink: 0,
-          marginTop: '1.4rem', // 对齐汉字行
+          marginTop: '1.4rem',
         }}
       >
         {speaker}
       </div>
 
-      {/* 内容区 */}
       <div style={{ flex: '1', minWidth: 0 }}>
-        {/* 拼音+汉字行 + 右侧按钮组 */}
         <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.25rem' }}>
           <div style={{ flex: 1 }}>
             <RubyLine chinese={chinese} mode={mode} keyWords={keyWords} />
           </div>
 
-          {/* 朗读按钮 */}
           <button
             onClick={speak}
             aria-label="朗读"
@@ -423,7 +532,6 @@ export function DialogueLine({
             🔊
           </button>
 
-          {/* 灯泡按钮 — per-line AI 解析 */}
           {onExplain && (
             <button
               onClick={onExplain}
@@ -450,7 +558,6 @@ export function DialogueLine({
           )}
         </div>
 
-        {/* 日语翻译 */}
         <p
           style={{
             fontSize: '0.8rem',
