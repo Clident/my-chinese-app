@@ -661,6 +661,30 @@ export const hsk34Dialogues: FallbackDialogue[] = [
       { word: "驿站", pinyin: "yì zhàn", meaning: "宅配便の取次所" },
       { word: "送上楼", pinyin: "sòng shàng lóu", meaning: "（部屋のある）階上まで届ける" }
     ],
+  },
+  {
+    scene: '手机没流量了',
+    sceneEmoji: '📱',
+    lines: [
+      { speaker: "租客", chinese: "我的手机没流量了，怎么买叠加包？", pinyin: "wǒ de shǒu jī méi liú liàng le ， zěn me mǎi dié jiā bāo ？", japanese: "スマホのデータ通信量がなくなりました。追加パックはどうやって買いますか？" },
+      { speaker: "客服", chinese: "您可以在我们的App里选择流量加油包。", pinyin: "nín kě yǐ zài wǒ men de App lǐ xuǎn zé liú liàng jiā yóu bāo 。", japanese: "弊社のアプリでデータ増量パックを選択いただけます。" }
+    ],
+    keyVocabulary: [
+      { word: "流量", pinyin: "liú liàng", meaning: "データ通信量" },
+      { word: "加油包", pinyin: "jiā yóu bāo", meaning: "データ追加パック" }
+    ],
+  },
+  {
+    scene: '办理新手机号',
+    sceneEmoji: '🆔',
+    lines: [
+      { speaker: "顾客", chinese: "我想办一张新的电话卡。", pinyin: "wǒ xiǎng bàn yì zhāng xīn de diàn huà kǎ 。", japanese: "新しいSIMカードを作りたいです。" },
+      { speaker: "营业员", chinese: "请出示您的护照，并选择一个套餐。", pinyin: "qǐng chū shì nín de hù zhào ， bìng xuǎn zé yí gè tào cān 。", japanese: "パスポートを提示して、プランを選択してください。" }
+    ],
+    keyVocabulary: [
+      { word: "套餐", pinyin: "tào cān", meaning: "セットメニュー、プラン" },
+      { word: "出示", pinyin: "chū shì", meaning: "提示する" }
+    ],
   }
 ]
 

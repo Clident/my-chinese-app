@@ -151,6 +151,11 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
   // 挑战模式下隐藏汉字
   const showChallengeBlank = challengeState === 'hidden' && underline
   const isRevealed = challengeState === 'revealed' && underline
+  
+  // 挑战模式下未揭示的词，拼音用灰色
+  const pinyinColorInChallenge = (challengeState === 'hidden' && underline)
+    ? '#6b7280' // 深灰色
+    : isChinese ? color : 'transparent'
 
   return (
     <div
@@ -185,7 +190,7 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
           whiteSpace: 'nowrap',
           overflow: 'visible',
           fontFamily: 'monospace',
-          color: isChinese ? color : 'transparent',
+          color: pinyinColorInChallenge,
           height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,

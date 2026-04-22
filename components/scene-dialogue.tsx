@@ -60,6 +60,18 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null)
   const [countdown, setCountdown] = useState(0)
 
+  // 解说 Modal 打开时禁止背景滚动
+  useEffect(() => {
+    if (showExplanation) {
+      document.body.style.overflow = 'hidden'
+    } else {
+      document.body.style.overflow = ''
+    }
+    return () => {
+      document.body.style.overflow = ''
+    }
+  }, [showExplanation])
+
   // countdown timer
   useEffect(() => {
     if (cooldownUntil == null) { setCountdown(0); return }
@@ -523,21 +535,33 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         </div>
       )}
 
-      {/* 解说面板 */}
+      {/* 解说 Modal */}
       {showExplanation && (
-        <Card className="shadow-lg border-blue-100 bg-blue-50/30">
-          <CardHeader className="pb-2 flex flex-row items-center justify-between">
-            <h3 className="text-base font-bold text-blue-800">文法・単語解説</h3>
-            <Button variant="ghost" size="icon" onClick={() => setShowExplanation(false)}>
-              <X className="h-4 w-4" />
-            </Button>
-          </CardHeader>
-          <CardContent className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {(isExplaining || lineExplaining !== null) && !explanation
-              ? '解説を準備中...'
-              : explanation || '解説がありません'}
-          </CardContent>
-        </Card>
+        <div
+          className="fixed inset-0 z-[100] flex items-center justify-center p-4"
+          style={{ background: 'rgba(0,0,0,0.4)' }}
+          onClick={() => setShowExplanation(false)}
+        >
+          <Card
+            className="shadow-xl border-blue-100 bg-white w-full max-w-lg"
+            onClick={e => e.stopPropagation()}
+          >
+            <CardHeader className="pb-2 flex flex-row items-center justify-between">
+              <h3 className="text-base font-bold text-blue-800">文法・単語解説</h3>
+              <Button variant="ghost" size="icon" onClick={() => setShowExplanation(false)}>
+                <X className="h-4 w-4" />
+              </Button>
+            </CardHeader>
+            <CardContent
+              className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap overflow-y-auto"
+              style={{ maxHeight: '70vh' }}
+            >
+              {(isExplaining || lineExplaining !== null) && !explanation
+                ? '解説を準備中...'
+                : explanation || '解説がありません'}
+            </CardContent>
+          </Card>
+        </div>
       )}
     </div>
   )
