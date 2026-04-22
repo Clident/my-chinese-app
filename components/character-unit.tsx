@@ -100,12 +100,14 @@ export const CharacterUnit = ({
           textAlign: 'center',
           width: '100%',
           whiteSpace: 'nowrap',
+          overflow: 'visible',
           fontFamily: 'monospace',
           color: isChinese ? color : 'transparent',
           height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
+          minWidth: 'fit-content',
         }}
       >
         {isChinese ? py : '\u00A0'}
@@ -181,12 +183,14 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
           textAlign: 'center',
           width: '100%',
           whiteSpace: 'nowrap',
+          overflow: 'visible',
           fontFamily: 'monospace',
           color: isChinese ? color : 'transparent',
           height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
+          minWidth: 'fit-content',
         }}
       >
         {isChinese ? py : '\u00A0'}

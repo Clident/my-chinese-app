@@ -122,11 +122,13 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
   // 整体解说（底部按钮）
   const explainGrammar = useCallback(async () => {
-    if (!dialogue) return
+    // 使用最新的索引和数组，避免状态同步问题
+    const currentDialogue = localDialogues[currentIndex]
+    if (!currentDialogue) return
     setIsExplaining(true)
     setShowExplanation(true)
 
-    const localNotes = (dialogue.keyVocabulary || [])
+    const localNotes = (currentDialogue.keyVocabulary || [])
       .map(v => {
         const parts: string[] = [`**${v.word}** (${v.pinyin}) - ${v.meaning}`]
         if (v.writingNote) parts.push(`📝 ${v.writingNote}`)
@@ -143,7 +145,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       const res = await fetch('/api/explain-grammar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ lines: dialogue.lines, scene: dialogue.scene }),
+        body: JSON.stringify({ lines: currentDialogue.lines, scene: currentDialogue.scene }),
         signal: controller.signal,
       })
       clearTimeout(timeoutId)
@@ -156,11 +158,13 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     } finally {
       setIsExplaining(false)
     }
-  }, [dialogue])
+  }, [currentIndex, localDialogues])
 
   // per-line 灯泡解说
   const explainLine = useCallback(async (lineIndex: number) => {
-    if (!dialogue) return
+    // 使用最新的索引和数组，避免状态同步问题
+    const currentDialogue = localDialogues[currentIndex]
+    if (!currentDialogue) return
     // 已有缓存直接展示
     if (lineExplanation[lineIndex]) {
       setShowExplanation(true)
@@ -171,9 +175,9 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     setLineExplaining(lineIndex)
     setShowExplanation(true)
 
-    const line = dialogue.lines[lineIndex]
+    const line = currentDialogue.lines[lineIndex]
     // 先用 keyVocabulary 里匹配该句的词做本地解说
-    const matchedVocab = (dialogue.keyVocabulary || []).filter(v =>
+    const matchedVocab = (currentDialogue.keyVocabulary || []).filter(v =>
       line.chinese.includes(v.word)
     )
     const localNote = matchedVocab.length
@@ -190,7 +194,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           lines: [line],
-          scene: dialogue.scene,
+          scene: currentDialogue.scene,
           singleLine: true,
         }),
         signal: controller.signal,
@@ -208,7 +212,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     } finally {
       setLineExplaining(null)
     }
-  }, [dialogue, lineExplanation])
+  }, [currentIndex, localDialogues, lineExplanation])
 
   const generateNewDialogue = useCallback(async () => {
     if (cooldownUntil && Date.now() < cooldownUntil) return
