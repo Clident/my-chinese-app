@@ -889,6 +889,18 @@ export const hsk34Dialogues: FallbackDialogue[] = [
       { word: "走散", pinyin: "zǒu sàn", meaning: "はぐれる" },
       { word: "广播", pinyin: "guǎng bō", meaning: "放送する、アナウンス" }
     ],
+  },
+  {
+    scene: '在陌生城市车坏了',
+    sceneEmoji: '🚗💥',
+    lines: [
+      { speaker: "司机", chinese: "师傅，我的车在高速上抛锚了，能帮我拖一下吗？", pinyin: "shī fu ， wǒ de chē zài gāo sù shàng pāo máo le ， néng bāng wǒ tuō yí xià ma ？", japanese: "すみません、高速道路で故障（エンスト）してしまいました。レッカーしてもらえますか？" },
+      { speaker: "救援", chinese: "请提供您的具体位置，我们大概一小时到。", pinyin: "qǐng tí gōng nín de jù tǐ wèi zhì ， wǒ men dà gài yì xiǎo shí dào 。", japanese: "具体的な場所を教えてください。一時間ほどで到着します。" }
+    ],
+    keyVocabulary: [
+      { word: "抛锚", pinyin: "pāo máo", meaning: "（車などが）故障して動かなくなる" },
+      { word: "拖车", pinyin: "tuō chē", meaning: "レッカー車、牽引する" }
+    ],
   }
 ]
 
@@ -1327,6 +1339,30 @@ export const hsk56Dialogues: FallbackDialogue[] = [
     keyVocabulary: [
       { word: "领事馆", pinyin: "lǐng shì guǎn", meaning: "領事館" },
       { word: "回执", pinyin: "huí zhí", meaning: "受領書、控え" }
+    ],
+  },
+  {
+    scene: '老板在群里画饼',
+    sceneEmoji: '🫓',
+    lines: [
+      { speaker: "老板", chinese: "只要大家今年再加把劲，公司明年带大家去团建。", pinyin: "zhǐ yào dà jiā jīn nián zài jiā bǎ jìn ， gōng sī míng nián dài dà jiā qù tuán jiàn 。", japanese: "今年みんなでもう一踏ん張りすれば、来年は社員旅行に連れて行くよ。" },
+      { speaker: "员工", chinese: "这句话您去年也说过，后来怎么没下文了？", pinyin: "zhè jù huà nín qù nián yě shuō guò ， hòu lái zěn me méi xià wén le ？", japanese: "そのセリフ、去年も聞きましたけど、その後どうなったんでしたっけ？" }
+    ],
+    keyVocabulary: [
+      { word: "画饼", pinyin: "huà bǐng", meaning: "実現不可能な約束をする（絵に描いた餅）" },
+      { word: "没下文", pinyin: "méi xià wén", meaning: "立ち消えになる、音沙汰がない" }
+    ],
+  },
+  {
+    scene: '健身房私教推销',
+    sceneEmoji: '💪',
+    lines: [
+      { speaker: "教练", chinese: "美女，看你动作不太标准，要不要试听一下我的私教课？", pinyin: "měi nǚ ， kàn nǐ dòng zuò bú tài biāo zhǔn ， yào bú yào shì tīng yí xià wǒ de sī jiào kè ？", japanese: "そこの方、フォームが少し乱れていますね。私のパーソナルレッスンを体験してみませんか？" },
+      { speaker: "你", chinese: "不用了，我就是随便练练，没打算办卡。", pinyin: "bú yòng le ， wǒ jiù shì suí biàn liàn liàn ， méi dǎ suàn bàn kǎ 。", japanese: "結構です。適当に体を動かしているだけなので、入会するつもりはありません。" }
+    ],
+    keyVocabulary: [
+      { word: "私教", pinyin: "sī jiào", meaning: "パーソナルトレーナー" },
+      { word: "办卡", pinyin: "bàn kǎ", meaning: "（ジムなどの）会員カードを作る、入会する" }
     ],
   }
 ]
