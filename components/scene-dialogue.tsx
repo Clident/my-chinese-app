@@ -4,42 +4,55 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-
-
-import { CharacterUnit, RubyLine } from './character-unit'
+import { RubyLine, type PinyinMode } from './character-unit'
 import {
   BookOpen,
   X,
   Sparkles,
   ChevronLeft,
   ChevronRight,
+  Eye,
+  EyeOff,
+  MousePointer,
 } from 'lucide-react'
 import {
   getDialoguesByLevel,
   type HSKLevel,
   type FallbackDialogue,
-  type KeyVocabulary,
 } from '@/lib/hsk-fallback-data'
 
-// ============================================================
-// 扩展类型，支持 AI 生成的对话
-// ============================================================
 interface DialogueData extends FallbackDialogue {
   isAIGenerated?: boolean
 }
+
+// ============================================================
+// 拼音模式切换按钮
+// ============================================================
+const MODES: { mode: PinyinMode; label: string; icon: React.ReactNode }[] = [
+  { mode: 'show',   label: '表示',   icon: <Eye className="h-3.5 w-3.5" /> },
+  { mode: 'hover',  label: 'ホバー', icon: <MousePointer className="h-3.5 w-3.5" /> },
+  { mode: 'hidden', label: '非表示', icon: <EyeOff className="h-3.5 w-3.5" /> },
+]
 
 export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKLevel }) {
   const [localDialogues, setLocalDialogues] = useState<FallbackDialogue[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [dialogue, setDialogue] = useState<DialogueData | null>(null)
 
+  // 拼音显示模式
+  const [pinyinMode, setPinyinMode] = useState<PinyinMode>('show')
+
+  // 解说面板（整体）
   const [explanation, setExplanation] = useState<string | null>(null)
   const [isExplaining, setIsExplaining] = useState(false)
   const [showExplanation, setShowExplanation] = useState(false)
 
+  // per-line 解说
+  const [lineExplaining, setLineExplaining] = useState<number | null>(null)
+  const [lineExplanation, setLineExplanation] = useState<Record<number, string>>({})
+
   const [isGenerating, setIsGenerating] = useState(false)
 
-  // 初始化：加载本地数据
   useEffect(() => {
     const dialogues = getDialoguesByLevel(currentLevel)
     setLocalDialogues(dialogues)
@@ -47,35 +60,37 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     setDialogue(dialogues[0] || null)
     setExplanation(null)
     setShowExplanation(false)
+    setLineExplanation({})
   }, [currentLevel])
 
   const goToPrev = useCallback(() => {
     if (currentIndex > 0) {
-      const newIndex = currentIndex - 1
-      setCurrentIndex(newIndex)
-      setDialogue(localDialogues[newIndex])
+      const i = currentIndex - 1
+      setCurrentIndex(i)
+      setDialogue(localDialogues[i])
       setExplanation(null)
       setShowExplanation(false)
+      setLineExplanation({})
     }
   }, [currentIndex, localDialogues])
 
   const goToNext = useCallback(() => {
     if (currentIndex < localDialogues.length - 1) {
-      const newIndex = currentIndex + 1
-      setCurrentIndex(newIndex)
-      setDialogue(localDialogues[newIndex])
+      const i = currentIndex + 1
+      setCurrentIndex(i)
+      setDialogue(localDialogues[i])
       setExplanation(null)
       setShowExplanation(false)
+      setLineExplanation({})
     }
   }, [currentIndex, localDialogues])
 
+  // 整体解说（底部按钮）
   const explainGrammar = useCallback(async () => {
     if (!dialogue) return
-
     setIsExplaining(true)
     setShowExplanation(true)
 
-    // 立即显示本地 keyVocabulary 的 notes（0ms）
     const localNotes = (dialogue.keyVocabulary || [])
       .map(v => {
         const parts: string[] = [`**${v.word}** (${v.pinyin}) - ${v.meaning}`]
@@ -85,42 +100,80 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       })
       .join('\n\n')
 
-    if (localNotes) {
-      setExplanation(localNotes)
-    } else {
-      setExplanation('解説を準備中...')
-    }
+    setExplanation(localNotes || '解説がありません')
 
     try {
       const controller = new AbortController()
       const timeoutId = setTimeout(() => controller.abort(), 4000)
-
       const res = await fetch('/api/explain-grammar', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          lines: dialogue.lines,
-          scene: dialogue.scene,
-        }),
+        body: JSON.stringify({ lines: dialogue.lines, scene: dialogue.scene }),
         signal: controller.signal,
       })
-
       clearTimeout(timeoutId)
-
       if (res.ok) {
         const data = await res.json()
-        if (data.explanation) {
-          setExplanation(data.explanation)
-        }
+        if (data.explanation) setExplanation(data.explanation)
       }
-    } catch (error: any) {
-      if (error.name !== 'AbortError') {
-        console.error('[explainGrammar] Error:', error.message)
-      }
+    } catch (e: any) {
+      if (e.name !== 'AbortError') console.error('[explainGrammar]', e.message)
     } finally {
       setIsExplaining(false)
     }
   }, [dialogue])
+
+  // per-line 灯泡解说
+  const explainLine = useCallback(async (lineIndex: number) => {
+    if (!dialogue) return
+    // 已有缓存直接展示
+    if (lineExplanation[lineIndex]) {
+      setShowExplanation(true)
+      setExplanation(lineExplanation[lineIndex])
+      return
+    }
+
+    setLineExplaining(lineIndex)
+    setShowExplanation(true)
+
+    const line = dialogue.lines[lineIndex]
+    // 先用 keyVocabulary 里匹配该句的词做本地解说
+    const matchedVocab = (dialogue.keyVocabulary || []).filter(v =>
+      line.chinese.includes(v.word)
+    )
+    const localNote = matchedVocab.length
+      ? matchedVocab.map(v => `**${v.word}** (${v.pinyin}) — ${v.meaning}${v.usageNote ? '\n💬 ' + v.usageNote : ''}`).join('\n\n')
+      : `「${line.chinese}」\n${line.japanese}`
+
+    setExplanation(localNote)
+
+    try {
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 4000)
+      const res = await fetch('/api/explain-grammar', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          lines: [line],
+          scene: dialogue.scene,
+          singleLine: true,
+        }),
+        signal: controller.signal,
+      })
+      clearTimeout(timeoutId)
+      if (res.ok) {
+        const data = await res.json()
+        if (data.explanation) {
+          setExplanation(data.explanation)
+          setLineExplanation(prev => ({ ...prev, [lineIndex]: data.explanation }))
+        }
+      }
+    } catch (e: any) {
+      if (e.name !== 'AbortError') console.error('[explainLine]', e.message)
+    } finally {
+      setLineExplaining(null)
+    }
+  }, [dialogue, lineExplanation])
 
   const generateNewDialogue = useCallback(async () => {
     setIsGenerating(true)
@@ -130,7 +183,6 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level: currentLevel }),
       })
-
       if (res.ok) {
         const data = await res.json()
         const newDialogue: DialogueData = {
@@ -140,36 +192,67 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
           keyVocabulary: data.keyVocabulary || [],
           isAIGenerated: true,
         }
-
-        const updatedList = [...localDialogues, newDialogue]
-        setLocalDialogues(updatedList)
-        setCurrentIndex(updatedList.length - 1)
+        const updated = [...localDialogues, newDialogue]
+        setLocalDialogues(updated)
+        setCurrentIndex(updated.length - 1)
         setDialogue(newDialogue)
         setExplanation(null)
         setShowExplanation(false)
+        setLineExplanation({})
       }
-    } catch (error: any) {
-      console.error('[generateNewDialogue] Error:', error.message)
+    } catch (e: any) {
+      console.error('[generateNewDialogue]', e.message)
     } finally {
       setIsGenerating(false)
     }
   }, [currentLevel, localDialogues])
+
+  // keyVocabulary の词列表
+  const keyWords = dialogue?.keyVocabulary?.map(v => v.word) ?? []
 
   return (
     <div className="w-full max-w-md mx-auto space-y-4">
       <Card className="shadow-md border-slate-200">
         <CardHeader className="pb-3 border-b border-slate-100">
           <div className="flex items-center justify-between">
+            {/* 场景标题 */}
             <div className="flex items-center gap-2">
               <span className="text-2xl">{dialogue?.sceneEmoji || '🗣️'}</span>
               <h2 className="text-lg font-bold text-slate-800">
                 {dialogue?.scene || 'シーンを選択'}
               </h2>
               {dialogue?.isAIGenerated && (
-                <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">
-                  AI
-                </span>
+                <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">AI</span>
               )}
+            </div>
+
+            {/* 拼音模式切换 */}
+            <div style={{ display: 'flex', gap: '2px', background: '#f1f5f9', borderRadius: '0.5rem', padding: '2px' }}>
+              {MODES.map(({ mode, label, icon }) => (
+                <button
+                  key={mode}
+                  onClick={() => setPinyinMode(mode)}
+                  title={`拼音: ${label}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    padding: '3px 7px',
+                    borderRadius: '0.375rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: pinyinMode === mode ? '600' : '400',
+                    background: pinyinMode === mode ? '#fff' : 'transparent',
+                    color: pinyinMode === mode ? '#3b82f6' : '#64748b',
+                    boxShadow: pinyinMode === mode ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {icon}
+                  <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
             </div>
 
             <div className="text-sm text-slate-500 font-mono">
@@ -180,67 +263,104 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
         <CardContent>
           {dialogue ? (
-            <div className="space-y-4">
-              {/* 每条对话：气泡背景，说话人不同背景色 */}
+            <div className="space-y-1">
               {dialogue.lines.map((line, index) => {
                 const isA = line.speaker === 'A'
                 return (
                   <div
                     key={index}
-                    className={`rounded-xl px-4 py-3 ${
-                      isA
-                        ? 'bg-blue-50 border border-blue-100'
-                        : 'bg-green-50 border border-green-100'
-                    }`}
+                    style={{
+                      borderRadius: '0.75rem',
+                      padding: '0.75rem 1rem',
+                      background: isA ? '#eff6ff' : '#f0fdf4',
+                      border: `1px solid ${isA ? '#dbeafe' : '#dcfce7'}`,
+                      marginBottom: '0.5rem',
+                    }}
                   >
-                    <div className="flex items-center gap-1.5 mb-1.5">
+                    {/* 说话人标签 */}
+                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.5rem' }}>
                       <span
-                        className={`text-xs font-bold px-1.5 py-0.5 rounded ${
-                          isA
-                            ? 'bg-blue-200 text-blue-700'
-                            : 'bg-green-200 text-green-700'
-                        }`}
+                        style={{
+                          fontSize: '11px',
+                          fontWeight: '700',
+                          padding: '1px 6px',
+                          borderRadius: '0.25rem',
+                          background: isA ? '#bfdbfe' : '#bbf7d0',
+                          color: isA ? '#1d4ed8' : '#15803d',
+                        }}
                       >
                         {line.speaker}
                       </span>
                     </div>
-                    <div style={{ textAlign: 'left', fontFamily: 'inherit' }}>
-                      <RubyLine chinese={line.chinese} />
+
+                    {/* 拼音+汉字 + 按钮组 */}
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.25rem' }}>
+                      <div style={{ flex: 1 }}>
+                        <RubyLine
+                          chinese={line.chinese}
+                          mode={pinyinMode}
+                          keyWords={keyWords}
+                        />
+                      </div>
+
+                      {/* 朗读 */}
+                      <button
+                        onClick={() => {
+                          if ('speechSynthesis' in window) {
+                            const u = new SpeechSynthesisUtterance(line.chinese)
+                            u.lang = 'zh-CN'; u.rate = 0.8
+                            speechSynthesis.speak(u)
+                          }
+                        }}
+                        aria-label="朗読"
+                        style={{
+                          width: '1.75rem', height: '1.75rem', flexShrink: 0,
+                          background: 'none', border: 'none', cursor: 'pointer',
+                          fontSize: '0.9rem', borderRadius: '0.25rem',
+                          color: '#94a3b8', marginBottom: '2px',
+                        }}
+                      >🔊</button>
+
+                      {/* 灯泡 */}
+                      <button
+                        onClick={() => explainLine(index)}
+                        aria-label="この文を解説"
+                        title="この文を解説"
+                        style={{
+                          width: '1.75rem', height: '1.75rem', flexShrink: 0,
+                          background: lineExplaining === index ? '#fef3c7' : 'none',
+                          border: lineExplaining === index ? '1px solid #fbbf24' : '1px solid transparent',
+                          cursor: 'pointer', fontSize: '0.9rem', borderRadius: '0.25rem',
+                          marginBottom: '2px', transition: 'background 0.15s',
+                        }}
+                      >
+                        {lineExplaining === index ? '⏳' : '💡'}
+                      </button>
                     </div>
-                    <p className="text-sm text-slate-500 italic">{line.japanese}</p>
+
+                    {/* 日语翻译 */}
+                    <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', paddingLeft: '0.125rem' }}>
+                      {line.japanese}
+                    </p>
                   </div>
                 )
               })}
             </div>
           ) : (
-            <div className="py-16 text-center text-slate-400">
-              データを読み込み中...
-            </div>
+            <div className="py-16 text-center text-slate-400">データを読み込み中...</div>
           )}
         </CardContent>
       </Card>
 
-      {/* 底部导航 */}
+      {/* 导航 */}
       <div className="flex gap-3">
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex-1 h-14 text-base gap-2"
-          onClick={goToPrev}
-          disabled={currentIndex === 0}
-        >
-          <ChevronLeft className="h-5 w-5" />
-          前の会話
+        <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
+          onClick={goToPrev} disabled={currentIndex === 0}>
+          <ChevronLeft className="h-5 w-5" />前の会話
         </Button>
-        <Button
-          variant="outline"
-          size="lg"
-          className="flex-1 h-14 text-base gap-2"
-          onClick={goToNext}
-          disabled={currentIndex >= localDialogues.length - 1}
-        >
-          次の会話
-          <ChevronRight className="h-5 w-5" />
+        <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
+          onClick={goToNext} disabled={currentIndex >= localDialogues.length - 1}>
+          次の会話<ChevronRight className="h-5 w-5" />
         </Button>
       </div>
 
@@ -253,12 +373,8 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
             onClick={explainGrammar}
             disabled={isExplaining}
           >
-            {isExplaining ? (
-              <Spinner className="h-5 w-5" />
-            ) : (
-              <BookOpen className="h-5 w-5" />
-            )}
-            AI先生の解説を見る
+            {isExplaining ? <Spinner className="h-5 w-5" /> : <BookOpen className="h-5 w-5" />}
+            AI先生の解説を見る（全体）
           </Button>
 
           <Button
@@ -267,11 +383,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
             onClick={generateNewDialogue}
             disabled={isGenerating}
           >
-            {isGenerating ? (
-              <Spinner className="h-5 w-5" />
-            ) : (
-              <Sparkles className="h-5 w-5" />
-            )}
+            {isGenerating ? <Spinner className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
             AIで新しい会話を生成
           </Button>
         </div>
@@ -282,16 +394,12 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         <Card className="shadow-lg border-blue-100 bg-blue-50/30">
           <CardHeader className="pb-2 flex flex-row items-center justify-between">
             <h3 className="text-base font-bold text-blue-800">文法・単語解説</h3>
-            <Button
-              variant="ghost"
-              size="icon"
-              onClick={() => setShowExplanation(false)}
-            >
+            <Button variant="ghost" size="icon" onClick={() => setShowExplanation(false)}>
               <X className="h-4 w-4" />
             </Button>
           </CardHeader>
           <CardContent className="text-sm text-slate-700 leading-relaxed whitespace-pre-wrap">
-            {isExplaining && !explanation
+            {(isExplaining || lineExplaining !== null) && !explanation
               ? '解説を準備中...'
               : explanation || '解説がありません'}
           </CardContent>
