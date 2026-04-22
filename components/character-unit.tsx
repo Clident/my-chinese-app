@@ -41,28 +41,44 @@ interface CharacterUnitProps {
 }
 
 export const CharacterUnit = ({ char, py, tone }: CharacterUnitProps) => {
-  const isChinese = /[\u4e00-\u9fff]/.test(char)
+  const isChinese = /[\u4e00-\u9fff]/.test(char);
 
   return (
-    <div className="inline-flex flex-col items-center justify-end min-w-[1.5em]">
-      {/* 拼音层：固定高度防塌陷，\u00A0 占位防抖 */}
+    <div
+      className="inline-flex flex-col items-center justify-end"
+      style={{
+        width: isChinese ? '4.5rem' : '1.5rem',
+        flexShrink: 0,
+      }}
+    >
+      {/* 拼音层 */}
       <span
-        className={`text-[12px] md:text-[13px] h-[1.2em] leading-none mb-1 text-center whitespace-nowrap ${
+        className={`text-[12px] md:text-[14px] h-[1.5em] leading-none mb-1 text-center font-mono font-bold ${
           isChinese ? TONE_CLASS[tone] || 't0' : ''
         }`}
+        style={{
+          width: '100%',
+          whiteSpace: 'nowrap',
+          overflow: 'visible',
+        }}
       >
-        {isChinese ? py || '\u00A0' : '\u00A0'}
+        {isChinese ? py : '\u00A0'}
       </span>
+
       {/* 汉字层 */}
       <span
-        className={`text-2xl md:text-3xl font-medium leading-none ${
+        className={`text-2xl md:text-4xl font-medium leading-none text-center ${
           isChinese ? 'text-gray-900' : 'text-gray-400'
         }`}
+        style={{
+          width: '100%',
+          display: 'block',
+        }}
       >
         {char}
       </span>
     </div>
-  )
+  );
 }
 
 // ============================================================
@@ -81,7 +97,7 @@ export const RubyLine = ({ chinese }: RubyLineProps) => {
   })
 
   return (
-    <div className="flex flex-wrap items-end gap-x-1 gap-y-6">
+    <div className="flex flex-wrap items-end gap-y-10 justify-start">
       {chinese.split('').map((char, i) => {
         const isChinese = /[\u4e00-\u9fff]/.test(char)
         const py = isChinese ? pinyinArray[i] || '' : ''
