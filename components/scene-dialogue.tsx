@@ -250,8 +250,20 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       setFakeLoadingMsg(loadingMessages[msgIdx])
     }, 800)
     
-    // 等待至少 3 秒
+    // 记录开始时间
     const startTime = Date.now()
+    
+    // 强制超时保险丝：10秒后无论如何关闭Loading
+    const forceCloseTimeout = setTimeout(() => {
+      clearInterval(msgInterval)
+      setFakeLoading(false)
+      setIsGenerating(false)
+      console.warn('[generateNewDialogue] 强制超时，关闭Loading')
+    }, 10000)
+    
+    // API请求超时控制：8秒
+    const controller = new AbortController()
+    const apiTimeout = setTimeout(() => controller.abort(), 8000)
     
     setIsGenerating(true)
     try {
@@ -259,7 +271,10 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level: currentLevel }),
+        signal: controller.signal,
       })
+      
+      clearTimeout(apiTimeout)
 
       const data = await res.json().catch(() => ({}))
 
@@ -289,12 +304,18 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         setLineExplanation({})
       }
     } catch (e: any) {
-      console.error('[generateNewDialogue]', e.message)
+      if (e.name === 'AbortError') {
+        console.warn('[generateNewDialogue] API超时，已中断')
+      } else {
+        console.error('[generateNewDialogue]', e.message)
+      }
     } finally {
-      // 清除消息切换
+      // 清除所有定时器
+      clearTimeout(forceCloseTimeout)
+      clearTimeout(apiTimeout)
       clearInterval(msgInterval)
       
-      // 确保至少等待 3 秒
+      // 确保至少等待 3 秒（伊利效应）
       const elapsed = Date.now() - startTime
       const remaining = Math.max(0, 3000 - elapsed)
       
@@ -581,6 +602,35 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
             <span className="text-lg font-medium text-slate-700">{fakeLoadingMsg}</span>
           </div>
           <p className="text-sm text-slate-500">请稍候，AI正在为您精心准备...</p>
+          
+          {/* 强制跳过按钮 */}
+          <button
+            onClick={() => {
+              setFakeLoading(false)
+              setIsGenerating(false)
+            }}
+            style={{
+              marginTop: '1.5rem',
+              padding: '0.5rem 1.25rem',
+              fontSize: '0.875rem',
+              color: '#94a3b8',
+              background: 'none',
+              border: '1px solid #cbd5e1',
+              borderRadius: '0.5rem',
+              cursor: 'pointer',
+              transition: 'all 0.15s',
+            }}
+            onMouseEnter={(e) => {
+              e.currentTarget.style.color = '#64748b'
+              e.currentTarget.style.borderColor = '#94a3b8'
+            }}
+            onMouseLeave={(e) => {
+              e.currentTarget.style.color = '#94a3b8'
+              e.currentTarget.style.borderColor = '#cbd5e1'
+            }}
+          >
+            取消 / Skip
+          </button>
         </div>
       )}
 
