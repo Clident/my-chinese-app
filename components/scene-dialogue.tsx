@@ -352,8 +352,8 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   const keyWords = dialogue?.keyVocabulary?.map(v => v.word) ?? []
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-4 pb-32">
-      <Card className="shadow-md border-slate-200 min-h-[60vh]">
+    <div className="w-full max-w-md mx-auto space-y-4 pb-32" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
+      <Card className="shadow-sm border-none min-h-[60vh] rounded-[2.5rem]" style={{ background: '#fff' }}>
         <CardHeader className="pb-3 border-b border-slate-100">
           <div className="flex items-center justify-between">
             {/* 场景标题 */}
@@ -463,11 +463,11 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                   <div
                     key={index}
                     style={{
-                      borderRadius: '0.75rem',
-                      padding: '0.75rem 1rem',
+                      borderRadius: '1.5rem',
+                      padding: '1rem 1.25rem',
                       background: isA ? '#eff6ff' : '#f0fdf4',
-                      border: `1px solid ${isA ? '#dbeafe' : '#dcfce7'}`,
-                      marginBottom: '0.5rem',
+                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
+                      marginBottom: '0.75rem',
                     }}
                   >
                     {/* 说话人标签 */}

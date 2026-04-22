@@ -142,23 +142,24 @@ export const CharacterUnit = ({
   const displayChar = showChallengeBlank ? '____' : char
 
   return (
-    <div
-      className={mode === 'hover' ? 'group' : ''}
-      onClick={showChallengeBlank && onReveal ? onReveal : undefined}
-      style={{
-        display: 'inline-flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        width: '3.5rem',
-        flexShrink: 0,
-        marginRight: '1px',
-        verticalAlign: 'bottom',
-        borderBottom: underline ? '2px solid #fbbf24' : 'none',
-        paddingBottom: underline ? '1px' : '0',
-        cursor: showChallengeBlank ? 'pointer' : 'default',
-      }}
-    >
+    <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+      <div
+        className={mode === 'hover' ? 'group' : ''}
+        onClick={showChallengeBlank && onReveal ? onReveal : undefined}
+        style={{
+          display: 'inline-flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          width: '3.5rem',
+          flexShrink: 0,
+          marginRight: '1px',
+          verticalAlign: 'bottom',
+          borderBottom: underline ? '2px solid #fbbf24' : 'none',
+          paddingBottom: underline ? '1px' : '0',
+          cursor: showChallengeBlank ? 'pointer' : 'default',
+        }}
+      >
       <span
         style={{
           fontSize: '11px',
@@ -194,6 +195,7 @@ export const CharacterUnit = ({
         {displayChar}
       </span>
     </div>
+    </span>
   )
 }
 
@@ -283,26 +285,27 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
   const pinyinColorInChallenge = showChallengeBlank ? '#6b7280' : color
 
   return (
-    <div
-      onMouseEnter={() => setHovered(true)}
-      onMouseLeave={() => setHovered(false)}
-      onClick={showChallengeBlank && onReveal ? onReveal : undefined}
-      style={{
-        display: 'inline-flex',
-        flexDirection: 'column',
-        alignItems: 'center',
-        justifyContent: 'flex-end',
-        width: '3.5rem',
-        flexShrink: 0,
-        marginRight: '1px',
-        verticalAlign: 'bottom',
-        borderBottom: underline && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
-        paddingBottom: underline ? '1px' : '0',
-        cursor: showChallengeBlank ? 'pointer' : 'default',
-        minHeight: showChallengeBlank ? '44px' : 'auto',
-        position: 'relative',
-      }}
-    >
+    <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
+      <div
+        onMouseEnter={() => setHovered(true)}
+        onMouseLeave={() => setHovered(false)}
+        onClick={showChallengeBlank && onReveal ? onReveal : undefined}
+        style={{
+          display: 'inline-flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'flex-end',
+          width: '3.5rem',
+          flexShrink: 0,
+          marginRight: '1px',
+          verticalAlign: 'bottom',
+          borderBottom: underline && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
+          paddingBottom: underline ? '1px' : '0',
+          cursor: showChallengeBlank ? 'pointer' : 'default',
+          minHeight: showChallengeBlank ? '44px' : 'auto',
+          position: 'relative',
+        }}
+      >
       <span
         style={{
           fontSize: '11px',
@@ -351,6 +354,7 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
         </span>
       )}
     </div>
+    </span>
   )
 }
 
@@ -404,6 +408,7 @@ export const RubyLine = ({
         alignItems: 'flex-end',
         justifyContent: 'flex-start',
         rowGap: '0.5rem',
+        lineHeight: '2.5',
       }}
     >
       {chinese.split('').map((char, i) => {

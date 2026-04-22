@@ -901,6 +901,18 @@ export const hsk34Dialogues: FallbackDialogue[] = [
       { word: "抛锚", pinyin: "pāo máo", meaning: "（車などが）故障して動かなくなる" },
       { word: "拖车", pinyin: "tuō chē", meaning: "レッカー車、牽引する" }
     ],
+  },
+  {
+    scene: '在高铁上坐错位置',
+    sceneEmoji: '🚄',
+    lines: [
+      { speaker: "乘客A", chinese: "不好意思，你好像坐了我的位置。", pinyin: "bú hǎo yì sī ， nǐ hǎo xiàng zuò le wǒ de wèi zhì 。", japanese: "すみません、私の席に座られているようです。" },
+      { speaker: "乘客B", chinese: "啊，对不起，我看错车厢号了。", pinyin: "ā ， duì bù qǐ ， wǒ kàn cuò chē xiāng hào le 。", japanese: "あ、すみません。車両番号を間違えて見ていました。" }
+    ],
+    keyVocabulary: [
+      { word: "好像", pinyin: "hǎo xiàng", meaning: "〜のようだ" },
+      { word: "车厢", pinyin: "chē xiāng", meaning: "車両" }
+    ],
   }
 ]
 
@@ -1363,6 +1375,18 @@ export const hsk56Dialogues: FallbackDialogue[] = [
     keyVocabulary: [
       { word: "私教", pinyin: "sī jiào", meaning: "パーソナルトレーナー" },
       { word: "办卡", pinyin: "bàn kǎ", meaning: "（ジムなどの）会員カードを作る、入会する" }
+    ],
+  },
+  {
+    scene: '委婉拒绝加班',
+    sceneEmoji: '🌙',
+    lines: [
+      { speaker: "领导", chinese: "小王，这个方案今晚得赶出来，辛苦一下？", pinyin: "xiǎo wáng ， zhè gè fāng àn jīn wǎn děi gǎn chū lái ， xīn kǔ yí xià ？", japanese: "王君、この案を今晩中に仕上げてほしいんだ。悪いね？" },
+      { speaker: "小王", chinese: "真抱歉领导，我今晚家里有点急事，恐怕处理不了。", pinyin: "zhēn bào qiàn lǐng dǎo ， wǒ jīn wǎn jiā lǐ yǒu diǎn jí shì ， kǒng pà chǔ lǐ bù liǎo 。", japanese: "申し訳ありません。今夜は家庭で急用がありまして、対応できそうにありません。" }
+    ],
+    keyVocabulary: [
+      { word: "赶出来", pinyin: "gǎn chū lái", meaning: "（急いで）仕上げる" },
+      { word: "恐怕", pinyin: "kǒng pà", meaning: "恐らく〜（できない）だろう" }
     ],
   }
 ]
