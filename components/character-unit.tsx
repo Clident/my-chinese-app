@@ -331,9 +331,19 @@ export function DialogueLine({
 }: DialogueLineProps) {
   const speak = () => {
     if ('speechSynthesis' in window) {
+      const voices = window.speechSynthesis.getVoices()
+      
+      // 优选 Xiaoxiao 或 Google 神经语音
+      const preferredVoice = voices.find(v => 
+        (v.name.includes('Xiaoxiao') || v.name.includes('Google')) && v.lang.includes('zh-CN')
+      ) || voices.find(v => v.lang.includes('zh-CN'))
+
       const utterance = new SpeechSynthesisUtterance(chinese)
       utterance.lang = 'zh-CN'
-      utterance.rate = 0.8
+      if (preferredVoice) utterance.voice = preferredVoice
+      utterance.pitch = 0.85
+      utterance.rate = 0.88
+      utterance.volume = 1.0
       speechSynthesis.speak(utterance)
     }
   }

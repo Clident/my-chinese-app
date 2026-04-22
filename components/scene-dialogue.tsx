@@ -408,8 +408,17 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                       <button
                         onClick={() => {
                           if ('speechSynthesis' in window) {
+                            const voices = window.speechSynthesis.getVoices()
+                            const preferredVoice = voices.find(v => 
+                              (v.name.includes('Xiaoxiao') || v.name.includes('Google')) && v.lang.includes('zh-CN')
+                            ) || voices.find(v => v.lang.includes('zh-CN'))
+                            
                             const u = new SpeechSynthesisUtterance(line.chinese)
-                            u.lang = 'zh-CN'; u.rate = 0.8
+                            u.lang = 'zh-CN'
+                            if (preferredVoice) u.voice = preferredVoice
+                            u.pitch = 0.85
+                            u.rate = 0.88
+                            u.volume = 1.0
                             speechSynthesis.speak(u)
                           }
                         }}
