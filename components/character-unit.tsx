@@ -142,51 +142,47 @@ export const CharacterUnit = ({
   const displayChar = showChallengeBlank ? '____' : char
 
   return (
-    <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
-      <div
-        className={mode === 'hover' ? 'group' : ''}
-        onClick={showChallengeBlank && onReveal ? onReveal : undefined}
-        style={{
-          display: 'inline-flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          width: '3.5rem',
-          flexShrink: 0,
-          marginRight: '1px',
-          verticalAlign: 'bottom',
-          borderBottom: underline ? '2px solid #fbbf24' : 'none',
-          paddingBottom: underline ? '1px' : '0',
-          cursor: showChallengeBlank ? 'pointer' : 'default',
-        }}
-      >
+    <span
+      className={mode === 'hover' ? 'group' : ''}
+      onClick={showChallengeBlank && onReveal ? onReveal : undefined}
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        minWidth: '2.2rem',
+        flexShrink: 0,
+        marginRight: '0.05rem',
+        verticalAlign: 'bottom',
+        borderBottom: underline ? '2px solid #fbbf24' : 'none',
+        paddingBottom: underline ? '1px' : '0',
+        cursor: showChallengeBlank ? 'pointer' : 'default',
+      }}
+    >
       <span
         style={{
-          fontSize: '0.7rem',
+          fontSize: '0.65rem',
           fontWeight: '400',
           lineHeight: '1',
-          marginBottom: '4px',
+          marginBottom: '3px',
           textAlign: 'center',
-          width: '100%',
           whiteSpace: 'nowrap',
           overflow: 'visible',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           color: '#9ca3af',
-          height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          letterSpacing: '0.15em',
+          letterSpacing: '0.1em',
         }}
       >
         {py}
       </span>
       <span
         style={{
-          fontSize: showChallengeBlank ? '1rem' : '2.25rem',
+          fontSize: showChallengeBlank ? '1rem' : '1.875rem',
           lineHeight: '1',
           textAlign: 'center',
-          width: '100%',
           color: showChallengeBlank ? '#fbbf24' : color,
           display: 'block',
           letterSpacing: showChallengeBlank ? '-1px' : 'normal',
@@ -195,7 +191,6 @@ export const CharacterUnit = ({
       >
         {displayChar}
       </span>
-    </div>
     </span>
   )
 }
@@ -286,44 +281,41 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
   const pinyinColorInChallenge = showChallengeBlank ? '#6b7280' : color
 
   return (
-    <span style={{ display: 'inline-block', whiteSpace: 'nowrap' }}>
-      <div
-        onMouseEnter={() => setHovered(true)}
-        onMouseLeave={() => setHovered(false)}
-        onClick={showChallengeBlank && onReveal ? onReveal : undefined}
-        style={{
-          display: 'inline-flex',
-          flexDirection: 'column',
-          alignItems: 'center',
-          justifyContent: 'flex-end',
-          width: '3.5rem',
-          flexShrink: 0,
-          marginRight: '1px',
-          verticalAlign: 'bottom',
-          borderBottom: underline && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
-          paddingBottom: underline ? '1px' : '0',
-          cursor: showChallengeBlank ? 'pointer' : 'default',
-          minHeight: showChallengeBlank ? '44px' : 'auto',
-          position: 'relative',
-        }}
-      >
+    <span
+      onMouseEnter={() => setHovered(true)}
+      onMouseLeave={() => setHovered(false)}
+      onClick={showChallengeBlank && onReveal ? onReveal : undefined}
+      style={{
+        display: 'inline-flex',
+        flexDirection: 'column',
+        alignItems: 'center',
+        justifyContent: 'flex-end',
+        minWidth: '2.2rem',
+        flexShrink: 0,
+        marginRight: '0.05rem',
+        verticalAlign: 'bottom',
+        borderBottom: underline && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
+        paddingBottom: underline ? '1px' : '0',
+        cursor: showChallengeBlank ? 'pointer' : 'default',
+        minHeight: showChallengeBlank ? '2.75rem' : 'auto',
+        position: 'relative',
+      }}
+    >
       <span
         style={{
-          fontSize: '0.7rem',
+          fontSize: '0.65rem',
           fontWeight: '400',
           lineHeight: '1',
-          marginBottom: '4px',
+          marginBottom: '3px',
           textAlign: 'center',
-          width: '100%',
           whiteSpace: 'nowrap',
           overflow: 'visible',
           fontFamily: 'system-ui, -apple-system, sans-serif',
           color: '#9ca3af',
-          height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          letterSpacing: '0.15em',
+          letterSpacing: '0.1em',
         }}
       >
         {py}
@@ -333,7 +325,7 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
         <span
           style={{
             width: '100%',
-            height: '2.25rem',
+            height: '1.875rem',
             borderBottom: '2px solid #9ca3af',
             display: 'inline-block',
             transition: 'all 0.3s ease',
@@ -342,7 +334,7 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
       ) : (
         <span
           style={{
-            fontSize: '2.25rem',
+            fontSize: '1.875rem',
             lineHeight: '1',
             textAlign: 'center',
             width: '100%',
@@ -355,7 +347,6 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
           {char}
         </span>
       )}
-    </div>
     </span>
   )
 }
@@ -409,7 +400,8 @@ export const RubyLine = ({
         flexWrap: 'wrap',
         alignItems: 'flex-end',
         justifyContent: 'flex-start',
-        rowGap: '0',
+        overflow: 'visible',
+        width: '100%',
       }}
     >
       {chinese.split('').map((char, i) => {

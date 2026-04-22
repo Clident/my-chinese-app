@@ -488,9 +488,9 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                       {line.speaker}
                     </span>
 
-                    {/* 对话主体：拼音+汉字 */}
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', marginBottom: '1rem' }}>
-                      <div style={{ flex: 1 }}>
+                    {/* 对话主体：RubyLine + 朗读/解说按钮同排 */}
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', overflow: 'visible', width: '100%' }}>
+                      <div style={{ flex: 1, overflow: 'visible' }}>
                         <RubyLine
                           chinese={line.chinese}
                           mode={pinyinMode}
