@@ -1,6 +1,0 @@
-const fs = require('fs')
-const c = fs.readFileSync('C:/Users/quent/Desktop/my-chinese-app/lib/hsk-fallback-data.ts', 'utf8')
-console.log('First 500 chars:')
-console.log(c.slice(0, 500))
-console.log('\n--- Last 500 chars ---')
-console.log(c.slice(-500))

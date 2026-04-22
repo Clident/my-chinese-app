@@ -16,53 +16,90 @@ const TONE_COLOR: Record<number, string> = {
 }
 
 // ============================================================
-// PinyinChar — 单字 + 拼音（Flex 纵向排列）
+// 提取声调数字
 // ============================================================
-export const PinyinChar = ({ char }: { char: string }) => {
-  const py = pinyin(char, { toneType: 'symbol' })
+const toneMap: Record<string, number> = {
+  'ā': 1, 'ē': 1, 'ī': 1, 'ō': 1, 'ū': 1, 'ǖ': 1,
+  'á': 2, 'é': 2, 'í': 2, 'ó': 2, 'ú': 2, 'ǘ': 2,
+  'ǎ': 3, 'ě': 3, 'ǐ': 3, 'ǒ': 3, 'ǔ': 3, 'ǚ': 3,
+  'à': 4, 'è': 4, 'ì': 4, 'ò': 4, 'ù': 4, 'ǜ': 4,
+}
 
-  // 提取声调数字
-  const toneMap: Record<string, number> = {
-    'ā': 1, 'ē': 1, 'ī': 1, 'ō': 1, 'ū': 1, 'ǖ': 1,
-    'á': 2, 'é': 2, 'í': 2, 'ó': 2, 'ú': 2, 'ǘ': 2,
-    'ǎ': 3, 'ě': 3, 'ǐ': 3, 'ǒ': 3, 'ǔ': 3, 'ǚ': 3,
-    'à': 4, 'è': 4, 'ì': 4, 'ò': 4, 'ù': 4, 'ǜ': 4,
+function getTone(py: string): number {
+  // 取拼音最后一个带调元音作为声调
+  const sorted = Object.keys(toneMap).sort((a, b) => b.length - a.length)
+  for (const k of sorted) {
+    if (py.includes(k)) return toneMap[k]
   }
+  return 0
+}
 
-  const isChinese = /[\u4e00-\u9fff]/.test(char)
-  const tone = isChinese ? (toneMap[py] ?? 0) : 0
+// ============================================================
+// isPunc — 判断是否为标点（不占拼音位）
+// ============================================================
+function isPunc(char: string): boolean {
+  return !/[\u4e00-\u9fff]/.test(char)
+}
 
-  if (!isChinese) {
-    return (
-      <span
-        className="text-[1.1rem] text-gray-500 mx-[2px] mb-6"
-        style={{ display: 'inline-flex', alignItems: 'flex-end', height: 'calc(1.5rem + 1.5rem + 4px)' }}
-      >
-        {char}
-      </span>
-    )
-  }
+// ============================================================
+// CharacterUnit — 单字盒子，死死锁住拼音+汉字
+// ============================================================
+interface CharacterUnitProps {
+  char: string
+  py: string
+  tone: number
+}
 
+const CharacterUnit = ({ char, py, tone }: CharacterUnitProps) => {
+  const punc = isPunc(char)
   return (
-    <span
-      className="mx-[2px]"
-      style={{ display: 'inline-flex', flexDirection: 'column', alignItems: 'center', width: 'min-content' }}
+    <div
+      className="inline-flex flex-col items-center justify-end mb-4"
+      style={{ width: 'min-content', minWidth: '2.5rem' }}
     >
+      {/* 拼音层 — 标点不需要 */}
+      {!punc && (
+        <span
+          className="text-[13px] font-bold leading-none mb-1.5 select-none whitespace-nowrap"
+          style={{ color: TONE_COLOR[tone] }}
+        >
+          {py}
+        </span>
+      )}
+      {/* 汉字层 */}
       <span
-        className="text-[13px] font-bold leading-none mb-1 select-none"
-        style={{ color: TONE_COLOR[tone] }}
+        className={`text-3xl md:text-4xl font-medium leading-none ${
+          punc ? 'text-gray-400 px-1' : 'text-gray-900'
+        }`}
       >
-        {py}
-      </span>
-      <span className="text-3xl font-medium leading-none text-gray-900">
         {char}
       </span>
-    </span>
+    </div>
   )
 }
 
 // ============================================================
-// DialogueLine 组件
+// RubyLine — 一整行字
+// ============================================================
+interface RubyLineProps {
+  chinese: string
+}
+
+export const RubyLine = ({ chinese }: RubyLineProps) => {
+  return (
+    <div className="inline-flex flex-wrap items-end gap-x-1 gap-y-6 leading-none">
+      {chinese.split('').map((char, i) => {
+        const punc = isPunc(char)
+        const py = pinyin(char, { toneType: 'symbol' })
+        const tone = punc ? 0 : getTone(py)
+        return <CharacterUnit key={i} char={char} py={py} tone={tone} />
+      })}
+    </div>
+  )
+}
+
+// ============================================================
+// DialogueLine 组件（保留，调用 RubyLine）
 // ============================================================
 interface DialogueLineProps {
   speaker: string
@@ -88,16 +125,12 @@ export function DialogueLine({ speaker, chinese, japanese }: DialogueLineProps) 
       <div className="flex-1 min-w-0">
         <div className="flex items-center gap-2">
           <p className="font-medium font-chinese">
-              <span className="inline-flex flex-wrap items-end gap-x-1">
-                {chinese.split('').map((char, i) => (
-                  <PinyinChar key={i} char={char} />
-                ))}
-              </span>
+            <RubyLine chinese={chinese} />
           </p>
           <Button
             variant="ghost"
             size="icon"
-            className="h-7 w-7 text-muted-foreground hover:text-primary"
+            className="h-7 w-7 text-muted-foreground hover:text-primary flex-shrink-0"
             onClick={speak}
           >
             <Volume2 className="h-4 w-4" />
@@ -107,4 +140,12 @@ export function DialogueLine({ speaker, chinese, japanese }: DialogueLineProps) 
       </div>
     </div>
   )
+}
+
+// 保留导出 PinyinChar 兼容（deprecated）
+export const PinyinChar = ({ char }: { char: string }) => {
+  const py = pinyin(char, { toneType: 'symbol' })
+  const punc = isPunc(char)
+  const tone = punc ? 0 : getTone(py)
+  return <CharacterUnit char={char} py={py} tone={tone} />
 }

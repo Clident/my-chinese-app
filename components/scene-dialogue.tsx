@@ -4,9 +4,9 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { pinyin } from 'pinyin-pro'
-import { Volume2 } from 'lucide-react'
-import { DialogueLine, PinyinChar } from './dialogue-line'
+
+
+import { DialogueLine, RubyLine } from './dialogue-line'
 import {
   BookOpen,
   X,
@@ -205,11 +205,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                       </span>
                     </div>
                     <p className="font-medium font-chinese mb-1.5">
-                      <span className="flex flex-wrap items-end gap-x-0 gap-y-3">
-                        {line.chinese.split('').map((char, ci) => (
-                          <PinyinChar key={ci} char={char} />
-                        ))}
-                      </span>
+                      <RubyLine chinese={line.chinese} />
                     </p>
                     <p className="text-sm text-slate-500 italic">{line.japanese}</p>
                   </div>
