@@ -138,19 +138,19 @@ export function DialogueLine({
         {speaker}
       </div>
       <div className="flex-1 min-w-0">
-        <div className="flex items-center gap-2">
-          <p className="font-medium font-chinese">
+        <div className="flex items-start gap-2">
+          <div className="font-medium font-chinese text-left flex-1">
             <RubyLine chinese={chinese} />
-          </p>
+          </div>
           <button
-            className="h-7 w-7 text-muted-foreground hover:text-primary"
+            className="h-10 w-10 flex-shrink-0 text-muted-foreground hover:text-primary mt-2"
             onClick={speak}
             aria-label="朗读"
           >
             🔊
           </button>
         </div>
-        <p className="text-sm text-muted-foreground mt-1">{japanese}</p>
+        <p className="text-sm text-muted-foreground mt-2 pl-1">{japanese}</p>
       </div>
     </div>
   )
