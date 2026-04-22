@@ -7,6 +7,7 @@ import { pinyin } from 'pinyin-pro'
 // 类型
 // ============================================================
 export type PinyinMode = 'show' | 'hidden' | 'hover'
+export type ChallengeState = 'hidden' | 'revealed'
 
 // ============================================================
 // 声调颜色
@@ -44,9 +45,19 @@ interface CharacterUnitProps {
   tone: number
   mode: PinyinMode
   underline?: boolean  // keyVocabulary 词组标记
+  challengeState?: ChallengeState  // 挑战模式状态
+  onReveal?: () => void  // 翻牌回调
 }
 
-export const CharacterUnit = ({ char, py, tone, mode, underline = false }: CharacterUnitProps) => {
+export const CharacterUnit = ({
+  char,
+  py,
+  tone,
+  mode,
+  underline = false,
+  challengeState,
+  onReveal,
+}: CharacterUnitProps) => {
   const isChinese = /[\u4e00-\u9fff]/.test(char)
   const isPunctuation = isPunc(char)
   const color = TONE_COLOR[tone] || TONE_COLOR[0]
@@ -57,9 +68,14 @@ export const CharacterUnit = ({ char, py, tone, mode, underline = false }: Chara
   // 拼音层透明度
   const pinyinOpacity = !isChinese ? 0 : mode === 'show' ? 1 : 0
 
+  // 挑战模式下隐藏汉字
+  const showChallengeBlank = challengeState === 'hidden' && underline
+  const displayChar = showChallengeBlank ? '____' : char
+
   return (
     <div
       className={mode === 'hover' && isChinese ? 'group' : ''}
+      onClick={showChallengeBlank && onReveal ? onReveal : undefined}
       style={{
         display: 'inline-flex',
         flexDirection: 'column',
@@ -71,6 +87,7 @@ export const CharacterUnit = ({ char, py, tone, mode, underline = false }: Chara
         verticalAlign: 'bottom',
         borderBottom: underline && isChinese ? '2px solid #fbbf24' : 'none',
         paddingBottom: underline && isChinese ? '1px' : '0',
+        cursor: showChallengeBlank ? 'pointer' : 'default',
       }}
     >
       {/* 拼音层 — 始终占位，opacity 控制显隐 */}
@@ -90,8 +107,6 @@ export const CharacterUnit = ({ char, py, tone, mode, underline = false }: Chara
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
         }}
-        // hover 模式：CSS :hover 通过 group 实现，但 inline style 不支持伪类
-        // 改用 onMouseEnter/Leave 控制
       >
         {isChinese ? py : '\u00A0'}
       </span>
@@ -99,15 +114,16 @@ export const CharacterUnit = ({ char, py, tone, mode, underline = false }: Chara
       {/* 汉字层 */}
       <span
         style={{
-          fontSize: '1.875rem',
+          fontSize: showChallengeBlank ? '1rem' : '1.875rem',
           lineHeight: '1',
           textAlign: 'center',
           width: '100%',
-          color: isChinese ? '#111827' : '#9ca3af',
+          color: showChallengeBlank ? '#fbbf24' : isChinese ? '#111827' : '#9ca3af',
           display: 'block',
+          letterSpacing: showChallengeBlank ? '-1px' : 'normal',
         }}
       >
-        {char}
+        {displayChar}
       </span>
     </div>
   )
@@ -116,7 +132,7 @@ export const CharacterUnit = ({ char, py, tone, mode, underline = false }: Chara
 // hover 模式需要 JS 控制，封装一个带 hover state 的版本
 export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { mode: PinyinMode }) => {
   const [hovered, setHovered] = useState(false)
-  const { char, py, tone, mode, underline } = props
+  const { char, py, tone, mode, underline, challengeState, onReveal } = props
   const isChinese = /[\u4e00-\u9fff]/.test(char)
   const isPunctuation = isPunc(char)
   const color = TONE_COLOR[tone] || TONE_COLOR[0]
@@ -130,10 +146,15 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
     ? (hovered ? 1 : 0)
     : 0 // hidden
 
+  // 挑战模式下隐藏汉字
+  const showChallengeBlank = challengeState === 'hidden' && underline
+  const isRevealed = challengeState === 'revealed' && underline
+
   return (
     <div
       onMouseEnter={() => setHovered(true)}
       onMouseLeave={() => setHovered(false)}
+      onClick={showChallengeBlank && onReveal ? onReveal : undefined}
       style={{
         display: 'inline-flex',
         flexDirection: 'column',
@@ -143,11 +164,14 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
         flexShrink: 0,
         marginRight: isPunctuation ? '0' : '1px',
         verticalAlign: 'bottom',
-        borderBottom: underline && isChinese ? '2px solid #fbbf24' : 'none',
+        borderBottom: underline && isChinese && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
         paddingBottom: underline && isChinese ? '1px' : '0',
-        cursor: mode === 'hover' && isChinese ? 'default' : 'default',
+        cursor: showChallengeBlank ? 'pointer' : 'default',
+        minHeight: showChallengeBlank ? '44px' : 'auto', // 移动端热区
+        position: 'relative',
       }}
     >
+      {/* 拼音层 */}
       <span
         style={{
           fontSize: '11px',
@@ -167,46 +191,78 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
       >
         {isChinese ? py : '\u00A0'}
       </span>
-      <span
-        style={{
-          fontSize: '1.875rem',
-          lineHeight: '1',
-          textAlign: 'center',
-          width: '100%',
-          color: isChinese ? '#111827' : '#9ca3af',
-          display: 'block',
-        }}
-      >
-        {char}
-      </span>
+      
+      {/* 汉字层 */}
+      {showChallengeBlank ? (
+        // 填空横线
+        <span
+          style={{
+            width: '100%',
+            height: '1.875rem',
+            borderBottom: '2px solid #9ca3af',
+            display: 'inline-block',
+            transition: 'all 0.3s ease',
+          }}
+        />
+      ) : (
+        <span
+          style={{
+            fontSize: '1.875rem',
+            lineHeight: '1',
+            textAlign: 'center',
+            width: '100%',
+            color: isRevealed ? '#2563eb' : isChinese ? '#111827' : '#9ca3af',
+            display: 'block',
+            fontWeight: isRevealed ? '700' : '400',
+            transition: 'color 0.3s ease',
+          }}
+        >
+          {char}
+        </span>
+      )}
     </div>
   )
 }
 
 // ============================================================
-// RubyLine — 支持 mode + keyVocabulary 下划线
+// RubyLine — 支持 mode + keyVocabulary 下划线 + 挑战模式
 // ============================================================
 interface RubyLineProps {
   chinese: string
   mode: PinyinMode
   keyWords?: string[]  // 需要下划线的词列表
+  revealedWords?: Set<string>  // 挑战模式下已揭示的词
+  challengeMode?: boolean  // 是否处于挑战模式
+  onWordReveal?: (word: string) => void  // 揭示词的回调
 }
 
-export const RubyLine = ({ chinese, mode, keyWords = [] }: RubyLineProps) => {
+export const RubyLine = ({
+  chinese,
+  mode,
+  keyWords = [],
+  revealedWords = new Set(),
+  challengeMode = false,
+  onWordReveal,
+}: RubyLineProps) => {
   const pinyinArray = pinyin(chinese, {
     toneType: 'symbol',
     type: 'array',
     padding: true,
   })
 
-  // 构建下划线 index set
+  // 构建下划线 index set + 词到索引的映射
   const underlineSet = new Set<number>()
+  const indexToWord = new Map<number, string>()
+  
   for (const word of keyWords) {
     let idx = 0
     while (idx < chinese.length) {
       const pos = chinese.indexOf(word, idx)
       if (pos === -1) break
-      for (let j = pos; j < pos + word.length; j++) underlineSet.add(j)
+      for (let j = pos; j < pos + word.length; j++) {
+        underlineSet.add(j)
+        indexToWord.set(j, word)
+      }
       idx = pos + 1
     }
   }
@@ -226,6 +282,13 @@ export const RubyLine = ({ chinese, mode, keyWords = [] }: RubyLineProps) => {
         const py = isChinese ? (pinyinArray[i] || '') : ''
         const tone = isChinese ? getTone(py) : 0
         const underline = underlineSet.has(i)
+        const word = indexToWord.get(i)
+        
+        // 挑战模式状态：如果该字属于某个词，根据是否揭示决定状态
+        let challengeState: ChallengeState | undefined
+        if (challengeMode && underline && word) {
+          challengeState = revealedWords.has(word) ? 'revealed' : 'hidden'
+        }
 
         return (
           <CharacterUnitHover
@@ -235,6 +298,8 @@ export const RubyLine = ({ chinese, mode, keyWords = [] }: RubyLineProps) => {
             tone={tone}
             mode={mode}
             underline={underline}
+            challengeState={challengeState}
+            onReveal={word && onWordReveal ? () => onWordReveal(word) : undefined}
           />
         )
       })}

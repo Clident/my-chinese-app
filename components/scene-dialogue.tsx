@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { RubyLine, type PinyinMode } from './character-unit'
+import { RubyLine, type PinyinMode, type ChallengeState } from './character-unit'
 import {
   BookOpen,
   X,
@@ -14,6 +14,7 @@ import {
   Eye,
   EyeOff,
   MousePointer,
+  Target,
 } from 'lucide-react'
 import {
   getDialoguesByLevel,
@@ -41,6 +42,10 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
   // 拼音显示模式
   const [pinyinMode, setPinyinMode] = useState<PinyinMode>('show')
+
+  // 挑战模式
+  const [challengeMode, setChallengeMode] = useState(false)
+  const [revealedWords, setRevealedWords] = useState<Set<string>>(new Set())
 
   // 解说面板（整体）
   const [explanation, setExplanation] = useState<string | null>(null)
@@ -76,6 +81,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     setExplanation(null)
     setShowExplanation(false)
     setLineExplanation({})
+    setRevealedWords(new Set()) // 切换场景时重置挑战模式
   }, [currentLevel])
 
   const goToPrev = useCallback(() => {
@@ -86,6 +92,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       setExplanation(null)
       setShowExplanation(false)
       setLineExplanation({})
+      setRevealedWords(new Set()) // 切换对话时重置挑战模式
     }
   }, [currentIndex, localDialogues])
 
@@ -97,6 +104,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       setExplanation(null)
       setShowExplanation(false)
       setLineExplanation({})
+      setRevealedWords(new Set()) // 切换对话时重置挑战模式
     }
   }, [currentIndex, localDialogues])
 
@@ -234,6 +242,17 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     }
   }, [currentLevel, localDialogues, cooldownUntil])
 
+  // 挑战模式：揭示单词
+  const revealWord = useCallback((word: string) => {
+    setRevealedWords(prev => new Set(prev).add(word))
+  }, [])
+
+  // 切换挑战模式时重置
+  const toggleChallengeMode = useCallback(() => {
+    setChallengeMode(prev => !prev)
+    setRevealedWords(new Set())
+  }, [])
+
   // keyVocabulary の词列表
   const keyWords = dialogue?.keyVocabulary?.map(v => v.word) ?? []
 
@@ -253,33 +272,85 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
               )}
             </div>
 
-            {/* 拼音模式切换 */}
-            <div style={{ display: 'flex', gap: '2px', background: '#f1f5f9', borderRadius: '0.5rem', padding: '2px' }}>
-              {MODES.map(({ mode, label, icon }) => (
-                <button
-                  key={mode}
-                  onClick={() => setPinyinMode(mode)}
-                  title={`拼音: ${label}`}
-                  style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '3px',
-                    padding: '3px 7px',
-                    borderRadius: '0.375rem',
-                    border: 'none',
-                    cursor: 'pointer',
-                    fontSize: '11px',
-                    fontWeight: pinyinMode === mode ? '600' : '400',
-                    background: pinyinMode === mode ? '#fff' : 'transparent',
-                    color: pinyinMode === mode ? '#3b82f6' : '#64748b',
-                    boxShadow: pinyinMode === mode ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
-                    transition: 'all 0.15s',
-                  }}
-                >
-                  {icon}
-                  <span className="hidden sm:inline">{label}</span>
-                </button>
-              ))}
+            {/* 拼音模式切换 + 挑战/重置按钮 */}
+            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
+              {/* 拼音模式 */}
+              <div style={{ display: 'flex', gap: '2px', background: '#f1f5f9', borderRadius: '0.5rem', padding: '2px' }}>
+                {MODES.map(({ mode, label, icon }) => (
+                  <button
+                    key={mode}
+                    onClick={() => setPinyinMode(mode)}
+                    title={`拼音: ${label}`}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '3px',
+                      padding: '3px 7px',
+                      borderRadius: '0.375rem',
+                      border: 'none',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: pinyinMode === mode ? '600' : '400',
+                      background: pinyinMode === mode ? '#fff' : 'transparent',
+                      color: pinyinMode === mode ? '#3b82f6' : '#64748b',
+                      boxShadow: pinyinMode === mode ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    {icon}
+                    <span className="hidden sm:inline">{label}</span>
+                  </button>
+                ))}
+              </div>
+
+              {/* 挑战/重置按钮 */}
+              {keyWords.length > 0 && (
+                <>
+                  <button
+                    onClick={toggleChallengeMode}
+                    title={challengeMode ? '挑战モード終了' : '挑戦モード'}
+                    style={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: '4px',
+                      padding: '4px 8px',
+                      borderRadius: '0.375rem',
+                      border: challengeMode ? '1px solid #f59e0b' : '1px solid #e5e7eb',
+                      cursor: 'pointer',
+                      fontSize: '11px',
+                      fontWeight: '600',
+                      background: challengeMode ? '#fef3c7' : '#fff',
+                      color: challengeMode ? '#d97706' : '#64748b',
+                      transition: 'all 0.15s',
+                    }}
+                  >
+                    <Target className="h-3.5 w-3.5" />
+                    <span>チャレンジ</span>
+                  </button>
+                  
+                  {challengeMode && (
+                    <button
+                      onClick={() => setRevealedWords(new Set())}
+                      title="リセット"
+                      style={{
+                        display: 'flex',
+                        alignItems: 'center',
+                        justifyContent: 'center',
+                        width: '28px',
+                        height: '28px',
+                        borderRadius: '0.375rem',
+                        border: '1px solid #e5e7eb',
+                        cursor: 'pointer',
+                        background: '#fff',
+                        color: '#64748b',
+                        transition: 'all 0.15s',
+                      }}
+                    >
+                      🔄
+                    </button>
+                  )}
+                </>
+              )}
             </div>
 
             <div className="text-sm text-slate-500 font-mono">
@@ -327,6 +398,9 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                           chinese={line.chinese}
                           mode={pinyinMode}
                           keyWords={keyWords}
+                          challengeMode={challengeMode}
+                          revealedWords={revealedWords}
+                          onWordReveal={revealWord}
                         />
                       </div>
 
