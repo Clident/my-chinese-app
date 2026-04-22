@@ -65,7 +65,8 @@ export async function POST(req: Request) {
 1. 解釈は必ず正確な日本語で行うこと
 2. 嘘をつかないこと
 3. 返信は200文字以内の簡潔なものにすること
-4. 形式は必ず【語源】【使い分け】の2点のみ回答すること`
+4. 形式は必ず【語源】【使い分け】の2点のみ回答すること
+5. 拼音（ピンイン）を書く場合は、音節を繋げて書くこと（例：bàogào）。音節内部にスペースを入れないこと（例：bà ogà o は禁止）。`
 
   const userPrompt = `以下の「${scene}」での対話について、重要な単語や表現を簡潔に解説してください。
 
@@ -89,7 +90,9 @@ ${dialogueText}
         maxOutputTokens: 800,
       })
 
-      return Response.json({ explanation: text })
+      // 修拼音空格：声调元音后如果有空格，移除它
+      const cleaned = text.replace(/([āáǎàēéěèīíǐìōóǒòūúǔùüǖǘǚǜ])\s+/gi, '$1')
+      return Response.json({ explanation: cleaned })
 
     } catch (error: any) {
       lastError = error
