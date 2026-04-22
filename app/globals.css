@@ -131,5 +131,22 @@
   }
 }
 
+/* ============================================================
+   声调颜色 — 全局 CSS，防止 inline style 被覆盖
+   ============================================================ */
+.t1 { color: #ff4d4f !important; } /* 1声红 */
+.t2 { color: #ffa940 !important; } /* 2声橙 */
+.t3 { color: #73d13d !important; } /* 3声绿 */
+.t4 { color: #40a9ff !important; } /* 4声蓝 */
+.t0 { color: #9ca3af !important; } /* 轻声/未识别 → 灰 */
+
+/* 防止长拼音挤压 — 拼音层强制居中不换行 */
+.t1, .t2, .t3, .t4, .t0 {
+  white-space: nowrap;
+  display: block;
+  text-align: center;
+  width: 100%;
+}
+
 /* 标点占位：保持与其他汉字同高 */
 .placeholder-dot { display: inline-block; width: 0.8em; }

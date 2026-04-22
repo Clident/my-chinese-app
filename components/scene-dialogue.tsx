@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 
 
-import { DialogueLine, RubyLine } from './dialogue-line'
+import { CharacterUnit, RubyLine } from './character-unit'
 import {
   BookOpen,
   X,
