@@ -63,6 +63,9 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   // 伪装 Loading 状态（伊利效应）
   const [fakeLoading, setFakeLoading] = useState(false)
   const [fakeLoadingMsg, setFakeLoadingMsg] = useState('')
+  
+  // 切换动画状态
+  const [isFading, setIsFading] = useState(false)
 
   // 解说 Modal 打开时禁止背景滚动
   useEffect(() => {
@@ -106,15 +109,18 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel()
       }
-      const i = currentIndex - 1
-      setCurrentIndex(i)
-      setDialogue(localDialogues[i])
-      setExplanation(null)
-      setShowExplanation(false)
-      setLineExplanation({})
-      setRevealedWords(new Set())
-      // 回弹顶部
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setIsFading(true)
+      setTimeout(() => {
+        const i = currentIndex - 1
+        setCurrentIndex(i)
+        setDialogue(localDialogues[i])
+        setExplanation(null)
+        setShowExplanation(false)
+        setLineExplanation({})
+        setRevealedWords(new Set())
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        setIsFading(false)
+      }, 150)
     }
   }, [currentIndex, localDialogues])
 
@@ -124,15 +130,18 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       if ('speechSynthesis' in window) {
         window.speechSynthesis.cancel()
       }
-      const i = currentIndex + 1
-      setCurrentIndex(i)
-      setDialogue(localDialogues[i])
-      setExplanation(null)
-      setShowExplanation(false)
-      setLineExplanation({})
-      setRevealedWords(new Set())
-      // 回弹顶部
-      window.scrollTo({ top: 0, behavior: 'smooth' })
+      setIsFading(true)
+      setTimeout(() => {
+        const i = currentIndex + 1
+        setCurrentIndex(i)
+        setDialogue(localDialogues[i])
+        setExplanation(null)
+        setShowExplanation(false)
+        setLineExplanation({})
+        setRevealedWords(new Set())
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+        setIsFading(false)
+      }, 150)
     }
   }, [currentIndex, localDialogues])
 
@@ -315,9 +324,11 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       clearTimeout(apiTimeout)
       clearInterval(msgInterval)
       
-      // 确保至少等待 3 秒（伊利效应）
+      // 确保至少等待随机时间（伊利效应）
+      // 30%概率等3秒，70%概率等1.5秒
+      const smartDelay = Math.random() < 0.3 ? 3000 : 1500
       const elapsed = Date.now() - startTime
-      const remaining = Math.max(0, 3000 - elapsed)
+      const remaining = Math.max(0, smartDelay - elapsed)
       
       await new Promise(resolve => setTimeout(resolve, remaining))
       
@@ -443,7 +454,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
           </div>
         </CardHeader>
 
-        <CardContent>
+        <CardContent className={`transition-opacity duration-300 ${isFading ? 'opacity-0' : 'opacity-100'}`}>
           {dialogue ? (
             <div className="space-y-1">
               {dialogue.lines.map((line, index) => {
