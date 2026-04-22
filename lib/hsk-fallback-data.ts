@@ -1388,6 +1388,114 @@ export const hsk56Dialogues: FallbackDialogue[] = [
       { word: "赶出来", pinyin: "gǎn chū lái", meaning: "（急いで）仕上げる" },
       { word: "恐怕", pinyin: "kǒng pà", meaning: "恐らく〜（できない）だろう" }
     ],
+  },
+  {
+    scene: '同事推卸责任',
+    sceneEmoji: '🙄',
+    lines: [
+      { speaker: "A", chinese: "这个错误明明是你负责的部分，为什么要推给我？", pinyin: "zhè gè cuò wù míng míng shì nǐ fù zé de bù fèn ， wèi shén me yào tuī gěi wǒ ？", japanese: "このミスは明らかに君の担当部分なのに、どうして僕のせいにすんだよ？" },
+      { speaker: "B", chinese: "我也是按你的模板做的，出问题大家都有责任吧。", pinyin: "wǒ yě shì àn nǐ de mú bǎn zuò de ， chū wèn tí dà jiā dōu yǒu zé rèn ba 。", japanese: "僕も君のテンプレート通りにやったんだ。問題が出たらお互い様だろ？" }
+    ],
+    keyVocabulary: [
+      { word: "推卸", pinyin: "tuī xiè", meaning: "（責任を）逃れる、転嫁する" },
+      { word: "模板", pinyin: "mú bǎn", meaning: "テンプレート" }
+    ],
+  },
+  {
+    scene: '被吐槽食堂难吃',
+    sceneEmoji: '🥣',
+    lines: [
+      { speaker: "同事", chinese: "这食堂的饭简直难以下咽，老板怎么想的？", pinyin: "zhè shí táng de fàn jiǎn zhí nán yǐ xià yàn ， lǎo bǎn zěn me xiǎng de ？", japanese: "この食堂の飯、マジで食えたもんじゃないな。社長は何を考えてんだ？" },
+      { speaker: "你", chinese: "省钱呗，反正他自己又不在这里吃。", pinyin: "shěng qián bei ， fǎn zhèng tā zì jǐ yòu bú zài zhè lǐ chī 。", japanese: "コスト削減だよ。どうせ自分はここで食べないんだから。" }
+    ],
+    keyVocabulary: [
+      { word: "难以下咽", pinyin: "nán yǐ xià yàn", meaning: "（まずくて）飲み込みにくい" },
+      { word: "反正", pinyin: "fǎn zhèng", meaning: "どうせ、いずれにせよ" }
+    ],
+  },
+  {
+    scene: '委婉拒绝老板的画饼',
+    sceneEmoji: '🥯',
+    lines: [
+      { speaker: "老板", chinese: "只要你今年肯努力，明年给你涨薪百分之五十。", pinyin: "zhǐ yào nǐ jīn nián kěn nǔ lì ， míng nián gěi nǐ zhǎng xīn bǎi fēn zhī wǔ shí 。", japanese: "今年頑張れば、来年は給料を50％アップしてあげるよ。" },
+      { speaker: "你", chinese: "谢谢老板。但我更希望现在的工资能按时发放。", pinyin: "xiè xie lǎo bǎn 。 dàn wǒ gèng xī wàng xiàn zài de gōng zī néng àn shí fā fàng 。", japanese: "ありがとうございます。ですが、今はまず今の給料が遅れずに支払われることを願っています。" }
+    ],
+    keyVocabulary: [
+      { word: "按时", pinyin: "àn shí", meaning: "時間通りに" },
+      { word: "发放", pinyin: "fā fàng", meaning: "（給与を）支給する" }
+    ],
+  },
+  {
+    scene: '职场八卦',
+    sceneEmoji: '🍉',
+    lines: [
+      { speaker: "同事A", chinese: "听说了吗？财务部的老张要跳槽了。", pinyin: "tīng shuō le ma ？ cái wù bù de lǎo zhāng yào tiào cáo le 。", japanese: "聞いた？財務部の張さんが転職するらしいよ。" },
+      { speaker: "同事B", chinese: "真的假的？他不是才升职吗，怎么又要走？", pinyin: "zhēn de jiǎ de ？ tā bú shì cái shēng zhí ma ， zěn me yòu yào zǒu ？", japanese: "本当？彼は最近昇進したばかりじゃないの、なんでまた辞めるの？" }
+    ],
+    keyVocabulary: [
+      { word: "跳槽", pinyin: "tiào cáo", meaning: "（会社・職種を）乗り換える跳槽" },
+      { word: "升职", pinyin: "shēng zhí", meaning: "昇進する" }
+    ],
+  },
+  {
+    scene: '被要求周末加班',
+    sceneEmoji: '😤',
+    lines: [
+      { speaker: "领导", chinese: "这周有个紧急项目，周末大家克服一下。", pinyin: "zhè zhōu yǒu gè jǐn jí xiàng mù ， zhōu mò dà jiā kè fú yí xià 。", japanese: "今週中に緊急プロジェクトがあるんだ。週末、みんな頑張って。" },
+      { speaker: "你", chinese: "这已经是连续第三个周末了，我的年假还没休过呢。", pinyin: "zhè yǐ jīng shì lián xù dì sān gè zhōu mò le ， wǒ de nián jià hái méi xiū guò ne 。", japanese: "もう連続で3週連続の週末出勤だよ。有給もまだ一回も取ってないのに。" }
+    ],
+    keyVocabulary: [
+      { word: "克服", pinyin: "kè fú", meaning: "我慢する、克服する" },
+      { word: "年假", pinyin: "nián jià", meaning: "年次休暇、有給" }
+    ],
+  },
+  {
+    scene: '工作群里发错消息',
+    sceneEmoji: '😅',
+    lines: [
+      { speaker: "你", chinese: "不好意思，刚才那条消息是发错群了，请忽略。", pinyin: "bú hǎo yì si ， gāng cái nà tiáo xiāo xī shì fā cuò qún le ， qǐng hū luè 。", japanese: "すみません、さっきのメッセージは間違えて別のグループに送っちゃいました。無視してください。" },
+      { speaker: "同事", chinese: "哈哈哈没事，我都准备去参加party了。", pinyin: "hā hā hā méi shì ， wǒ dōu zhǔn bèi qù cān jiā party le 。", japanese: "ははは大丈夫だよ。むしろ俺、パーティーの準備し始めてた所だった。" }
+    ],
+    keyVocabulary: [
+      { word: "发错群", pinyin: "fā cuò qún", meaning: "（LINEなどの）グループに間違えて送信する" },
+      { word: "忽略", pinyin: "hū luè", meaning: "無視する" }
+    ],
+  },
+  {
+    scene: '被同事阴阳怪气',
+    sceneEmoji: '😏',
+    lines: [
+      { speaker: "同事", chinese: "哎呀，你PPT做得真快呀，不愧是卷王呢！", pinyin: "āi yā ， nǐ PPT zuò de zhēn kuài ya ， bú kuì shì juàn wáng ne ！", japanese: "おやおや、PPT的制作が早いね〜。やっぱりキミは努力の人だね！" },
+      { speaker: "你", chinese: "彼此彼此，你不也在领导面前表现得很积极吗？", pinyin: "bǐ cǐ bǐ cǐ ， nǐ bù yě zài lǐng dǎo miàn qián biǎo xiàn de hěn jī jí ma ？", japanese: "お互い様でしょ。キミだって上司の前ではっぴょっぴろ？" }
+    ],
+    keyVocabulary: [
+      { word: "卷王", pinyin: "juǎn wáng", meaning: "激烈に 경쟁하는 사람（過劳競争 genshin" },
+      { word: "阴阳怪气", pinyin: "yīn yáng guài qì", meaning: "嫌味、皮肉を言う" }
+    ],
+  },
+  {
+    scene: '汇报工作时被打断',
+    sceneEmoji: '🤷',
+    lines: [
+      { speaker: "你", chinese: "关于这个方案，我们已经做了详细的市场调研，结果显示——", pinyin: "guān yú zhè gè fāng àn ， wǒ men yǐ jīng zuò le xiáng xì de shì chǎng diào yán ， jié guǒ xiǎn shì ——", japanese: "この方案については、すでに詳しい市場調査を行っており、結果は——" },
+      { speaker: "领导", chinese: "直接说结论吧，时间有限。", pinyin: "zhí jiē shuō jié lùn ba ， shí jiān yǒu xiàn 。", japanese: "結論直接从言ってください。時間が限られてるので。" }
+    ],
+    keyVocabulary: [
+      { word: "汇报", pinyin: "huì bào", meaning: "（上司に）報告する" },
+      { word: "调研", pinyin: "diào yán", meaning: "調査研究" }
+    ],
+  },
+  {
+    scene: '迟到被领导发现',
+    sceneEmoji: '🕐',
+    lines: [
+      { speaker: "领导", chinese: "小李，今天又迟到了，这个月第几次了？", pinyin: "xiǎo lǐ ， jīn tiān yòu chí dào le ， zhè gè yuè dì jǐ cì le ？", japanese: "李さん、今日はまた遅刻？今月何度目？" },
+      { speaker: "你", chinese: "路上堵车了，我明天一定早点出发。", pinyin: "lù shàng dǔ chē le ， wǒ míng tiān yí dìng zǎo diǎn chū fā 。", japanese: "途中で込んでいるんです。明日こそ早く出発します。" }
+    ],
+    keyVocabulary: [
+      { word: "迟到", pinyin: "chí dào", meaning: "遅刻する" },
+      { word: "堵车", pinyin: "dǔ chē", meaning: "交通渋滞" }
+    ],
   }
 ]
 

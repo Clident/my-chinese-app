@@ -354,103 +354,102 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   return (
     <div className="w-full max-w-md mx-auto space-y-4 pb-32" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
       <Card className="shadow-sm border-none min-h-[60vh] rounded-[2.5rem]" style={{ background: '#fff' }}>
-        <CardHeader className="pb-3 border-b border-slate-100">
-          <div className="flex items-center justify-between">
-            {/* 场景标题 */}
-            <div className="flex items-center gap-2">
-              <span className="text-2xl">{dialogue?.sceneEmoji || '🗣️'}</span>
-              <h2 className="text-lg font-bold text-slate-800">
+        <CardHeader className="pb-4 border-b border-slate-100">
+          {/* 第一层：场景标题 + 进度数字 */}
+          <div className="flex justify-between items-end mb-6 px-2">
+            <div className="flex items-center gap-3">
+              <span className="text-4xl">{dialogue?.sceneEmoji || '🗣️'}</span>
+              <h2 className="text-2xl font-bold tracking-tight text-gray-800">
                 {dialogue?.scene || 'シーンを選択'}
               </h2>
               {dialogue?.isAIGenerated && (
                 <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">AI</span>
               )}
             </div>
+            <div className="text-sm font-medium text-gray-400 tabular-nums">
+              <span className="text-blue-500 text-lg">{currentIndex + 1}</span> / {localDialogues.length}
+            </div>
+          </div>
 
-            {/* 拼音模式切换 + 挑战/重置按钮 */}
-            <div style={{ display: 'flex', alignItems: 'center', gap: '4px' }}>
-              {/* 拼音模式 */}
-              <div style={{ display: 'flex', gap: '2px', background: '#f1f5f9', borderRadius: '0.5rem', padding: '2px' }}>
-                {MODES.map(({ mode, label, icon }) => (
+          {/* 第二层：功能按钮组 */}
+          <div className="flex items-center gap-2 bg-gray-50/50 p-1.5 rounded-2xl w-fit">
+            {/* 拼音模式切换 */}
+            <div className="flex bg-white rounded-xl shadow-sm p-1 border border-gray-100">
+              {MODES.map(({ mode, label, icon }) => (
+                <button
+                  key={mode}
+                  onClick={() => setPinyinMode(mode)}
+                  title={`拼音: ${label}`}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '3px',
+                    padding: '4px 10px',
+                    borderRadius: '0.5rem',
+                    border: 'none',
+                    cursor: 'pointer',
+                    fontSize: '11px',
+                    fontWeight: pinyinMode === mode ? '600' : '400',
+                    background: pinyinMode === mode ? '#f1f5f9' : 'transparent',
+                    color: pinyinMode === mode ? '#3b82f6' : '#64748b',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  {icon}
+                  <span className="hidden sm:inline">{label}</span>
+                </button>
+              ))}
+            </div>
+
+            {/* 挑战按钮 */}
+            {keyWords.length > 0 && (
+              <div className="flex items-center">
+                <button
+                  onClick={toggleChallengeMode}
+                  title={challengeMode ? '挑战モード終了' : '挑戦モード'}
+                  style={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    gap: '6px',
+                    padding: '6px 12px',
+                    borderRadius: '0.75rem',
+                    border: challengeMode ? '1px solid #f59e0b' : '1px solid #e5e7eb',
+                    cursor: 'pointer',
+                    fontSize: '12px',
+                    fontWeight: '600',
+                    background: challengeMode ? '#fef3c7' : '#fff',
+                    color: challengeMode ? '#d97706' : '#64748b',
+                    boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                    transition: 'all 0.15s',
+                  }}
+                >
+                  <Target className="h-3.5 w-3.5" />
+                  <span>チャレンジ</span>
+                </button>
+                {challengeMode && (
                   <button
-                    key={mode}
-                    onClick={() => setPinyinMode(mode)}
-                    title={`拼音: ${label}`}
+                    onClick={() => setRevealedWords(new Set())}
+                    title="リセット"
                     style={{
                       display: 'flex',
                       alignItems: 'center',
-                      gap: '3px',
-                      padding: '3px 7px',
+                      justifyContent: 'center',
+                      width: '28px',
+                      height: '28px',
                       borderRadius: '0.375rem',
-                      border: 'none',
+                      border: '1px solid #e5e7eb',
                       cursor: 'pointer',
-                      fontSize: '11px',
-                      fontWeight: pinyinMode === mode ? '600' : '400',
-                      background: pinyinMode === mode ? '#fff' : 'transparent',
-                      color: pinyinMode === mode ? '#3b82f6' : '#64748b',
-                      boxShadow: pinyinMode === mode ? '0 1px 2px rgba(0,0,0,0.08)' : 'none',
+                      background: '#fff',
+                      color: '#64748b',
                       transition: 'all 0.15s',
+                      marginLeft: '4px',
                     }}
                   >
-                    {icon}
-                    <span className="hidden sm:inline">{label}</span>
+                    🔄
                   </button>
-                ))}
+                )}
               </div>
-
-              {/* 挑战/重置按钮 */}
-              {keyWords.length > 0 && (
-                <>
-                  <button
-                    onClick={toggleChallengeMode}
-                    title={challengeMode ? '挑战モード終了' : '挑戦モード'}
-                    style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: '4px',
-                      padding: '4px 8px',
-                      borderRadius: '0.375rem',
-                      border: challengeMode ? '1px solid #f59e0b' : '1px solid #e5e7eb',
-                      cursor: 'pointer',
-                      fontSize: '11px',
-                      fontWeight: '600',
-                      background: challengeMode ? '#fef3c7' : '#fff',
-                      color: challengeMode ? '#d97706' : '#64748b',
-                      transition: 'all 0.15s',
-                    }}
-                  >
-                    <Target className="h-3.5 w-3.5" />
-                    <span>チャレンジ</span>
-                  </button>
-                  
-                  {challengeMode && (
-                    <button
-                      onClick={() => setRevealedWords(new Set())}
-                      title="リセット"
-                      style={{
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        width: '28px',
-                        height: '28px',
-                        borderRadius: '0.375rem',
-                        border: '1px solid #e5e7eb',
-                        cursor: 'pointer',
-                        background: '#fff',
-                        color: '#64748b',
-                        transition: 'all 0.15s',
-                      }}
-                    >
-                      🔄
-                    </button>
-                  )}
-                </>
-              )}
-            </div>
-
-            <div className="text-sm text-slate-500 font-mono">
-              {currentIndex + 1} / {localDialogues.length}
-            </div>
+            )}
           </div>
         </CardHeader>
 
@@ -463,31 +462,34 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                   <div
                     key={index}
                     style={{
-                      borderRadius: '1.5rem',
-                      padding: '1rem 1.25rem',
-                      background: isA ? '#eff6ff' : '#f0fdf4',
-                      boxShadow: '0 2px 8px rgba(0,0,0,0.04)',
-                      marginBottom: '0.75rem',
+                      borderRadius: '2rem',
+                      padding: '2rem 1.5rem',
+                      background: '#fff',
+                      boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
+                      border: '1px solid #f1f5f9',
+                      marginBottom: '1.5rem',
                     }}
                   >
-                    {/* 说话人标签 */}
-                    <div style={{ display: 'flex', alignItems: 'center', gap: '0.375rem', marginBottom: '0.5rem' }}>
-                      <span
-                        style={{
-                          fontSize: '11px',
-                          fontWeight: '700',
-                          padding: '1px 6px',
-                          borderRadius: '0.25rem',
-                          background: isA ? '#bfdbfe' : '#bbf7d0',
-                          color: isA ? '#1d4ed8' : '#15803d',
-                        }}
-                      >
-                        {line.speaker}
-                      </span>
-                    </div>
+                    {/* 说话人标签：小而精致 */}
+                    <span
+                      style={{
+                        display: 'inline-block',
+                        padding: '2px 8px',
+                        borderRadius: '0.375rem',
+                        background: '#f1f5f9',
+                        color: '#64748b',
+                        fontSize: '10px',
+                        fontWeight: '700',
+                        textTransform: 'uppercase',
+                        letterSpacing: '-0.025em',
+                        marginBottom: '1rem',
+                      }}
+                    >
+                      {line.speaker}
+                    </span>
 
-                    {/* 拼音+汉字 + 按钮组 */}
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.25rem' }}>
+                    {/* 对话主体：拼音+汉字 */}
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', marginBottom: '1rem' }}>
                       <div style={{ flex: 1 }}>
                         <RubyLine
                           chinese={line.chinese}
@@ -543,8 +545,15 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                       </button>
                     </div>
 
-                    {/* 日语翻译 */}
-                    <p style={{ fontSize: '0.78rem', color: '#64748b', marginTop: '0.25rem', paddingLeft: '0.125rem' }}>
+                    {/* 日语翻译：字体调淡，优雅跟随 */}
+                    <p style={{
+                      marginTop: '2rem',
+                      color: '#94a3b8',
+                      fontSize: '0.875rem',
+                      fontWeight: '300',
+                      borderTop: '1px solid #f1f5f9',
+                      paddingTop: '1rem',
+                    }}>
                       {line.japanese}
                     </p>
                   </div>

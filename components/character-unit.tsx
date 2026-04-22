@@ -11,14 +11,14 @@ export type ChallengeState = 'hidden' | 'revealed'
 
 // ============================================================
 // 声调颜色（莫兰迪高级色系）
-// 1声玫瑰红、2声祖母绿、3声靛蓝、4声琥珀棕
+// 1声珊瑚暗红、2声橄榄深绿、3声深海靛蓝、4声琥珀深棕
 // ============================================================
 const TONE_COLOR: Record<number, string> = {
-  1: '#f43f5e', // rose-500 - 高平
-  2: '#059669', // emerald-600 - 上升
+  1: '#e11d48', // rose-600 - 高平
+  2: '#047857', // emerald-700 - 上升
   3: '#4f46e5', // indigo-600 - 转折
-  4: '#d97706', // amber-600 - 下降
-  0: '#6b7280', // 中性/轻声
+  4: '#b45309', // amber-700 - 下降
+  0: '#9ca3af', // 中性/轻声/非汉字
 }
 
 const TONE_MAP: Record<string, number> = {
@@ -162,34 +162,35 @@ export const CharacterUnit = ({
       >
       <span
         style={{
-          fontSize: '11px',
-          fontWeight: 'bold',
+          fontSize: '0.7rem',
+          fontWeight: '400',
           lineHeight: '1',
-          marginBottom: '3px',
+          marginBottom: '4px',
           textAlign: 'center',
           width: '100%',
           whiteSpace: 'nowrap',
           overflow: 'visible',
-          fontFamily: 'monospace',
-          color: color,
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          color: '#9ca3af',
           height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
+          letterSpacing: '0.15em',
         }}
       >
         {py}
       </span>
       <span
         style={{
-          fontSize: showChallengeBlank ? '1rem' : '1.875rem',
+          fontSize: showChallengeBlank ? '1rem' : '2.25rem',
           lineHeight: '1',
           textAlign: 'center',
           width: '100%',
           color: showChallengeBlank ? '#fbbf24' : color,
           display: 'block',
           letterSpacing: showChallengeBlank ? '-1px' : 'normal',
-          fontWeight: '500',
+          fontWeight: '600',
         }}
       >
         {displayChar}
@@ -308,20 +309,21 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
       >
       <span
         style={{
-          fontSize: '11px',
-          fontWeight: 'bold',
+          fontSize: '0.7rem',
+          fontWeight: '400',
           lineHeight: '1',
-          marginBottom: '3px',
+          marginBottom: '4px',
           textAlign: 'center',
           width: '100%',
           whiteSpace: 'nowrap',
           overflow: 'visible',
-          fontFamily: 'monospace',
-          color: pinyinColorInChallenge,
+          fontFamily: 'system-ui, -apple-system, sans-serif',
+          color: '#9ca3af',
           height: '1.2em',
           display: 'block',
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
+          letterSpacing: '0.15em',
         }}
       >
         {py}
@@ -331,7 +333,7 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
         <span
           style={{
             width: '100%',
-            height: '1.875rem',
+            height: '2.25rem',
             borderBottom: '2px solid #9ca3af',
             display: 'inline-block',
             transition: 'all 0.3s ease',
@@ -340,13 +342,13 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
       ) : (
         <span
           style={{
-            fontSize: '1.875rem',
+            fontSize: '2.25rem',
             lineHeight: '1',
             textAlign: 'center',
             width: '100%',
             color: isRevealed ? '#2563eb' : color,
             display: 'block',
-            fontWeight: isRevealed ? '700' : '500',
+            fontWeight: '600',
             transition: 'color 0.3s ease',
           }}
         >
@@ -413,6 +415,7 @@ export const RubyLine = ({
     >
       {chinese.split('').map((char, i) => {
         const isChinese = /[\u4e00-\u9fff]/.test(char)
+        const isPuncChar = /[，。？！；：、""''（）【】《》…—～·]/.test(char)
         const py = isChinese ? (pinyinArray[i] || '') : ''
         const tone = isChinese ? getTone(py) : 0
         const underline = underlineSet.has(i)
@@ -421,6 +424,26 @@ export const RubyLine = ({
         let challengeState: ChallengeState | undefined
         if (challengeMode && underline && word) {
           challengeState = revealedWords.has(word) ? 'revealed' : 'hidden'
+        }
+
+        // 标点符号：独立渲染，老老实实待在基准线上
+        if (isPuncChar) {
+          return (
+            <span
+              key={i}
+              style={{
+                fontSize: '1.5rem',
+                fontWeight: '400',
+                color: '#9ca3af',
+                margin: '0 0.05rem',
+                verticalAlign: 'baseline',
+                lineHeight: '1',
+                alignSelf: 'flex-end',
+              }}
+            >
+              {char}
+            </span>
+          )
         }
 
         return (
