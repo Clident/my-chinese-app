@@ -52,6 +52,21 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   const [lineExplanation, setLineExplanation] = useState<Record<number, string>>({})
 
   const [isGenerating, setIsGenerating] = useState(false)
+  const [cooldownUntil, setCooldownUntil] = useState<number | null>(null)
+  const [countdown, setCountdown] = useState(0)
+
+  // countdown timer
+  useEffect(() => {
+    if (cooldownUntil == null) { setCountdown(0); return }
+    const tick = () => {
+      const left = Math.max(0, Math.ceil((cooldownUntil - Date.now()) / 1000))
+      setCountdown(left)
+      if (left === 0) setCooldownUntil(null)
+    }
+    tick()
+    const id = setInterval(tick, 1000)
+    return () => clearInterval(id)
+  }, [cooldownUntil])
 
   useEffect(() => {
     const dialogues = getDialoguesByLevel(currentLevel)
@@ -176,6 +191,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   }, [dialogue, lineExplanation])
 
   const generateNewDialogue = useCallback(async () => {
+    if (cooldownUntil && Date.now() < cooldownUntil) return
     setIsGenerating(true)
     try {
       const res = await fetch('/api/generate-dialogue', {
@@ -183,8 +199,19 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ level: currentLevel }),
       })
-      if (res.ok) {
-        const data = await res.json()
+
+      const data = await res.json().catch(() => ({}))
+
+      if (data.retryAfterSec) {
+        // 后端告诉前端需要等多久
+        const waitMs = data.retryAfterSec * 1000
+        setCooldownUntil(Date.now() + waitMs)
+      } else {
+        // 成功后也进入 62s 静默期
+        setCooldownUntil(Date.now() + 62_000)
+      }
+
+      if (res.ok && data.lines?.length > 0) {
         const newDialogue: DialogueData = {
           scene: data.scene || 'AI生成',
           sceneEmoji: data.sceneEmoji || '🤖',
@@ -205,7 +232,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     } finally {
       setIsGenerating(false)
     }
-  }, [currentLevel, localDialogues])
+  }, [currentLevel, localDialogues, cooldownUntil])
 
   // keyVocabulary の词列表
   const keyWords = dialogue?.keyVocabulary?.map(v => v.word) ?? []
@@ -379,12 +406,18 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
           <Button
             variant="outline"
-            className="w-full h-14 gap-2 text-base bg-gradient-to-r from-purple-50 to-blue-50 border-2 border-purple-100 hover:from-purple-100 hover:to-blue-100 text-purple-700"
+            className={`w-full h-14 gap-2 text-base border-2 border-purple-100 ${cooldownUntil && countdown > 0 ? 'bg-amber-50 text-amber-500 cursor-not-allowed opacity-70' : 'bg-gradient-to-r from-purple-50 to-blue-50 hover:from-purple-100 hover:to-blue-100 text-purple-700'} transition-all`}
             onClick={generateNewDialogue}
-            disabled={isGenerating}
+            disabled={isGenerating || (cooldownUntil !== null && countdown > 0)}
           >
-            {isGenerating ? <Spinner className="h-5 w-5" /> : <Sparkles className="h-5 w-5" />}
-            AIで新しい会話を生成
+            {isGenerating ? (
+              <Spinner className="h-5 w-5" />
+            ) : countdown > 0 ? (
+              <span style={{ fontSize: '1rem' }}>⏳</span>
+            ) : (
+              <Sparkles className="h-5 w-5" />
+            )}
+            {isGenerating ? '生成中...' : countdown > 0 ? `${countdown}秒後に再生成可能` : 'AIで新しい会話を生成'}
           </Button>
         </div>
       )}
