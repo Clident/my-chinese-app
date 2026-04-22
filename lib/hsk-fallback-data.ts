@@ -877,6 +877,18 @@ export const hsk34Dialogues: FallbackDialogue[] = [
       { word: "撞", pinyin: "zhuàng", meaning: "ぶつかる" },
       { word: "报警", pinyin: "bào jǐng", meaning: "警察に通報する" }
     ],
+  },
+  {
+    scene: '在商场跟孩子走散了',
+    sceneEmoji: '📢',
+    lines: [
+      { speaker: "家长", chinese: "保安你好，我孩子不见了，能不能帮我广播一下？", pinyin: "bǎo ān nǐ hǎo ， wǒ hái zi bú jiàn le ， néng bù néng bāng wǒ guǎng bō yí xià ？", japanese: "警備員さん、子供がいなくなりました。館内放送をしてもらえませんか？" },
+      { speaker: "保安", chinese: "别着急，请告诉我孩子的身高和衣服颜色。", pinyin: "bié zháo jí ， qǐng gào sù wǒ hái zi de shēn gāo hé yī fú yán sè 。", japanese: "落ち着いてください。お子さんの身長と服の色を教えてください。" }
+    ],
+    keyVocabulary: [
+      { word: "走散", pinyin: "zǒu sàn", meaning: "はぐれる" },
+      { word: "广播", pinyin: "guǎng bō", meaning: "放送する、アナウンス" }
+    ],
   }
 ]
 
@@ -1279,6 +1291,42 @@ export const hsk56Dialogues: FallbackDialogue[] = [
     keyVocabulary: [
       { word: "偷", pinyin: "tōu", meaning: "盗む" },
       { word: "挂失", pinyin: "guà shī", meaning: "紛失届を出す" }
+    ],
+  },
+  {
+    scene: '询问是否需要空腹抽血',
+    sceneEmoji: '💉',
+    lines: [
+      { speaker: "患者", chinese: "护士，我明天抽血需要空腹吗？", pinyin: "hù shi ， wǒ míng tiān chōu xuě xū yào kōng fù ma ？", japanese: "看護師さん、明日の採血は空腹（絶食）である必要がありますか？" },
+      { speaker: "护士", chinese: "是的，今晚十二点以后不要吃东西，水也要少喝。", pinyin: "shì de ， jīn wǎn shí èr diǎn yǐ hòu bú yào chī dōng xī ， shuǐ yě yào shǎo hē 。", japanese: "はい、今夜12時以降は何も食べないでください。水も控えてください。" }
+    ],
+    keyVocabulary: [
+      { word: "空腹", pinyin: "kōng fù", meaning: "空腹、絶食状態" },
+      { word: "抽血", pinyin: "chōu xuě", meaning: "採血する" }
+    ],
+  },
+  {
+    scene: '咨询医疗保险理赔',
+    sceneEmoji: '📄',
+    lines: [
+      { speaker: "患者", chinese: "医生，请帮我开一下诊断证明，我要办保险理赔。", pinyin: "yī shēng ， qǐng bāng wǒ kāi yí xià zhěn duàn zhèng míng ， wǒ yào bàn bǎo xiǎn lǐ péi 。", japanese: "先生、診断書を書いてください。保険金の請求（理賠）をしたいんです。" },
+      { speaker: "医生", chinese: "没问题，拿着这个单子去窗口盖章就行。", pinyin: "méi wèn tí ， ná zhe zhè gè dān zi qù chuāng kǒu gài zhāng jiù xíng 。", japanese: "わかりました。この書類を持って窓口で押印してもらってください。" }
+    ],
+    keyVocabulary: [
+      { word: "理赔", pinyin: "lǐ péi", meaning: "（保険などの）請求、支払い手続き" },
+      { word: "盖章", pinyin: "gài zhāng", meaning: "押印する、スタンプを押す" }
+    ],
+  },
+  {
+    scene: '护照丢了去领事馆',
+    sceneEmoji: '🛂',
+    lines: [
+      { speaker: "游客", chinese: "我的护照丢了，明天就要回国了，能办紧急旅行证吗？", pinyin: "wǒ de hù zhào diū le ， míng tiān jiù yào huí guó le ， néng bàn jǐn jí lǚ xíng zhèng ma ？", japanese: "パスポートを紛失しました。明日帰国予定なのですが、緊急旅行証を発行できますか？" },
+      { speaker: "工作人员", chinese: "你需要先去警察局报案，拿着报案回执再来这里。", pinyin: "nǐ xū yào xiān qù jǐng chá jú bào àn ， ná zhe bào àn huí zhí zài lái zhè lǐ 。", japanese: "まず警察署へ行って届け出てください。その受理証を持ってここに来てください。" }
+    ],
+    keyVocabulary: [
+      { word: "领事馆", pinyin: "lǐng shì guǎn", meaning: "領事館" },
+      { word: "回执", pinyin: "huí zhí", meaning: "受領書、控え" }
     ],
   }
 ]
