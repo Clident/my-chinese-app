@@ -59,6 +59,10 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   const [isGenerating, setIsGenerating] = useState(false)
   const [cooldownUntil, setCooldownUntil] = useState<number | null>(null)
   const [countdown, setCountdown] = useState(0)
+  
+  // 伪装 Loading 状态（伊利效应）
+  const [fakeLoading, setFakeLoading] = useState(false)
+  const [fakeLoadingMsg, setFakeLoadingMsg] = useState('')
 
   // 解说 Modal 打开时禁止背景滚动
   useEffect(() => {
@@ -228,6 +232,27 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
   const generateNewDialogue = useCallback(async () => {
     if (cooldownUntil && Date.now() < cooldownUntil) return
+    
+    // 开始伪装 Loading
+    const loadingMessages = [
+      'AI正在构思对话场景...',
+      '正在选择合适的词汇...',
+      '正在生成自然对话...',
+      '正在调整难度等级...'
+    ]
+    setFakeLoading(true)
+    setFakeLoadingMsg(loadingMessages[0])
+    
+    // 动态切换消息
+    let msgIdx = 0
+    const msgInterval = setInterval(() => {
+      msgIdx = (msgIdx + 1) % loadingMessages.length
+      setFakeLoadingMsg(loadingMessages[msgIdx])
+    }, 800)
+    
+    // 等待至少 3 秒
+    const startTime = Date.now()
+    
     setIsGenerating(true)
     try {
       const res = await fetch('/api/generate-dialogue', {
@@ -266,7 +291,17 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     } catch (e: any) {
       console.error('[generateNewDialogue]', e.message)
     } finally {
+      // 清除消息切换
+      clearInterval(msgInterval)
+      
+      // 确保至少等待 3 秒
+      const elapsed = Date.now() - startTime
+      const remaining = Math.max(0, 3000 - elapsed)
+      
+      await new Promise(resolve => setTimeout(resolve, remaining))
+      
       setIsGenerating(false)
+      setFakeLoading(false)
     }
   }, [currentLevel, localDialogues, cooldownUntil])
 
@@ -532,6 +567,20 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
             )}
             {isGenerating ? '生成中...' : countdown > 0 ? `${countdown}秒後に再生成可能` : 'AIで新しい会話を生成'}
           </Button>
+        </div>
+      )}
+      
+      {/* 伪装 Loading 覆盖层（伊利效应） */}
+      {fakeLoading && (
+        <div
+          className="fixed inset-0 z-[90] flex flex-col items-center justify-center gap-4"
+          style={{ background: 'rgba(255,255,255,0.95)' }}
+        >
+          <div className="flex items-center gap-3">
+            <Spinner className="h-8 w-8 text-purple-600" />
+            <span className="text-lg font-medium text-slate-700">{fakeLoadingMsg}</span>
+          </div>
+          <p className="text-sm text-slate-500">请稍候，AI正在为您精心准备...</p>
         </div>
       )}
 

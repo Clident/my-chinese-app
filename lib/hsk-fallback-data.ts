@@ -295,6 +295,54 @@ export const hsk12Dialogues: FallbackDialogue[] = [
       { word: "外卖", pinyin: "wài mài", meaning: "デリバリー、外食の持ち帰り" },
       { word: "在路上", pinyin: "zài lù shàng", meaning: "（移動中で）向かっているところ" }
     ],
+  },
+  {
+    scene: '打车去机场',
+    sceneEmoji: '🚕',
+    lines: [
+      { speaker: "乘客", chinese: "师傅，去机场要多长时间？", pinyin: "shī fu ， qù jī chǎng yào duō shǎo shí jiān ？", japanese: "運転手さん、空港までどのくらいかかりますか？" },
+      { speaker: "司机", chinese: "不堵车的话，四十分钟就能到。", pinyin: "bù dǔ chē de huà ， sì shí fēn zhōng jiù néng dào 。", japanese: "渋滞してなければ、40分で着きますよ。" }
+    ],
+    keyVocabulary: [
+      { word: "堵车", pinyin: "dǔ chē", meaning: "渋滞する" },
+      { word: "师傅", pinyin: "shī fu", meaning: "（運転手や職人への）呼びかけ、〜さん" }
+    ],
+  },
+  {
+    scene: '询问地铁站',
+    sceneEmoji: '🚇',
+    lines: [
+      { speaker: "游客", chinese: "请问，最近的地铁站在哪儿？", pinyin: "qǐng wèn ， zuì jìn de dì tiě zhàn zài nǎ r ？", japanese: "すみません、一番近い地下鉄の駅はどこですか？" },
+      { speaker: "行人", chinese: "往前走，过两个红绿灯就到了。", pinyin: "wǎng qián zǒu ， guò liǎng gè hóng lǜ dēng jiù dào le 。", japanese: "真っ直ぐ行って、信号を二つ過ぎたら着きますよ。" }
+    ],
+    keyVocabulary: [
+      { word: "红绿灯", pinyin: "hóng lǜ dēng", meaning: "信号機" },
+      { word: "在哪儿", pinyin: "zài nǎ r", meaning: "どこにありますか" }
+    ],
+  },
+  {
+    scene: '餐厅点菜',
+    sceneEmoji: '🍜',
+    lines: [
+      { speaker: "顾客", chinese: "请问，这个菜辣不辣？", pinyin: "qǐng wèn ， zhè ge cài là bu là ？", japanese: "すみません、この料理は辛いですか？" },
+      { speaker: "服务员", chinese: "有一点儿辣，怕辣的话可以点红烧的。", pinyin: "yǒu yì diǎn er là ， pà là de huà kě yǐ diǎn hóng shāo de 。", japanese: "少し辛いですよ。辛いのが苦手なら紅焼（醤油煮）にできます。" }
+    ],
+    keyVocabulary: [
+      { word: "辣", pinyin: "là", meaning: "辛い" },
+      { word: "红烧", pinyin: "hóng shāo", meaning: "醤油煮込み（調理法）" }
+    ],
+  },
+  {
+    scene: '餐厅忌口',
+    sceneEmoji: '🥗',
+    lines: [
+      { speaker: "顾客", chinese: "我对花生过敏，这道菜里有花生吗？", pinyin: "wǒ duì huā shēng guò mǐn ， zhè dào cài lǐ yǒu huā shēng ma ？", japanese: "私はピーナッツアレルギーです。この料理にピーナッツは入っていますか？" },
+      { speaker: "服务员", chinese: "没有花生，不过里面有芝麻，您能吃吗？", pinyin: "méi yǒu huā shēng ， bú guò lǐ miàn yǒu zhī ma ， nín néng chī ma ？", japanese: "ピーナッツは入っていませんが、中にゴマがあります。召し上がれますか？" }
+    ],
+    keyVocabulary: [
+      { word: "过敏", pinyin: "guò mǐn", meaning: "アレルギー" },
+      { word: "芝麻", pinyin: "zhī ma", meaning: "ゴマ" }
+    ],
   }
 ]
 
@@ -685,6 +733,42 @@ export const hsk34Dialogues: FallbackDialogue[] = [
       { word: "套餐", pinyin: "tào cān", meaning: "セットメニュー、プラン" },
       { word: "出示", pinyin: "chū shì", meaning: "提示する" }
     ],
+  },
+  {
+    scene: '酒店办理入住',
+    sceneEmoji: '🏨',
+    lines: [
+      { speaker: "前台", chinese: "您好，请出示您的预订信息。", pinyin: "nín hǎo ， qǐng chū shì nín de yù dìng xìn xī 。", japanese: "いらっしゃいませ、予約情報を提示してください。" },
+      { speaker: "客人", chinese: "我姓张，预订了两晚的大床房。", pinyin: "wǒ xìng zhāng ， yù dìng le liǎng wǎn de dà chuáng fáng 。", japanese: "張です。ダブルルームを二泊で予約しています。" }
+    ],
+    keyVocabulary: [
+      { word: "预订", pinyin: "yù dìng", meaning: "予約する" },
+      { word: "大床房", pinyin: "dà chuáng fáng", meaning: "ダブルルーム（キングサイズベッドの部屋）" }
+    ],
+  },
+  {
+    scene: '餐厅买单',
+    sceneEmoji: '💳',
+    lines: [
+      { speaker: "顾客", chinese: "服务员，买单！可以刷卡吗？", pinyin: "fú wù yuán ， mǎi dān ！ kě yǐ shuā kǎ ma ？", japanese: "すみません、お会計！カード使えますか？" },
+      { speaker: "服务员", chinese: "可以刷卡，也可以扫码支付。", pinyin: "kě yǐ shuā kǎ ， yě kě yǐ sǎo mǎ zhī fù 。", japanese: "カードも使えますし、QRコード決済もできます。" }
+    ],
+    keyVocabulary: [
+      { word: "买单", pinyin: "mǎi dān", meaning: "お会計" },
+      { word: "扫码", pinyin: "sǎo mǎ", meaning: "（QRコードを）スキャンする" }
+    ],
+  },
+  {
+    scene: '餐厅打包',
+    sceneEmoji: '🥡',
+    lines: [
+      { speaker: "顾客", chinese: "剩下的菜可以帮我打包吗？", pinyin: "shèng xià de cài kě yǐ bāng wǒ dǎ bāo ma ？", japanese: "残った料理、持ち帰りにできますか？" },
+      { speaker: "服务员", chinese: "好的，给您拿个打包盒。", pinyin: "hǎo de ， gěi nín ná ge dǎ bāo hé 。", japanese: "承知しました。テイクアウト用の容器をお持ちします。" }
+    ],
+    keyVocabulary: [
+      { word: "打包", pinyin: "dǎ bāo", meaning: "持ち帰りにする" },
+      { word: "打包盒", pinyin: "dǎ bāo hé", meaning: "テイクアウト容器" }
+    ],
   }
 ]
 
@@ -979,6 +1063,30 @@ export const hsk56Dialogues: FallbackDialogue[] = [
     keyVocabulary: [
       { word: "打包", pinyin: "dǎ bāo", meaning: "荷造りする、梱包する" },
       { word: "运输", pinyin: "yùn shū", meaning: "運搬、輸送" }
+    ],
+  },
+  {
+    scene: '航班延误改签',
+    sceneEmoji: '✈️',
+    lines: [
+      { speaker: "旅客", chinese: "我的航班延误了，能帮我改签到下一班吗？", pinyin: "wǒ de háng bān yán wù le ， néng bāng wǒ gǎi qiān dào xià yì bān ma ？", japanese: "私の便が遅延しました。次の便に振り替えてもらえますか？" },
+      { speaker: "客服", chinese: "抱歉，由于天气原因，后续航班也都满员了。", pinyin: "bào qiàn ， yóu yú tiān qì yuán yīn ， hòu xù háng bān yě dōu mǎn yuán le 。", japanese: "申し訳ありません、天候の影響で、後続の便もすべて満席です。" }
+    ],
+    keyVocabulary: [
+      { word: "改签", pinyin: "gǎi qiān", meaning: "（チケットを）変更する、振り替える" },
+      { word: "延误", pinyin: "yán wù", meaning: "（交通機関が）遅延する" }
+    ],
+  },
+  {
+    scene: '餐厅投诉',
+    sceneEmoji: '😤',
+    lines: [
+      { speaker: "顾客", chinese: "这道菜味道不太对，是不是盐放多了？", pinyin: "zhè dào cài wèi dào bú tài duì ， shì bu shì yán fàng duō le ？", japanese: "この料理、味がおかしいです。塩を入れすぎたんじゃないですか？" },
+      { speaker: "经理", chinese: "抱歉，我帮您换一份，或者给您免单。", pinyin: "bào qiàn ， wǒ bāng nín huàn yí fèn ， huò zhě gěi nín miǎn dān 。", japanese: "申し訳ございません。お取り替えします。または無料にさせていただきます。" }
+    ],
+    keyVocabulary: [
+      { word: "味道", pinyin: "wèi dào", meaning: "味/風味" },
+      { word: "免单", pinyin: "miǎn dān", meaning: "無料にする、勘弁する" }
     ],
   }
 ]
