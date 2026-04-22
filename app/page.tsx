@@ -4,6 +4,7 @@ import { useState, useEffect } from 'react'
 
 export default function Home() {
   const [level, setLevel] = useState<'HSK1-2' | 'HSK3-4' | 'HSK5-6'>('HSK1-2');
+  const [isLevelChanging, setIsLevelChanging] = useState(false);
   const [deployInfo, setDeployInfo] = useState<{version?: string; timestamp?: string} | null>(null);
 
   useEffect(() => {
@@ -35,7 +36,20 @@ export default function Home() {
         {levels.map((l) => (
           <button
             key={l.id}
-            onClick={() => setLevel(l.id as any)}
+            onClick={() => {
+              if (l.id !== level) {
+                setIsLevelChanging(true)
+                // 停止音频
+                if ('speechSynthesis' in window) {
+                  window.speechSynthesis.cancel()
+                }
+                setTimeout(() => {
+                  setLevel(l.id as any)
+                  setIsLevelChanging(false)
+                  window.scrollTo({ top: 0, behavior: 'smooth' })
+                }, 150)
+              }
+            }}
             className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
               level === l.id 
                 ? 'bg-white text-blue-600 shadow-sm' 
@@ -48,7 +62,9 @@ export default function Home() {
       </div>
 
       {/* 传入当前的等级 */}
-      <SceneDialogue currentLevel={level} />
+      <div className={`transition-opacity duration-150 ${isLevelChanging ? 'opacity-0' : 'opacity-100'}`}>
+        <SceneDialogue currentLevel={level} key={level} />
+      </div>
 
       <footer className="mt-12 text-center text-xs text-slate-400">
         <p>© 2026 毎日中国語 | 拼音の着色: 1声(赤) 2声(橙) 3声(緑) 4声(青)</p>

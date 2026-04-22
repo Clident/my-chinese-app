@@ -86,25 +86,37 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
   const goToPrev = useCallback(() => {
     if (currentIndex > 0) {
+      // 停止音频播放
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
       const i = currentIndex - 1
       setCurrentIndex(i)
       setDialogue(localDialogues[i])
       setExplanation(null)
       setShowExplanation(false)
       setLineExplanation({})
-      setRevealedWords(new Set()) // 切换对话时重置挑战模式
+      setRevealedWords(new Set())
+      // 回弹顶部
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [currentIndex, localDialogues])
 
   const goToNext = useCallback(() => {
     if (currentIndex < localDialogues.length - 1) {
+      // 停止音频播放
+      if ('speechSynthesis' in window) {
+        window.speechSynthesis.cancel()
+      }
       const i = currentIndex + 1
       setCurrentIndex(i)
       setDialogue(localDialogues[i])
       setExplanation(null)
       setShowExplanation(false)
       setLineExplanation({})
-      setRevealedWords(new Set()) // 切换对话时重置挑战模式
+      setRevealedWords(new Set())
+      // 回弹顶部
+      window.scrollTo({ top: 0, behavior: 'smooth' })
     }
   }, [currentIndex, localDialogues])
 
@@ -257,8 +269,8 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   const keyWords = dialogue?.keyVocabulary?.map(v => v.word) ?? []
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-4">
-      <Card className="shadow-md border-slate-200">
+    <div className="w-full max-w-md mx-auto space-y-4 pb-32">
+      <Card className="shadow-md border-slate-200 min-h-[60vh]">
         <CardHeader className="pb-3 border-b border-slate-100">
           <div className="flex items-center justify-between">
             {/* 场景标题 */}
@@ -462,16 +474,18 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         </CardContent>
       </Card>
 
-      {/* 导航 */}
-      <div className="flex gap-3">
-        <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
-          onClick={goToPrev} disabled={currentIndex === 0}>
-          <ChevronLeft className="h-5 w-5" />前の会話
-        </Button>
-        <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
-          onClick={goToNext} disabled={currentIndex >= localDialogues.length - 1}>
-          次の会話<ChevronRight className="h-5 w-5" />
-        </Button>
+      {/* 固定底部导航栏 */}
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-lg z-50">
+        <div className="max-w-md mx-auto flex gap-3">
+          <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
+            onClick={goToPrev} disabled={currentIndex === 0}>
+            <ChevronLeft className="h-5 w-5" />前
+          </Button>
+          <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
+            onClick={goToNext} disabled={currentIndex >= localDialogues.length - 1}>
+            次<ChevronRight className="h-5 w-5" />
+          </Button>
+        </div>
       </div>
 
       {/* AI 功能按钮 */}
