@@ -4,7 +4,8 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { SentenceRenderer, type WordUnitMode } from './sentence-renderer'
+import { SentenceRenderer } from './sentence-renderer'
+import { type WordUnitMode } from '@/components/word-unit'
 import {
   BookOpen,
   X,
@@ -21,9 +22,11 @@ import {
   type HSKLevel,
   type FallbackDialogue,
 } from '@/lib/hsk-fallback-data'
+import { useDialogueStore, getSceneRevealedSet } from '@/lib/store'
 
 interface DialogueData extends FallbackDialogue {
   isAIGenerated?: boolean
+  scene_jp?: string
 }
 
 // ============================================================
@@ -43,9 +46,17 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   // 拼音显示模式
   const [pinyinMode, setPinyinMode] = useState<WordUnitMode>('show')
 
-  // 挑战模式
-  const [challengeMode, setChallengeMode] = useState(false)
-  const [revealedWords, setRevealedWords] = useState<Set<string>>(new Set())
+  // Zustand store — challengeMode + revealedWords 统一管理
+  // Zustand store — challengeMode 统一管理
+  const challengeMode = useDialogueStore(s => s.challengeMode)
+
+  // 当前场景 key（用 dialogue.state 而不是 currentDialogue computed）
+  const sceneKey = dialogue?.scene ?? ''
+
+  // Zustand derived: 当前场景的揭示 Set
+  const revealedWordsSet = useDialogueStore(
+    getSceneRevealedSet(sceneKey)
+  )
 
   // 解说面板（整体）
   const [explanation, setExplanation] = useState<string | null>(null)
@@ -100,7 +111,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     setExplanation(null)
     setShowExplanation(false)
     setLineExplanation({})
-    setRevealedWords(new Set()) // 切换场景时重置挑战模式
+    if (dialogues[0]?.scene) useDialogueStore.getState().resetScene(dialogues[0].scene)
   }, [currentLevel])
 
   const goToPrev = useCallback(() => {
@@ -117,7 +128,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         setExplanation(null)
         setShowExplanation(false)
         setLineExplanation({})
-        setRevealedWords(new Set())
+        if (localDialogues[i]?.scene) useDialogueStore.getState().resetScene(localDialogues[i].scene)
         window.scrollTo({ top: 0, behavior: 'smooth' })
         setIsFading(false)
       }, 150)
@@ -138,7 +149,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
         setExplanation(null)
         setShowExplanation(false)
         setLineExplanation({})
-        setRevealedWords(new Set())
+        if (localDialogues[i]?.scene) useDialogueStore.getState().resetScene(localDialogues[i].scene)
         window.scrollTo({ top: 0, behavior: 'smooth' })
         setIsFading(false)
       }, 150)
@@ -337,16 +348,20 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     }
   }, [currentLevel, localDialogues, cooldownUntil])
 
-  // 挑战模式：揭示单词
+  // 挑战模式：揭示单词（持久化到 Zustand）
   const revealWord = useCallback((word: string) => {
-    setRevealedWords(prev => new Set(prev).add(word))
-  }, [])
+    if (sceneKey) {
+      useDialogueStore.getState().revealWord(sceneKey, word)
+    }
+  }, [sceneKey])
 
-  // 切换挑战模式时重置
+  // 切换挑战模式时重置当前场景的揭示状态
   const toggleChallengeMode = useCallback(() => {
-    setChallengeMode(prev => !prev)
-    setRevealedWords(new Set())
-  }, [])
+    useDialogueStore.getState().toggleChallengeMode()
+    if (sceneKey) {
+      useDialogueStore.getState().resetScene(sceneKey)
+    }
+  }, [sceneKey])
 
   // 数据层清洗：确保 scene_jp 永远有日语值
   const currentDialogue = dialogue
@@ -433,7 +448,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                 </button>
                 {challengeMode && (
                   <button
-                    onClick={() => setRevealedWords(new Set())}
+                    onClick={() => sceneKey && useDialogueStore.getState().resetScene(sceneKey)}
                     title="リセット"
                     style={{
                       display: 'flex',
@@ -500,7 +515,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                         mode={pinyinMode}
                         keyWords={keyWords}
                         challengeMode={challengeMode}
-                        revealedWords={revealedWords}
+                        revealedWords={revealedWordsSet}
                         onWordReveal={revealWord}
                       />
 
