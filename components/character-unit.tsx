@@ -339,7 +339,7 @@ export const RubyLine = ({
   }
 
   return (
-    <div className="flex flex-wrap items-end content-start w-full gap-x-0.5 gap-y-4 py-1">
+    <div className="flex flex-wrap items-end content-start w-full gap-x-[2px] gap-y-2 py-0">
       {chinese.split('').map((char, i) => {
         const isChinese = /[\u4e00-\u9fff]/.test(char)
         const isPuncChar = /[，。？！、；：]/.test(char)

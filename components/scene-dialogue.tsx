@@ -348,8 +348,13 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     setRevealedWords(new Set())
   }, [])
 
+  // 数据层清洗：确保 scene_jp 永远有日语值
+  const currentDialogue = dialogue
+    ? { ...dialogue, scene_jp: dialogue.scene_jp ?? dialogue.scene }
+    : null
+
   // keyVocabulary の词列表
-  const keyWords = dialogue?.keyVocabulary?.map(v => v.word) ?? []
+  const keyWords = currentDialogue?.keyVocabulary?.map(v => v.word) ?? []
 
   return (
     <div className="w-full max-w-md mx-auto space-y-4 pb-32" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
@@ -360,7 +365,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
             <div className="flex items-center gap-3">
               <span className="text-3xl">{dialogue?.sceneEmoji || '🗣️'}</span>
               <h2 className="text-xl font-bold text-slate-800">
-                {dialogue?.scene_jp || dialogue?.scene || 'シーンを選択'}
+                {currentDialogue?.scene_jp || currentDialogue?.scene || 'シーンを選択'}
               </h2>
               {dialogue?.isAIGenerated && (
                 <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">AI</span>
