@@ -220,7 +220,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
     ],
   },
   {
-    scene: '电梯遇到邻居',
+    scene: 'エレベーターで隣人',
     sceneEmoji: '🛗',
     lines: [
       { speaker: "邻居", chinese: "下班了？今天挺早的。", pinyin: "xià bān le ？ jīn tiān tǐng zǎo de 。", japanese: "お帰りなさい。今日は早いですね。" },
@@ -285,7 +285,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
     ],
   },
   {
-    scene: '外卖催单',
+    scene: 'デリバリー催促',
     sceneEmoji: '🛵',
     lines: [
       { speaker: "顾客", chinese: "你好，我的外卖还没到。", pinyin: "nǐ hǎo ， wǒ de wài mài hái méi dào 。", japanese: "すみません、デリバリーがまだ届きません。" },
@@ -771,7 +771,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
     ],
   },
   {
-    scene: '餐厅买单',
+    scene: 'レストランで会計',
     sceneEmoji: '💳',
     lines: [
       { speaker: "顾客", chinese: "服务员，买单！可以刷卡吗？", pinyin: "fú wù yuán ， mǎi dān ！ kě yǐ shuā kǎ ma ？", japanese: "すみません、お会計！カード使えますか？" },
@@ -1133,7 +1133,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
     ],
   },
   {
-    scene: '过年被亲戚催婚',
+    scene: '帰省で結婚催促',
     sceneEmoji: '🧨',
     lines: [
       { speaker: "亲戚", chinese: "老大不小了，怎么还不谈对象啊？", pinyin: "lǎo dà bù xiǎo le ， zěn me hái bù tán duì xiàng ā ？", japanese: "もういい年なんだから、どうしてまだ恋人を作らないの？" },

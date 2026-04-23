@@ -356,7 +356,11 @@ export const RubyLine = ({
         // 标点：直接丢出来，不套组件
         if (isPuncChar) {
           return (
-            <span key={i} className="text-2xl text-slate-300 px-0.5 self-end mb-1">
+            <span
+              key={i}
+              className="text-2xl text-slate-300 px-0.5 leading-none flex flex-col justify-end"
+              style={{ paddingTop: '14px', height: 'calc(14px + 1.5rem)' }}
+            >
               {char}
             </span>
           )
