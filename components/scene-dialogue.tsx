@@ -4,7 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { RubyLine, type PinyinMode, type ChallengeState } from './character-unit'
+import { SentenceRenderer, type WordUnitMode } from './sentence-renderer'
 import {
   BookOpen,
   X,
@@ -29,7 +29,7 @@ interface DialogueData extends FallbackDialogue {
 // ============================================================
 // 拼音模式切换按钮
 // ============================================================
-const MODES: { mode: PinyinMode; label: string; icon: React.ReactNode }[] = [
+const MODES: { mode: WordUnitMode; label: string; icon: React.ReactNode }[] = [
   { mode: 'show',   label: '表示',   icon: <Eye className="h-3.5 w-3.5" /> },
   { mode: 'hover',  label: 'ホバー', icon: <MousePointer className="h-3.5 w-3.5" /> },
   { mode: 'hidden', label: '非表示', icon: <EyeOff className="h-3.5 w-3.5" /> },
@@ -41,7 +41,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
   const [dialogue, setDialogue] = useState<DialogueData | null>(null)
 
   // 拼音显示模式
-  const [pinyinMode, setPinyinMode] = useState<PinyinMode>('show')
+  const [pinyinMode, setPinyinMode] = useState<WordUnitMode>('show')
 
   // 挑战模式
   const [challengeMode, setChallengeMode] = useState(false)
@@ -495,8 +495,8 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
                     {/* 对话主体：RubyLine + 朗读/解说按钮同排 */}
                     <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', overflow: 'visible' }}>
-                      <RubyLine
-                        chinese={line.chinese}
+                      <SentenceRenderer
+                        text={line.chinese}
                         mode={pinyinMode}
                         keyWords={keyWords}
                         challengeMode={challengeMode}
