@@ -143,31 +143,28 @@ export const CharacterUnit = ({
 
   return (
     <span
-      className={`inline-flex flex-col items-center justify-end min-w-fit mx-0.5 mb-2 ${mode === 'hover' ? 'group' : ''}`}
+      className="inline-flex flex-col items-center justify-end min-w-fit mx-[1px]"
       onClick={showChallengeBlank && onReveal ? onReveal : undefined}
       style={{
         cursor: showChallengeBlank ? 'pointer' : 'default',
         borderBottom: underline ? '2px solid #fbbf24' : 'none',
-        paddingBottom: underline ? '1px' : '0',
       }}
     >
       {/* 拼音 */}
       <span
-        className="text-[10px] leading-none text-slate-400 font-sans uppercase mb-1 h-3 flex items-end"
+        className="text-[10px] leading-none text-slate-400 font-sans uppercase mb-0.5 h-3 flex items-end"
         style={{
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          letterSpacing: '0.05em',
         }}
       >
         {py}
       </span>
       {/* 汉字 */}
       <span
-        className={`text-3xl font-bold leading-none`}
+        className="text-2xl font-bold leading-none"
         style={{
           color: showChallengeBlank ? '#fbbf24' : color,
-          letterSpacing: showChallengeBlank ? '-1px' : 'normal',
         }}
       >
         {displayChar}
@@ -263,22 +260,19 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
 
   return (
     <span
-      className={`inline-flex flex-col items-center justify-end min-w-fit mx-0.5 mb-2`}
+      className={`inline-flex flex-col items-center justify-end min-w-fit mx-[1px]`}
       onClick={showChallengeBlank && onReveal ? onReveal : undefined}
       style={{
         cursor: showChallengeBlank ? 'pointer' : 'default',
         borderBottom: underline && !showChallengeBlank ? '2px solid #fbbf24' : 'none',
-        paddingBottom: underline ? '1px' : '0',
-        minHeight: showChallengeBlank ? '2.75rem' : 'auto',
       }}
     >
       {/* 拼音 */}
       <span
-        className="text-[10px] leading-none text-slate-400 font-sans uppercase mb-1 h-3 flex items-end"
+        className="text-[10px] leading-none text-slate-400 font-sans uppercase mb-0.5 h-3 flex items-end"
         style={{
           opacity: pinyinOpacity,
           transition: 'opacity 0.15s ease',
-          letterSpacing: '0.05em',
         }}
       >
         {py}
@@ -286,14 +280,13 @@ export const CharacterUnitHover = (props: Omit<CharacterUnitProps, 'mode'> & { m
       {/* 汉字 */}
       {showChallengeBlank ? (
         <span
-          className="text-3xl font-bold leading-none text-amber-400"
-          style={{ letterSpacing: '-1px' }}
+          className="text-2xl font-bold leading-none text-amber-400"
         >
           ____
         </span>
       ) : (
         <span
-          className="text-3xl font-bold leading-none"
+          className="text-2xl font-bold leading-none"
           style={{ color: isRevealed ? '#2563eb' : color }}
         >
           {char}
@@ -346,7 +339,7 @@ export const RubyLine = ({
   }
 
   return (
-    <div className="flex flex-wrap items-end content-start w-full gap-x-1 gap-y-8 py-2">
+    <div className="flex flex-wrap items-end content-start w-full gap-x-0.5 gap-y-4 py-1">
       {chinese.split('').map((char, i) => {
         const isChinese = /[\u4e00-\u9fff]/.test(char)
         const isPuncChar = /[，。？！、；：]/.test(char)

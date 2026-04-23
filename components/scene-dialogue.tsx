@@ -360,7 +360,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
             <div className="flex items-center gap-3">
               <span className="text-3xl">{dialogue?.sceneEmoji || '🗣️'}</span>
               <h2 className="text-xl font-bold text-slate-800">
-                {dialogue?.scene || 'シーンを選択'}
+                {dialogue?.scene_jp || dialogue?.scene || 'シーンを選択'}
               </h2>
               {dialogue?.isAIGenerated && (
                 <span className="text-xs bg-purple-100 text-purple-600 px-1.5 py-0.5 rounded">AI</span>
@@ -463,11 +463,11 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                     key={index}
                     style={{
                       borderRadius: '2rem',
-                      padding: '2rem 1.5rem',
+                      padding: '1.25rem 1rem',
                       background: '#fff',
                       boxShadow: '0 4px 20px rgba(0,0,0,0.03)',
                       border: '1px solid #f1f5f9',
-                      marginBottom: '1.5rem',
+                      marginBottom: '0.75rem',
                     }}
                   >
                     {/* 说话人标签：小而精致 */}
@@ -482,7 +482,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
                         fontWeight: '700',
                         textTransform: 'uppercase',
                         letterSpacing: '-0.025em',
-                        marginBottom: '1rem',
+                        marginBottom: '0.5rem',
                       }}
                     >
                       {line.speaker}
@@ -545,12 +545,12 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
 
                     {/* 日语翻译：字体调淡，优雅跟随 */}
                     <p style={{
-                      marginTop: '2rem',
+                      marginTop: '1rem',
                       color: '#94a3b8',
-                      fontSize: '0.875rem',
+                      fontSize: '0.8rem',
                       fontWeight: '300',
                       borderTop: '1px solid #f1f5f9',
-                      paddingTop: '1rem',
+                      paddingTop: '0.75rem',
                     }}>
                       {line.japanese}
                     </p>
