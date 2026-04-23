@@ -38,7 +38,12 @@ const MODES: { mode: WordUnitMode; label: string; icon: React.ReactNode }[] = [
   { mode: 'hidden', label: '非表示', icon: <EyeOff className="h-3.5 w-3.5" /> },
 ]
 
-export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKLevel }) {
+export function SceneDialogue() {
+  // ── 来自 Zustand Store 的导航状态 ──
+  const hskLevel = useDialogueStore(s => s.hskLevel)
+  const currentScene = useDialogueStore(s => s.currentScene)
+
+  // ── 本地状态（AI生成、解释等）─
   const [localDialogues, setLocalDialogues] = useState<FallbackDialogue[]>([])
   const [currentIndex, setCurrentIndex] = useState(0)
   const [dialogue, setDialogue] = useState<DialogueData | null>(null)
@@ -103,58 +108,49 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
     return () => clearInterval(id)
   }, [cooldownUntil])
 
+  // ── 加载当前级别的数据（level变化时触发）─
   useEffect(() => {
-    const dialogues = getDialoguesByLevel(currentLevel)
+    const dialogues = getDialoguesByLevel(hskLevel as HSKLevel)
     setLocalDialogues(dialogues)
-    setCurrentIndex(0)
-    setDialogue(dialogues[0] || null)
-    setExplanation(null)
-    setShowExplanation(false)
-    setLineExplanation({})
-    if (dialogues[0]?.scene) useDialogueStore.getState().resetScene(dialogues[0].scene)
-  }, [currentLevel])
+    // 如果没有 currentScene，选第一个；有则保持
+    if (!useDialogueStore.getState().currentScene && dialogues.length > 0) {
+      useDialogueStore.getState().goToScene(dialogues[0].scene)
+    }
+  }, [hskLevel])
+
+  // ── 根据 currentScene 同步当前 dialogue（核心：store驱动渲染）─
+  useEffect(() => {
+    if (!currentScene) return
+    const idx = localDialogues.findIndex(d => d.scene === currentScene)
+    if (idx >= 0) {
+      setCurrentIndex(idx)
+      setDialogue(localDialogues[idx] ?? null)
+      setExplanation(null)
+      setShowExplanation(false)
+      setLineExplanation({})
+      window.scrollTo({ top: 0, behavior: 'smooth' })
+    }
+  }, [currentScene, localDialogues])
 
   const goToPrev = useCallback(() => {
-    if (currentIndex > 0) {
-      // 停止音频播放
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
-      setIsFading(true)
-      setTimeout(() => {
-        const i = currentIndex - 1
-        setCurrentIndex(i)
-        setDialogue(localDialogues[i])
-        setExplanation(null)
-        setShowExplanation(false)
-        setLineExplanation({})
-        if (localDialogues[i]?.scene) useDialogueStore.getState().resetScene(localDialogues[i].scene)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        setIsFading(false)
-      }, 150)
-    }
-  }, [currentIndex, localDialogues])
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+    setIsFading(true)
+    setTimeout(() => {
+      const scenes = localDialogues.map(d => d.scene)
+      useDialogueStore.getState().goToPrevScene(scenes)
+      setIsFading(false)
+    }, 150)
+  }, [localDialogues])
 
   const goToNext = useCallback(() => {
-    if (currentIndex < localDialogues.length - 1) {
-      // 停止音频播放
-      if ('speechSynthesis' in window) {
-        window.speechSynthesis.cancel()
-      }
-      setIsFading(true)
-      setTimeout(() => {
-        const i = currentIndex + 1
-        setCurrentIndex(i)
-        setDialogue(localDialogues[i])
-        setExplanation(null)
-        setShowExplanation(false)
-        setLineExplanation({})
-        if (localDialogues[i]?.scene) useDialogueStore.getState().resetScene(localDialogues[i].scene)
-        window.scrollTo({ top: 0, behavior: 'smooth' })
-        setIsFading(false)
-      }, 150)
-    }
-  }, [currentIndex, localDialogues])
+    if ('speechSynthesis' in window) window.speechSynthesis.cancel()
+    setIsFading(true)
+    setTimeout(() => {
+      const scenes = localDialogues.map(d => d.scene)
+      useDialogueStore.getState().goToNextScene(scenes)
+      setIsFading(false)
+    }, 150)
+  }, [localDialogues])
 
   // 整体解说（底部按钮）
   const explainGrammar = useCallback(async () => {
@@ -290,7 +286,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       const res = await fetch('/api/generate-dialogue', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ level: currentLevel }),
+        body: JSON.stringify({ level: hskLevel }),
         signal: controller.signal,
       })
       
@@ -346,7 +342,7 @@ export function SceneDialogue({ currentLevel = 'HSK1-2' }: { currentLevel?: HSKL
       setIsGenerating(false)
       setFakeLoading(false)
     }
-  }, [currentLevel, localDialogues, cooldownUntil])
+  }, [hskLevel, localDialogues, cooldownUntil])
 
   // 挑战模式：揭示单词（持久化到 Zustand）
   const revealWord = useCallback((word: string) => {

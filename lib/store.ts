@@ -7,92 +7,107 @@ import { persist } from 'zustand/middleware'
 // 解决的问题：
 // 1. 揭示状态跨场景持久化（用户切到便利店再回来，进度不丢）
 // 2. challengeMode 开关统一管理（不再散落在 SentenceRenderer 里）
-// 3. currentScene 追踪（切场景时触发 revealedWords 的 localStorage 同步）
+// 3. navigation 状态集中化（level + scene，sidebar/主内容区共享）
 // ============================================================
 
+export type HSKLevel = 'HSK1-2' | 'HSK3-4' | 'HSK5-6'
+
 interface DialogueState {
-  // 已揭示的关键词集合（key = scene 场景名）
-  revealedWordsMap: Record<string, string[]>
+  // ── Navigation 状态 ──
+  hskLevel: HSKLevel
+  currentScene: string | null   // 当前场景名（dialogue.scene，日语，唯一key）
 
-  // 当前场景名（用于检测切换）
-  currentScene: string | null
-
-  // 挑战模式是否开启
+  // ── Challenge 状态 ──
   challengeMode: boolean
+  revealedWordsMap: Record<string, string[]>  // scene → [revealed words]
 
-  // 揭示一个关键词
-  revealWord: (scene: string, word: string) => void
+  // ── Actions ──
+  setHskLevel: (level: HSKLevel) => void
+  goToScene: (scene: string) => void
+  goToPrevScene: (scenes: string[]) => void
+  goToNextScene: (scenes: string[]) => void
 
-  // 重置当前场景的揭示状态
-  resetScene: (scene: string) => void
-
-  // 切换场景（检测到场景变化时调用，可选：在这里做 localStorage 同步）
-  setCurrentScene: (scene: string) => void
-
-  // 开启/关闭挑战模式
   toggleChallengeMode: () => void
+  revealWord: (sceneKey: string, word: string) => void
+  resetScene: (sceneKey: string) => void
 }
 
 export const useDialogueStore = create<DialogueState>()(
   persist(
-    (set, get) => ({
-      revealedWordsMap: {},
+    (set) => ({
+      // ── Navigation ──
+      hskLevel: 'HSK1-2',
       currentScene: null,
-      challengeMode: false,
 
-      revealWord: (scene, word) => {
+      // ── Challenge ──
+      challengeMode: false,
+      revealedWordsMap: {},
+
+      // ── Navigation Actions ──
+      setHskLevel: (level) => {
+        set({ hskLevel: level, currentScene: null })
+      },
+
+      goToScene: (scene) => {
+        set({ currentScene: scene })
+      },
+
+      goToPrevScene: (scenes) => {
         set((state) => {
-          const current = state.revealedWordsMap[scene] ?? []
-          if (current.includes(word)) return state // 已在集合中，无变化
+          const idx = scenes.indexOf(state.currentScene ?? '')
+          const prev = idx > 0 ? scenes[idx - 1] : scenes[0]
+          return { currentScene: prev }
+        })
+      },
+
+      goToNextScene: (scenes) => {
+        set((state) => {
+          const idx = scenes.indexOf(state.currentScene ?? '')
+          const next = idx < scenes.length - 1 ? scenes[idx + 1] : scenes[scenes.length - 1]
+          return { currentScene: next }
+        })
+      },
+
+      // ── Challenge Actions ──
+      toggleChallengeMode: () => {
+        set((state) => ({ challengeMode: !state.challengeMode }))
+      },
+
+      revealWord: (sceneKey, word) => {
+        set((state) => {
+          const current = state.revealedWordsMap[sceneKey] ?? []
+          if (current.includes(word)) return state
           return {
             revealedWordsMap: {
               ...state.revealedWordsMap,
-              [scene]: [...current, word],
+              [sceneKey]: [...current, word],
             },
           }
         })
       },
 
-      resetScene: (scene) => {
+      resetScene: (sceneKey) => {
         set((state) => ({
-          revealedWordsMap: {
-            ...state.revealedWordsMap,
-            [scene]: [],
-          },
+          revealedWordsMap: { ...state.revealedWordsMap, [sceneKey]: [] },
         }))
-      },
-
-      setCurrentScene: (scene) => {
-        const prev = get().currentScene
-        if (prev !== null && prev !== scene) {
-          // 场景切换：旧场景的揭示状态已通过 zustand/persist 自动保存
-          // 这里可以做跨场景的日志、埋点等
-          console.debug(`[DialogueStore] Scene switched: ${prev} → ${scene}`)
-        }
-        set({ currentScene: scene })
-      },
-
-      toggleChallengeMode: () => {
-        set((state) => ({ challengeMode: !state.challengeMode }))
       },
     }),
     {
-      name: 'dialogue-store',        // localStorage key
+      name: 'dialogue-store',
       partialize: (state) => ({
         revealedWordsMap: state.revealedWordsMap,
         challengeMode: state.challengeMode,
-        // 不持久化 currentScene（它只是运行时追踪）
+        hskLevel: state.hskLevel,
+        // currentScene 不持久化（纯导航状态）
       }),
     }
   )
 )
 
 // ============================================================
-// Selectors — 派生状态（避免在组件里重复计算）
+// Selectors
 // ============================================================
 
-/** 获取当前场景的揭示 Set（传给 SentenceRenderer 的 revealedWords prop） */
-export const getSceneRevealedSet = (scene: string) => (state: DialogueState) => {
-  const words = state.revealedWordsMap[scene] ?? []
-  return new Set(words)
-}
+/** 获取当前场景的揭示 Set */
+export const getSceneRevealedSet = (sceneKey: string) => (state: DialogueState) =>
+  new Set(state.revealedWordsMap[sceneKey] ?? [])

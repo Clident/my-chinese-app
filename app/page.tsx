@@ -1,81 +1,63 @@
-"use client"; // 确保是客户端组件
-import { SceneDialogue } from '@/components/scene-dialogue'
-import { useState, useEffect } from 'react'
+"use client";
+
+import { useState, useEffect } from "react";
+import { Sidebar } from "@/components/sidebar";
+import { SceneDialogue } from "@/components/scene-dialogue";
 
 export default function Home() {
-  const [level, setLevel] = useState<'HSK1-2' | 'HSK3-4' | 'HSK5-6'>('HSK1-2');
-  const [isLevelChanging, setIsLevelChanging] = useState(false);
-  const [deployInfo, setDeployInfo] = useState<{version?: string; timestamp?: string} | null>(null);
+  const [drawerOpen, setDrawerOpen] = useState(false);
+  const [deployInfo, setDeployInfo] = useState<{ version?: string; timestamp?: string } | null>(null);
 
   useEffect(() => {
-    fetch('/api/generate-dialogue')
-      .then(r => r.json())
-      .then(d => setDeployInfo({ version: d.version, timestamp: d.timestamp }))
-      .catch(() => {})
+    fetch("/api/generate-dialogue")
+      .then((r) => r.json())
+      .then((d) => setDeployInfo({ version: d.version, timestamp: d.timestamp }))
+      .catch(() => {});
   }, []);
 
-  const levels = [
-    { id: 'HSK1-2', label: '初級', desc: 'HSK 1-2' },
-    { id: 'HSK3-4', label: '中級', desc: 'HSK 3-4' },
-    { id: 'HSK5-6', label: '上級', desc: 'HSK 5-6' },
-  ];
+  // 移动端打开抽屉时禁止背景滚动
+  useEffect(() => {
+    document.body.style.overflow = drawerOpen ? "hidden" : "";
+    return () => { document.body.style.overflow = ""; };
+  }, [drawerOpen]);
 
   return (
-    <main className="min-h-screen py-8 px-4 bg-slate-50">
-      <header className="text-center mb-8">
-        <h1 className="text-3xl font-bold text-slate-800 tracking-tight">
-          毎日中国語 <span className="text-blue-500">AI</span>
-        </h1>
-        <p className="text-sm text-slate-500 mt-2">
-          AIと場面対話で学ぶ中国語
-        </p>
-      </header>
+    <div className="flex h-screen overflow-hidden bg-slate-50">
+      {/* 侧边栏（桌面固定，移动端抽屉） */}
+      <Sidebar open={drawerOpen} onClose={() => setDrawerOpen(false)} />
 
-      {/* 分级切换器 */}
-      <div className="max-w-md mx-auto mb-6 flex justify-center gap-2 p-1 bg-slate-200 rounded-xl">
-        {levels.map((l) => (
+      {/* 主内容区 */}
+      <main className="flex-1 overflow-y-auto">
+        {/* 移动端顶部栏（汉堡菜单） */}
+        <div className="sticky top-0 z-20 bg-white/80 backdrop-blur border-b border-slate-200 flex items-center px-4 h-14 md:hidden">
           <button
-            key={l.id}
-            onClick={() => {
-              if (l.id !== level) {
-                setIsLevelChanging(true)
-                // 停止音频
-                if ('speechSynthesis' in window) {
-                  window.speechSynthesis.cancel()
-                }
-                setTimeout(() => {
-                  setLevel(l.id as any)
-                  setIsLevelChanging(false)
-                  window.scrollTo({ top: 0, behavior: 'smooth' })
-                }, 150)
-              }
-            }}
-            className={`flex-1 py-2 rounded-lg text-sm font-medium transition-all ${
-              level === l.id 
-                ? 'bg-white text-blue-600 shadow-sm' 
-                : 'text-slate-600 hover:bg-white/50'
-            }`}
+            onClick={() => setDrawerOpen(true)}
+            className="p-2 rounded-xl hover:bg-slate-100 text-slate-600 transition-colors"
+            aria-label="メニューを開く"
           >
-            {l.label}
+            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 6h16M4 12h16M4 18h16" />
+            </svg>
           </button>
-        ))}
-      </div>
+          <span className="ml-3 text-sm font-bold text-slate-700">毎日中国語</span>
+        </div>
 
-      {/* 传入当前的等级 */}
-      <div className={`transition-opacity duration-150 ${isLevelChanging ? 'opacity-0' : 'opacity-100'}`}>
-        <SceneDialogue currentLevel={level} key={level} />
-      </div>
+        {/* 场景对话区 */}
+        <div className="py-6 px-4">
+          <SceneDialogue />
+        </div>
 
-      <footer className="mt-12 text-center text-xs text-slate-400">
-        <p>© 2026 毎日中国語 | 拼音の着色: 1声(赤) 2声(橙) 3声(緑) 4声(青)</p>
-        {deployInfo ? (
-          <p className="mt-1 text-green-500 font-mono">
-            ● deployed: {deployInfo.version} @ {deployInfo.timestamp}
-          </p>
-        ) : (
-          <p className="mt-1 text-red-400">● 部署信息加载中...</p>
-        )}
-      </footer>
-    </main>
-  )
+        <footer className="px-4 pb-6 text-center text-xs text-slate-400">
+          <p>© 2026 毎日中国語 | 拼音の着色: 1声(赤) 2声(橙) 3声(緑) 4声(青)</p>
+          {deployInfo ? (
+            <p className="mt-1 text-green-500 font-mono">
+              ● deployed: {deployInfo.version} @ {deployInfo.timestamp}
+            </p>
+          ) : (
+            <p className="mt-1 text-red-400">● 部署信息加载中...</p>
+          )}
+        </footer>
+      </main>
+    </div>
+  );
 }
