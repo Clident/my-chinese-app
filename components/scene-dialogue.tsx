@@ -246,7 +246,7 @@ export function SceneDialogue() {
             <div className="flex items-center gap-3">
               <span className="text-2xl">{dialogue?.sceneEmoji || '🗣️'}</span>
               <h2 className="text-lg font-bold text-slate-800">
-                {currentDialogue?.scene_jp || currentDialogue?.scene || 'シーンを選択'}
+                {currentDialogue?.scene_ja || currentDialogue?.scene || 'シーンを選択'}
               </h2>
             </div>
           </div>
@@ -465,7 +465,7 @@ export function SceneDialogue() {
           {/* 底部下一场景提示 */}
           <div className="flex justify-between text-xs text-slate-400 mb-2 px-1">
             <span>シーン {currentIndex + 1}</span>
-            <span>次へ → {currentIndex < localDialogues.length - 1 ? (localDialogues[currentIndex + 1]?.scene_jp ?? localDialogues[currentIndex + 1]?.scene) : '終了'}</span>
+            <span>次へ → {currentIndex < localDialogues.length - 1 ? (localDialogues[currentIndex + 1]?.scene_ja ?? localDialogues[currentIndex + 1]?.scene) : '終了'}</span>
           </div>
           <div className="flex gap-3">
             <Button variant="outline" size="lg" className="flex-1 h-12 text-sm font-medium"

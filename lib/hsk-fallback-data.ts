@@ -19,6 +19,7 @@ export interface DialogueLine {
 
 export interface FallbackDialogue {
   scene: string
+  scene_ja: string
   sceneEmoji: string
   lines: DialogueLine[]
   keyVocabulary: KeyVocabulary[]
@@ -28,6 +29,7 @@ export interface FallbackDialogue {
 export const hsk12Dialogues: FallbackDialogue[] = [
   {
     scene: 'コンビニ',
+    scene_ja: 'コンビニ',
     sceneEmoji: '🏪',
     lines: [
       { speaker: 'A', chinese: '你好！', pinyin: 'Nǐ hǎ o !', japanese: 'こんにちは！' },
@@ -40,6 +42,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '学校',
+    scene_ja: '学校',
     sceneEmoji: '🏫',
     lines: [
       { speaker: 'A', chinese: '你是学生吗？', pinyin: 'Nǐ shì xué shē ng ma ?', japanese: 'あなたは学生ですか？' },
@@ -52,6 +55,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'カフェ',
+    scene_ja: 'カフェ',
     sceneEmoji: '☕',
     lines: [
       { speaker: 'A', chinese: '我要一杯咖啡。', pinyin: 'Wǒ yà o yī bē i kā fē i .', japanese: 'コーヒーを一杯ください。' },
@@ -64,6 +68,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'レストラン',
+    scene_ja: 'レストラン',
     sceneEmoji: '🍜',
     lines: [
       { speaker: 'A', chinese: '这个多少钱？', pinyin: 'Zhè ge duō shao qiá n ?', japanese: 'これはいくらですか？' },
@@ -76,6 +81,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '駅',
+    scene_ja: '駅',
     sceneEmoji: '🚉',
     lines: [
       { speaker: 'A', chinese: '地铁站在哪儿？', pinyin: 'Dì tiě zhà n zà i nǎ r ?', japanese: '地下鉄の駅はどこですか？' },
@@ -89,6 +95,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
 
   {
     scene: '果物屋',
+    scene_ja: '果物屋',
     sceneEmoji: '🍎',
     lines: [
       { speaker: 'A', chinese: '苹果多少钱一斤？', pinyin: 'Pí ng guǒ duō shao qiá n yì jī n ?', japanese: 'りんごは一斤いくらですか？' },
@@ -103,6 +110,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '道案内',
+    scene_ja: '道案内',
     sceneEmoji: '🗺️',
     lines: [
       { speaker: 'A', chinese: '请问，洗手间在哪儿？', pinyin: 'Qǐ ngwè n , xǐ shǒ ujiā n zà i nǎ r ?', japanese: 'すみません、トイレはどこですか？' },
@@ -116,6 +124,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '天気',
+    scene_ja: '天気',
     sceneEmoji: '🌤️',
     lines: [
       { speaker: 'A', chinese: '今天天气怎么样？', pinyin: 'Jī n tiā n tiā n qì zě nme yà ng ?', japanese: '今日の天気はどうですか？' },
@@ -129,6 +138,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'タクシー',
+    scene_ja: 'タクシー',
     sceneEmoji: '🚕',
     lines: [
       { speaker: 'A', chinese: '师傅，去火车站多少钱？', pinyin: 'Shī fu , qù huǒ chē zhà n duō shao qiá n ?', japanese: '運転手さん、駅までいくらですか？' },
@@ -142,6 +152,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '郵便局',
+    scene_ja: '郵便局',
     sceneEmoji: '📮',
     lines: [
       { speaker: 'A', chinese: '我要寄一封信。', pinyin: 'Wǒ yà o jì yì fē ng xì n .', japanese: '手紙を一通出したいです。' },
@@ -156,6 +167,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '美容院',
+    scene_ja: '美容院',
     sceneEmoji: '💇',
     lines: [
       { speaker: 'A', chinese: '我想剪头发。', pinyin: 'Wǒ xiǎ ng jiǎ n tó u fa .', japanese: '髪を切りたいです。' },
@@ -169,6 +181,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '薬局',
+    scene_ja: '薬局',
     sceneEmoji: '💊',
     lines: [
       { speaker: 'A', chinese: '我头疼，有药吗？', pinyin: 'Wǒ tó u té ng , yǒ u yà o ma ?', japanese: '頭が痛いです。薬はありますか？' },
@@ -182,6 +195,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'ジム',
+    scene_ja: 'ジム',
     sceneEmoji: '🏋️',
     lines: [
       { speaker: 'A', chinese: '你常去健身房吗？', pinyin: 'Nǐ chá ng qù jiàn shē n fá ng ma ?', japanese: 'よくジムに行きますか？' },
@@ -195,6 +209,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '図書館',
+    scene_ja: '図書館',
     sceneEmoji: '📚',
     lines: [
       { speaker: 'A', chinese: '请问可以借书吗？', pinyin: 'Qǐ ngwè n kě yǐ jiè shū ma ?', japanese: '本を借りられますか？' },
@@ -208,6 +223,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '誕生日',
+    scene_ja: '誕生日',
     sceneEmoji: '🎂',
     lines: [
       { speaker: 'A', chinese: '今天是你生日吗？', pinyin: 'Jī n tiā n shì nǐ shē ng rì ma ?', japanese: '今日は誕生日ですか？' },
@@ -221,6 +237,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'エレベーターで隣人',
+    scene_ja: 'エレベーターで隣人',
     sceneEmoji: '🛗',
     lines: [
       { speaker: "邻居", chinese: "下班了？今天挺早的。", pinyin: "xià bān le ？ jīn tiān tǐng zǎo de 。", japanese: "お帰りなさい。今日は早いですね。" },
@@ -234,6 +251,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '医院挂号',
+    scene_ja: '医院挂号',
     sceneEmoji: '🏥',
     lines: [
       { speaker: "患者", chinese: "你好，我想挂内科。", pinyin: "nǐ hǎo ， wǒ xiǎng guà nèi kē 。", japanese: "すみません、内科の受診をお願いします。" },
@@ -247,6 +265,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '药店买感冒药',
+    scene_ja: '药店买感冒药',
     sceneEmoji: '💊',
     lines: [
       { speaker: "顾客", chinese: "我感冒了，嗓子疼。", pinyin: "wǒ gǎn mào le ， sǎng zi téng 。", japanese: "風邪を引いて、喉が痛いです。" },
@@ -260,6 +279,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '只是修一下',
+    scene_ja: '只是修一下',
     sceneEmoji: '💇‍♂️',
     lines: [
       { speaker: "理发师", chinese: "你想怎么剪？", pinyin: "nǐ xiǎng zěn me jiǎn ？", japanese: "どうされますか？" },
@@ -273,6 +293,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '菜市场砍价',
+    scene_ja: '菜市场砍价',
     sceneEmoji: '🥬',
     lines: [
       { speaker: "顾客", chinese: "老板，这苹果怎么卖？", pinyin: "lǎo bǎn ， zhè píng guǒ zěn me mài ？", japanese: "おじさん、このリンゴいくら？" },
@@ -286,6 +307,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'デリバリー催促',
+    scene_ja: 'デリバリー催促',
     sceneEmoji: '🛵',
     lines: [
       { speaker: "顾客", chinese: "你好，我的外卖还没到。", pinyin: "nǐ hǎo ， wǒ de wài mài hái méi dào 。", japanese: "すみません、デリバリーがまだ届きません。" },
@@ -298,6 +320,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '打车去机场',
+    scene_ja: '打车去机场',
     sceneEmoji: '🚕',
     lines: [
       { speaker: "乘客", chinese: "师傅，去机场要多长时间？", pinyin: "shī fu ， qù jī chǎng yào duō shǎo shí jiān ？", japanese: "運転手さん、空港までどのくらいかかりますか？" },
@@ -310,6 +333,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '询问地铁站',
+    scene_ja: '询问地铁站',
     sceneEmoji: '🚇',
     lines: [
       { speaker: "游客", chinese: "请问，最近的地铁站在哪儿？", pinyin: "qǐng wèn ， zuì jìn de dì tiě zhàn zài nǎ r ？", japanese: "すみません、一番近い地下鉄の駅はどこですか？" },
@@ -322,6 +346,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '餐厅点菜',
+    scene_ja: '餐厅点菜',
     sceneEmoji: '🍜',
     lines: [
       { speaker: "顾客", chinese: "请问，这个菜辣不辣？", pinyin: "qǐng wèn ， zhè ge cài là bu là ？", japanese: "すみません、この料理は辛いですか？" },
@@ -334,6 +359,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '餐厅忌口',
+    scene_ja: '餐厅忌口',
     sceneEmoji: '🥗',
     lines: [
       { speaker: "顾客", chinese: "我对花生过敏，这道菜里有花生吗？", pinyin: "wǒ duì huā shēng guò mǐn ， zhè dào cài lǐ yǒu huā shēng ma ？", japanese: "私はピーナッツアレルギーです。この料理にピーナッツは入っていますか？" },
@@ -346,6 +372,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '手机丢了',
+    scene_ja: '手机丢了',
     sceneEmoji: '📱',
     lines: [
       { speaker: "失主", chinese: "你好，我的手机丢了，能不能帮我打一下？", pinyin: "nǐ hǎo ， wǒ de shǒu jī diū le ， néng bu néng bāng wǒ dǎ yí xià ？", japanese: "すみません、携帯を落としたんです。1回鳴らしてもらえませんか？" },
@@ -358,6 +385,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '护照丢了',
+    scene_ja: '护照丢了',
     sceneEmoji: '🛂',
     lines: [
       { speaker: "游客", chinese: "警察叔叔，我的护照丢了，怎么办？", pinyin: "jǐng chá shū shu ， wǒ de hù zhào diū le ， zěn me bàn ？", japanese: "お巡りさん、パスポートをなくしました。どうすればいいですか？" },
@@ -374,6 +402,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
 export const hsk34Dialogues: FallbackDialogue[] = [
   {
     scene: '会社',
+    scene_ja: '会社',
     sceneEmoji: '🏢',
     lines: [
       { speaker: 'A', chinese: '王经理，这份报告我已经准备好了。', pinyin: 'Wá ng jī nglǐ, zhè fè n bà ogà o wǒ yǐ jī ng zhǔ nbè i hǎ o le .', japanese: '王マネージャー、この報告書はもう準備できました。' },
@@ -387,6 +416,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '病院',
+    scene_ja: '病院',
     sceneEmoji: '🏥',
     lines: [
       { speaker: 'A', chinese: '医生，我最近经常头疼，晚上也睡不好。', pinyin: 'Yī shē ng , wǒ zuì jì n jī ngchá ng tó u té ng , wǎ nshang yě shuì bù hǎ o .', japanese: '先生、最近よく頭痛がして、夜もよく眠れません。' },
@@ -400,6 +430,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '銀行',
+    scene_ja: '銀行',
     sceneEmoji: '🏦',
     lines: [
       { speaker: 'A', chinese: '你好，我想开一个银行账户。', pinyin: 'Nǐ hǎ o , wǒ xiǎ ng kā i yī gè yí nhá ng zhà nghù.', japanese: 'こんにちは、銀行口座を開設したいのですが。' },
@@ -413,6 +444,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'ホテル',
+    scene_ja: 'ホテル',
     sceneEmoji: '🏨',
     lines: [
       { speaker: 'A', chinese: '请问房间里有免费的网络吗？', pinyin: 'qǐng wèn fáng jiān lǐ yǒu miǎn fèi de wǎng luò ma ？', japanese: 'お部屋に無料のネットはありますか？' },
@@ -425,6 +457,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'デパート',
+    scene_ja: 'デパート',
     sceneEmoji: '🛍️',
     lines: [
       { speaker: 'A', chinese: '这件衣服能不能便宜一点？', pinyin: 'Zhè jià n yī fu né ng bù né ng piá nyi yī diǎ n ?', japanese: 'この服、もう少し安くなりませんか？' },
@@ -438,6 +471,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
 
   {
     scene: 'スマホ修理',
+    scene_ja: 'スマホ修理',
     sceneEmoji: '📱',
     lines: [
       { speaker: 'A', chinese: '我的手机屏幕碎了，能修吗？', pinyin: 'Wǒ de shǒu jī pí ng mù suì le , né ng xiū ma ?', japanese: '携帯の画面が割れたんですが、修理できますか？' },
@@ -452,6 +486,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '面接',
+    scene_ja: '面接',
     sceneEmoji: '👔',
     lines: [
       { speaker: 'A', chinese: '你为什么想来我们公司工作？', pinyin: 'Nǐ wè i shé nme xiǎ ng lá i wǒ men gō ng sī gō ng zuò ?', japanese: 'なぜ弊社で働きたいのですか？' },
@@ -465,6 +500,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '遅刻',
+    scene_ja: '遅刻',
     sceneEmoji: '⏰',
     lines: [
       { speaker: 'A', chinese: '不好意思，我迟到了。', pinyin: 'Bù hǎ o yì si , wǒ chí dà o le .', japanese: 'すみません、遅刻しました。' },
@@ -479,6 +515,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'ホテル予約',
+    scene_ja: 'ホテル予約',
     sceneEmoji: '🏨',
     lines: [
       { speaker: 'A', chinese: '请问还有房间吗？', pinyin: 'Qǐ ngwè n há i yǒ u fá ng jiā n ma ?', japanese: '部屋は空いていますか？' },
@@ -493,6 +530,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '家探し',
+    scene_ja: '家探し',
     sceneEmoji: '🏠',
     lines: [
       { speaker: 'A', chinese: '这个房子离地铁站远吗？', pinyin: 'Zhè ge fá ng zi lí dì tiě zhà n yuǎ n ma ?', japanese: 'この家は地下鉄の駅から遠いですか？' },
@@ -506,6 +544,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '引っ越し',
+    scene_ja: '引っ越し',
     sceneEmoji: '📦',
     lines: [
       { speaker: 'A', chinese: '你什么时候搬家？需要帮忙吗？', pinyin: 'Nǐ shé nme shí hou bān jiā ? Xū yà o bā ng má ng ma ?', japanese: 'いつ引っ越しですか？手伝いましょうか？' },
@@ -519,6 +558,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'レストラン予約',
+    scene_ja: 'レストラン予約',
     sceneEmoji: '🍽️',
     lines: [
       { speaker: 'A', chinese: '您好，想订一个包间。', pinyin: 'Ní n hǎ o , xiǎ ng dì ng yí ge bā o jiā n .', japanese: 'こんにちは、個室を予約したいです。' },
@@ -532,6 +572,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '観光案内',
+    scene_ja: '観光案内',
     sceneEmoji: '🏯',
     lines: [
       { speaker: 'A', chinese: '请问故宫怎么走？', pinyin: 'Qǐ ngwè n Gǔ gō ng zě nme zǒ u ?', japanese: 'すみません、故宮へはどう行けばいいですか？' },
@@ -545,6 +586,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '病院',
+    scene_ja: '病院',
     sceneEmoji: '🏥',
     lines: [
       { speaker: 'A', chinese: '你好，我挂一个内科。', pinyin: 'Nǐ hǎ o , wǒ guà yí ge nè i kē .', japanese: 'こんにちは、内科の受付をお願いします。' },
@@ -558,6 +600,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '銀行振込',
+    scene_ja: '銀行振込',
     sceneEmoji: '🏦',
     lines: [
       { speaker: 'A', chinese: '你好，我想汇款到日本。', pinyin: 'Nǐ hǎ o , wǒ xiǎ ng huì kuǎ n dà o Rì bě n .', japanese: 'こんにちは、日本へ送金したいです。' },
@@ -571,6 +614,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '同事推卸责任',
+    scene_ja: '同事推卸责任',
     sceneEmoji: '🙄',
     lines: [
       { speaker: "同事", chinese: "这个表格你还没做完吗？", pinyin: "zhè gè biǎo gé nǐ hái méi zuò wán ma ？", japanese: "この表、まだ終わってないの？" },
@@ -584,6 +628,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '办公室摸鱼被抓',
+    scene_ja: '办公室摸鱼被抓',
     sceneEmoji: '💻',
     lines: [
       { speaker: "经理", chinese: "小王，看什么呢，这么认真？", pinyin: "xiǎo wáng ， kàn shén me ne ， zhè me rèn zhēn ？", japanese: "王さん、何をそんなに熱心に見てるの？" },
@@ -597,6 +642,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '吐槽公司食堂',
+    scene_ja: '吐槽公司食堂',
     sceneEmoji: '🍛',
     lines: [
       { speaker: "A", chinese: "今天食堂又是土豆丝？", pinyin: "jīn tiān shí táng yòu shì tǔ dòu sī ？", japanese: "今日の食堂、またジャガイモの千切り？" },
@@ -609,6 +655,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '被不熟的同学借钱',
+    scene_ja: '被不熟的同学借钱',
     sceneEmoji: '💸',
     lines: [
       { speaker: "同学", chinese: "老同学，最近手头有点紧，能借点钱吗？", pinyin: "lǎo tóng xué ， zuì jìn shǒu tóu yǒu diǎn jǐn ， néng jiè diǎn qián ma ？", japanese: "同級生よ、最近ちょっと手元が苦しくて、お金貸してくれない？" },
@@ -622,6 +669,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '相亲尬聊',
+    scene_ja: '相亲尬聊',
     sceneEmoji: '🍵',
     lines: [
       { speaker: "A", chinese: "你平时有什么爱好吗？", pinyin: "nǐ píng shí yǒu shén me ài hào ma ？", japanese: "普段、何か趣味はありますか？" },
@@ -635,6 +683,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '向医生描述症状',
+    scene_ja: '向医生描述症状',
     sceneEmoji: '👨‍⚕️',
     lines: [
       { speaker: "医生", chinese: "哪里不舒服？", pinyin: "nǎ lǐ bù shū fú ？", japanese: "どこが具合悪いですか？" },
@@ -648,6 +697,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '确认过敏史（救命句）',
+    scene_ja: '确认过敏史（救命句）',
     sceneEmoji: '⚠️',
     lines: [
       { speaker: "医生", chinese: "你有过敏药物吗？", pinyin: "nǐ yǒu guò mǐn yào wù ma ？", japanese: "アレルギーのある薬はありますか？" },
@@ -661,6 +711,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '染发颜色咨询',
+    scene_ja: '染发颜色咨询',
     sceneEmoji: '🎨',
     lines: [
       { speaker: "顾客", chinese: "我想染个颜色，不要太夸张的。", pinyin: "wǒ xiǎng rǎn gè yán sè ， bú yào tài kuā zhāng de 。", japanese: "カラーをしたいのですが、派手すぎない感じで。" },
@@ -674,6 +725,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '洗头时的水温',
+    scene_ja: '洗头时的水温',
     sceneEmoji: '💆',
     lines: [
       { speaker: "店员", chinese: "水温可以吗？烫不烫？", pinyin: "shuǐ wēn kě yǐ ma ？ tàng bú tàng ？", japanese: "お湯加減はいかがですか？熱くないですか？" },
@@ -686,6 +738,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '询问房租与押金',
+    scene_ja: '询问房租与押金',
     sceneEmoji: '🏠',
     lines: [
       { speaker: "租客", chinese: "房东，这房子一个月多少钱？押金怎么付？", pinyin: "fáng dōng ， zhè fáng zi yí gè yuè duō shǎo qián ？ yā jīn zěn me fù ？", japanese: "大家さん、この部屋は一ヶ月いくらですか？敷金はどう払いますか？" },
@@ -698,6 +751,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '家里空调坏了',
+    scene_ja: '家里空调坏了',
     sceneEmoji: '🛠️',
     lines: [
       { speaker: "租客", chinese: "房东，空调不制冷了，你能找人修一下吗？", pinyin: "fáng dōng ， kōng tiáo bú zhì lěng le ， nǐ néng zhǎo rén xiū yí xià ma ？", japanese: "大家さん、エアコンが冷えなくなりました。誰か修理を呼んでくれますか？" },
@@ -710,6 +764,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '要求包邮',
+    scene_ja: '要求包邮',
     sceneEmoji: '📦',
     lines: [
       { speaker: "买家", chinese: "亲，买两件能包邮吗？", pinyin: "qīn ， mǎi liǎng jiàn néng bāo yóu ma ？", japanese: "すみません、2点買ったら送料無料になりますか？" },
@@ -723,6 +778,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '快递放驿站',
+    scene_ja: '快递放驿站',
     sceneEmoji: '🏪',
     lines: [
       { speaker: "快递员", chinese: "你好，快递给你放菜鸟驿站了。", pinyin: "nǐ hǎo ， kuài dì gěi nǐ fàng cài niǎo yì zhàn le 。", japanese: "もしもし、お荷物は菜鳥駅（宅配ロッカー/取次所）に置いておきました。" },
@@ -736,6 +792,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '手机没流量了',
+    scene_ja: '手机没流量了',
     sceneEmoji: '📱',
     lines: [
       { speaker: "租客", chinese: "我的手机没流量了，怎么买叠加包？", pinyin: "wǒ de shǒu jī méi liú liàng le ， zěn me mǎi dié jiā bāo ？", japanese: "スマホのデータ通信量がなくなりました。追加パックはどうやって買いますか？" },
@@ -748,6 +805,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '办理新手机号',
+    scene_ja: '办理新手机号',
     sceneEmoji: '🆔',
     lines: [
       { speaker: "顾客", chinese: "我想办一张新的电话卡。", pinyin: "wǒ xiǎng bàn yì zhāng xīn de diàn huà kǎ 。", japanese: "新しいSIMカードを作りたいです。" },
@@ -760,6 +818,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '酒店办理入住',
+    scene_ja: '酒店办理入住',
     sceneEmoji: '🏨',
     lines: [
       { speaker: "前台", chinese: "您好，请出示您的预订信息。", pinyin: "nín hǎo ， qǐng chū shì nín de yù dìng xìn xī 。", japanese: "いらっしゃいませ、予約情報を提示してください。" },
@@ -772,6 +831,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'レストランで会計',
+    scene_ja: 'レストランで会計',
     sceneEmoji: '💳',
     lines: [
       { speaker: "顾客", chinese: "服务员，买单！可以刷卡吗？", pinyin: "fú wù yuán ， mǎi dān ！ kě yǐ shuā kǎ ma ？", japanese: "すみません、お会計！カード使えますか？" },
@@ -784,6 +844,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '餐厅打包',
+    scene_ja: '餐厅打包',
     sceneEmoji: '🥡',
     lines: [
       { speaker: "顾客", chinese: "剩下的菜可以帮我打包吗？", pinyin: "shèng xià de cài kě yǐ bāng wǒ dǎ bāo ma ？", japanese: "残った料理、持ち帰りにできますか？" },
@@ -796,6 +857,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '房东涨租',
+    scene_ja: '房东涨租',
     sceneEmoji: '📈',
     lines: [
       { speaker: "房东", chinese: "今年房租要涨五百，现在物价都涨了。", pinyin: "jīn nián fáng zū yào zhǎng wǔ bǎi ， xiàn zài wù jià dōu zhǎng le 。", japanese: "今年は家賃を500元上げるよ。今は物価が全部上がってるから。" },
@@ -808,6 +870,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '退房押金',
+    scene_ja: '退房押金',
     sceneEmoji: '💰',
     lines: [
       { speaker: "租客", chinese: "我要退房了，押金什么时候能退给我？", pinyin: "wǒ yào tuì fáng le ， yā jīn shén me shí hou néng tuì gěi wǒ ？", japanese: "退去したいんですが、敷金はいつ返してもらえますか？" },
@@ -820,6 +883,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '房屋维修',
+    scene_ja: '房屋维修',
     sceneEmoji: '🔧',
     lines: [
       { speaker: "租客", chinese: "房东，马桶堵了，您能找人来修一下吗？", pinyin: "fáng dōng ， mǎ tǒng dǔ le ， nín néng zhǎo rén lái xiū yí xià ma ？", japanese: "大家さん、トイレが詰まりました。誰か修理に呼んでもらえますか？" },
@@ -832,6 +896,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '中介看房',
+    scene_ja: '中介看房',
     sceneEmoji: '🏠',
     lines: [
       { speaker: "中介", chinese: "这套房子离地铁站很近，采光也好，您要看看吗？", pinyin: "zhè tào fáng zi lí dì tiě zhàn hěn jìn ， cǎi guāng yě hǎo ， nín yào kàn kan ma ？", japanese: "この部屋は駅から近くて、日当たりも良いですよ。見てみますか？" },
@@ -844,6 +909,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '续签合同',
+    scene_ja: '续签合同',
     sceneEmoji: '📝',
     lines: [
       { speaker: "房东", chinese: "合同快到期了，你要续签吗？", pinyin: "hé tong kuài dào qī le ， nǐ yào xù qiān ma ？", japanese: "契約がもう切れるけど、更新する？" },
@@ -856,6 +922,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '商场走散',
+    scene_ja: '商场走散',
     sceneEmoji: '🛒',
     lines: [
       { speaker: "顾客", chinese: "服务员，我和孩子走散了，能帮我广播一下吗？", pinyin: "fú wù yuán ， wǒ hé hái zi zǒu sàn le ， néng bāng wǒ guǎng bō yí xià ma ？", japanese: "すみません、子供とはぐれました。放送してもらえますか？" },
@@ -868,6 +935,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '车祸处理',
+    scene_ja: '车祸处理',
     sceneEmoji: '🚗',
     lines: [
       { speaker: "司机A", chinese: "你开车怎么不看路！我的车被撞了！", pinyin: "nǐ kāi chē zěn me bú kàn lù ！ wǒ de chē bèi zhuàng le ！", japanese: "運転中、前を見てないのか！僕の車がぶつかったじゃないか！" },
@@ -880,6 +948,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '在商场跟孩子走散了',
+    scene_ja: '在商场跟孩子走散了',
     sceneEmoji: '📢',
     lines: [
       { speaker: "家长", chinese: "保安你好，我孩子不见了，能不能帮我广播一下？", pinyin: "bǎo ān nǐ hǎo ， wǒ hái zi bú jiàn le ， néng bù néng bāng wǒ guǎng bō yí xià ？", japanese: "警備員さん、子供がいなくなりました。館内放送をしてもらえませんか？" },
@@ -892,6 +961,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '在陌生城市车坏了',
+    scene_ja: '在陌生城市车坏了',
     sceneEmoji: '🚗💥',
     lines: [
       { speaker: "司机", chinese: "师傅，我的车在高速上抛锚了，能帮我拖一下吗？", pinyin: "shī fu ， wǒ de chē zài gāo sù shàng pāo máo le ， néng bāng wǒ tuō yí xià ma ？", japanese: "すみません、高速道路で故障（エンスト）してしまいました。レッカーしてもらえますか？" },
@@ -904,6 +974,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '在高铁上坐错位置',
+    scene_ja: '在高铁上坐错位置',
     sceneEmoji: '🚄',
     lines: [
       { speaker: "乘客A", chinese: "不好意思，你好像坐了我的位置。", pinyin: "bú hǎo yì sī ， nǐ hǎo xiàng zuò le wǒ de wèi zhì 。", japanese: "すみません、私の席に座られているようです。" },
@@ -920,6 +991,7 @@ export const hsk34Dialogues: FallbackDialogue[] = [
 export const hsk56Dialogues: FallbackDialogue[] = [
   {
     scene: '商談',
+    scene_ja: '商談',
     sceneEmoji: '💼',
     lines: [
       { speaker: 'A', chinese: '感谢贵公司百忙之中抽出时间来洽谈合作事宜。', pinyin: 'Gǎ nxiè guì gō ngsī bǎ imá ng zhī zhō ng chō uchū shí jiā n lá i qià tá n hé zuò shì yí.', japanese: 'お忙しい中、提携に関するご相談のお時間をいただき、誠にありがとうございます。' },
@@ -933,6 +1005,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '面接',
+    scene_ja: '面接',
     sceneEmoji: '👔',
     lines: [
       { speaker: 'A', chinese: '请问您对我们公司有什么了解？', pinyin: 'Qǐ ngwè n ní n duì wǒ me n gō ngsī yǒ u shé nme liǎ ojiě?', japanese: '弊社についてどのようなことをご存知ですか？' },
@@ -946,6 +1019,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '謝罪',
+    scene_ja: '謝罪',
     sceneEmoji: '🙇',
     lines: [
       { speaker: 'A', chinese: '关于这次的失误，我们深感抱歉，给您添麻烦了。', pinyin: 'Guā nyú zhè cì de shī wù, wǒ me n shē n gǎ n bà oqià n , gě i ní n tiā n má fan le .', japanese: '今回のミスについて、深くお詫び申し上げます。ご迷惑をおかけしました。' },
@@ -959,6 +1033,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '会食',
+    scene_ja: '会食',
     sceneEmoji: '🍷',
     lines: [
       { speaker: 'A', chinese: '张总，敬您一杯，祝咱们合作愉快！', pinyin: 'Zhā ng zǒ ng , jì ng ní n yī bē i , zhù zá nme n hé zuò yú kuà i !', japanese: '張社長、一杯お注ぎします。私たちの協力が順調でありますように！' },
@@ -972,6 +1047,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '断り',
+    scene_ja: '断り',
     sceneEmoji: '😅',
     lines: [
       { speaker: 'A', chinese: '这次的方案我们研究了很久，觉得还是有些不太成熟的地方。', pinyin: 'Zhè cì de fā ng à n wǒ me n yá njiū le hě n jiǔ, jué de há ishi yǒ uxiē bú tà i ché ngshú de dì fang .', japanese: '今回のプランは長い間検討しましたが、まだ成熟していない部分があるように感じます。' },
@@ -986,6 +1062,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
 
   {
     scene: '環境保護',
+    scene_ja: '環境保護',
     sceneEmoji: '🌿',
     lines: [
       { speaker: 'A', chinese: '近年来，环境污染问题日益严重，引起了广泛关注。', pinyin: 'Jì n niá n lá i , huá n jì ng wū rǎ n wè n tí rì yì yá n zhòng , yǐ n qǐ le guǎ ng fà n guā n zhù .', japanese: '近年、環境汚染問題がますます深刻化し、広く注目を集めています。' },
@@ -999,6 +1076,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'AI倫理',
+    scene_ja: 'AI倫理',
     sceneEmoji: '🤖',
     lines: [
       { speaker: 'A', chinese: '人工智能技术的发展给我们带来了便利，但也引发了一些伦理问题。', pinyin: 'Ré n gō ng zhì né ng jì shù de fā zhǎ n gě i wǒ me n dà lá i le bià n lì , dà n yě yǐ n fā le yì xiē lú n lǐ wè n tí .', japanese: 'AI技術の発展は私たちに利便性をもたらしましたが、倫理問題も引き起こしました。' },
@@ -1011,6 +1089,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: 'キャリア',
+    scene_ja: 'キャリア',
     sceneEmoji: '💼',
     lines: [
       { speaker: 'A', chinese: '在这家公司工作了五年，我觉得是时候寻求新的挑战了。', pinyin: 'Zà i zhè jiā gō ng sī gō ng zuò le wǔ niá n , wǒ jué de shì shí hou xú n qiú xī n de tiǎ o zhà n le .', japanese: 'この会社で5年働きましたが、新たな挑戦を求める時が来たと感じています。' },
@@ -1024,6 +1103,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '教育改革',
+    scene_ja: '教育改革',
     sceneEmoji: '📖',
     lines: [
       { speaker: 'A', chinese: '当前的教育体制存在诸多弊端，亟需改革。', pinyin: 'Dā ng qiá n de jià o yù tǐ zhì cú n zà i zhū duō bì duā n , jí xū gǎ i gé .', japanese: '現在の教育制度には多くの弊害があり、改革が急務です。' },
@@ -1036,6 +1116,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '心の健康',
+    scene_ja: '心の健康',
     sceneEmoji: '🧠',
     lines: [
       { speaker: 'A', chinese: '现代社会节奏快，很多人都面临着巨大的心理压力。', pinyin: 'Xià n dà i shè huì jié zò u kuà i , hě n duō ré n dō u mià n lí n zhe jù dà de xī n lǐ yā lì .', japanese: '現代社会はペースが速く、多くの人が大きな心理的プレッシャーに直面しています。' },
@@ -1048,6 +1129,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '国際関係',
+    scene_ja: '国際関係',
     sceneEmoji: '🌍',
     lines: [
       { speaker: 'A', chinese: '在全球化背景下，国际合作比以往任何时候都更加重要。', pinyin: 'Zà i quá n qiú huà bè i jǐ ng xià , guó jì hé zuò bǐ yǐ wà n rè n hé shí hou dō u gè ng jiā zhòng yà o .', japanese: 'グローバル化を背景に、国際協力はかつてないほど重要になっています。' },
@@ -1060,6 +1142,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '技術革新',
+    scene_ja: '技術革新',
     sceneEmoji: '💡',
     lines: [
       { speaker: 'A', chinese: '这项技术一旦成熟，将彻底改变我们的生活方式。', pinyin: 'Zhè xià ng jì shù yí dà n ché ng shú , jiā ng chè dǐ gǎ i bià n wǒ me n de shē ng huó fā ng shì .', japanese: 'この技術が成熟すれば、私たちの生活様式を根本から変えることになるでしょう。' },
@@ -1072,6 +1155,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '都市化',
+    scene_ja: '都市化',
     sceneEmoji: '🏙️',
     lines: [
       { speaker: 'A', chinese: '城市化进程虽然带来了经济增长，但也造成了房价上涨、交通拥堵等问题。', pinyin: 'Ché ng shì huà jì n ché ng suī rá n dà i lá i le jī ng jì zě ng zhǎ ng , dà n yě zà o ché ng le fá ng jià shà ng zhǎ ng , jiā o tō ng yō ng dǔ dě ng wè n tí .', japanese: '都市化のプロセスは経済成長をもたらしましたが、住宅価格の上昇や交通渋滞などの問題も引き起こしました。' },
@@ -1084,6 +1168,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '文化遺産',
+    scene_ja: '文化遺産',
     sceneEmoji: '🏛️',
     lines: [
       { speaker: 'A', chinese: '保护文化遗产是我们的历史责任，也是对子孙后代的承诺。', pinyin: 'Bǎ o hù wé n huà yí chǎ n shì wǒ me n de lì shǐ zé rè n , yě shì duì zǐ sūn hò u dà i de ché ng nuò .', japanese: '文化遺産の保護は私たちの歴史的責任であり、子孫への約束でもあります。' },
@@ -1096,6 +1181,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '金融科技',
+    scene_ja: '金融科技',
     sceneEmoji: '💳',
     lines: [
       { speaker: 'A', chinese: '移动支付的普及极大地改变了我们的消费习惯。', pinyin: 'Yí dòng zhī fù de pǔ jí jí dà de gǎ i bià n le wǒ me n de xiā o fè i xí guà n .', japanese: 'モバイル決済の普及は私たちの消費習慣を大きく変えました。' },
@@ -1108,6 +1194,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '老板画饼',
+    scene_ja: '老板画饼',
     sceneEmoji: '🫓',
     lines: [
       { speaker: "老板", chinese: "大家好好干，明年公司上市发奖金。", pinyin: "dà jiā hǎo hǎo gàn ， míng nián gōng sī shàng shì fā jiǎng jīn 。", japanese: "みんな頑張ろう、来年会社が上場したらボーナスを出すぞ。" },
@@ -1121,6 +1208,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '委婉拒绝不合理要求',
+    scene_ja: '委婉拒绝不合理要求',
     sceneEmoji: '🤐',
     lines: [
       { speaker: "甲方", chinese: "这个设计明天早上必须给我。", pinyin: "jiǎ fāng ， zhè gè shè jì míng tiān zǎo shàng bì xū gěi wǒ 。", japanese: "このデザイン、明日の朝までに必ず出してください。" },
@@ -1134,6 +1222,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '帰省で結婚催促',
+    scene_ja: '帰省で結婚催促',
     sceneEmoji: '🧨',
     lines: [
       { speaker: "亲戚", chinese: "老大不小了，怎么还不谈对象啊？", pinyin: "lǎo dà bù xiǎo le ， zěn me hái bù tán duì xiàng ā ？", japanese: "もういい年なんだから、どうしてまだ恋人を作らないの？" },
@@ -1147,6 +1236,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '聚餐被劝酒',
+    scene_ja: '聚餐被劝酒',
     sceneEmoji: '🍶',
     lines: [
       { speaker: "张总", chinese: "小李，这杯必须喝，不喝就是不给我面子。", pinyin: "xiǎo lǐ ， zhè bēi bì xū hē ， bù hē jiù shì bù gěi wǒ miàn zi 。", japanese: "李くん、この一杯は飲まないと。飲まないのは僕の顔を潰すことになるよ。" },
@@ -1160,6 +1250,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '询问药效与副作用',
+    scene_ja: '询问药效与副作用',
     sceneEmoji: '📝',
     lines: [
       { speaker: "患者", chinese: "这药会有副作用吗？", pinyin: "zhè yào huì yǒu fù zuò yòng ma ？", japanese: "この薬に副作用はありますか？" },
@@ -1173,6 +1264,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '抗议剪得太短了',
+    scene_ja: '抗议剪得太短了',
     sceneEmoji: '😱',
     lines: [
       { speaker: "顾客", chinese: "哎呀！你怎么剪了这么多？太短了！", pinyin: "āi yā ！ nǐ zěn me jiǎn le zhè me duō ？ tài duǎn le ！", japanese: "ちょっと！あんなに切ってって言ったのに！短すぎます！" },
@@ -1186,6 +1278,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '关于退还押金的争吵',
+    scene_ja: '关于退还押金的争吵',
     sceneEmoji: '😠',
     lines: [
       { speaker: "租客", chinese: "我要退房了，请把押金退给我。", pinyin: "wǒ yào tuì fáng le ， qǐng bǎ yā jīn tuì gěi wǒ 。", japanese: "退去するので、敷金を返してください。" },
@@ -1199,6 +1292,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '商量搬家的时间',
+    scene_ja: '商量搬家的时间',
     sceneEmoji: '🚚',
     lines: [
       { speaker: "A", chinese: "搬家公司约好了吗？几点能到？", pinyin: "bān jiā gōng sī yuē hǎo le ma ？ jǐ diǎn néng dào ？", japanese: "引っ越し業者の予約は済んだ？何時に着くって？" },
@@ -1211,6 +1305,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '航班延误改签',
+    scene_ja: '航班延误改签',
     sceneEmoji: '✈️',
     lines: [
       { speaker: "旅客", chinese: "我的航班延误了，能帮我改签到下一班吗？", pinyin: "wǒ de háng bān yán wù le ， néng bāng wǒ gǎi qiān dào xià yì bān ma ？", japanese: "私の便が遅延しました。次の便に振り替えてもらえますか？" },
@@ -1223,6 +1318,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '餐厅投诉',
+    scene_ja: '餐厅投诉',
     sceneEmoji: '😤',
     lines: [
       { speaker: "顾客", chinese: "这道菜味道不太对，是不是盐放多了？", pinyin: "zhè dào cài wèi dào bú tài duì ， shì bu shì yán fàng duō le ？", japanese: "この料理、味がおかしいです。塩を入れすぎたんじゃないですか？" },
@@ -1235,6 +1331,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '告白',
+    scene_ja: '告白',
     sceneEmoji: '💕',
     lines: [
       { speaker: "男生", chinese: "其实我一直想跟你说……我喜欢你很久了。", pinyin: "qí shí wǒ yì zhí xiǎng gēn nǐ shuō … … wǒ xǐ huan nǐ hěn jiǔ le 。", japanese: "実はずっと言いたかったんだ……君のことがずっと好きだった。" },
@@ -1247,6 +1344,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '吵架',
+    scene_ja: '吵架',
     sceneEmoji: '😤',
     lines: [
       { speaker: "女朋友", chinese: "你总是这样，从来不把我的话当回事！", pinyin: "nǐ zǒng shì zhè yàng ， cóng lái bù bǎ wǒ de huà dāng huí shì ！", japanese: "いつもこうだよね。私の話を全く聞いてない！" },
@@ -1259,6 +1357,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '冷战',
+    scene_ja: '冷战',
     sceneEmoji: '🥶',
     lines: [
       { speaker: "男生", chinese: "你还在生我的气吗？我们谈谈好不好？", pinyin: "nǐ hái zài shēng wǒ de qì ma ？ wǒ men tán tan hǎo bu hǎo ？", japanese: "まだ怒ってる？話そうよ。" },
@@ -1271,6 +1370,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '求婚',
+    scene_ja: '求婚',
     sceneEmoji: '💍',
     lines: [
       { speaker: "男生", chinese: "这些年和你在一起是我最幸福的时光，你愿意嫁给我吗？", pinyin: "zhè xiē nián hé nǐ zài yì qǐ shì wǒ zuì xìng fú de shí guāng ， nǐ yuàn yì jià gěi wǒ ma ？", japanese: "この数年、君と一緒にいられたのは最高に幸せな時間だった。僕と結婚してくれない？" },
@@ -1283,6 +1383,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '见家长',
+    scene_ja: '见家长',
     sceneEmoji: '👨‍👩‍👧',
     lines: [
       { speaker: "阿姨", chinese: "小伙子，你在哪里工作？收入怎么样？", pinyin: "xiǎo huǒ zi ， nǐ zài nǎ lǐ gōng zuò ？ shōu rù zěn me yàng ？", japanese: "お兄さん、どこで働いてるの？収入はどのくらい？" },
@@ -1295,6 +1396,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '行李延误',
+    scene_ja: '行李延误',
     sceneEmoji: '🧳',
     lines: [
       { speaker: "乘客", chinese: "我的行李没出来，能帮我查一下吗？", pinyin: "wǒ de xíng li méi chū lái ， néng bāng wǒ chá yí xià ma ？", japanese: "荷物が出てこないんですが、調べてもらえますか？" },
@@ -1307,6 +1409,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '钱包被偷',
+    scene_ja: '钱包被偷',
     sceneEmoji: '💸',
     lines: [
       { speaker: "游客", chinese: "我的钱包被偷了！里面有护照和银行卡！", pinyin: "wǒ de qián bāo bèi tōu le ！ lǐ miàn yǒu hù zhào hé yín háng kǎ ！", japanese: "財布が盗まれました！中にパスポートと銀行のカードが入ってます！" },
@@ -1319,6 +1422,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '询问是否需要空腹抽血',
+    scene_ja: '询问是否需要空腹抽血',
     sceneEmoji: '💉',
     lines: [
       { speaker: "患者", chinese: "护士，我明天抽血需要空腹吗？", pinyin: "hù shi ， wǒ míng tiān chōu xuě xū yào kōng fù ma ？", japanese: "看護師さん、明日の採血は空腹（絶食）である必要がありますか？" },
@@ -1331,6 +1435,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '咨询医疗保险理赔',
+    scene_ja: '咨询医疗保险理赔',
     sceneEmoji: '📄',
     lines: [
       { speaker: "患者", chinese: "医生，请帮我开一下诊断证明，我要办保险理赔。", pinyin: "yī shēng ， qǐng bāng wǒ kāi yí xià zhěn duàn zhèng míng ， wǒ yào bàn bǎo xiǎn lǐ péi 。", japanese: "先生、診断書を書いてください。保険金の請求（理賠）をしたいんです。" },
@@ -1343,6 +1448,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '护照丢了去领事馆',
+    scene_ja: '护照丢了去领事馆',
     sceneEmoji: '🛂',
     lines: [
       { speaker: "游客", chinese: "我的护照丢了，明天就要回国了，能办紧急旅行证吗？", pinyin: "wǒ de hù zhào diū le ， míng tiān jiù yào huí guó le ， néng bàn jǐn jí lǚ xíng zhèng ma ？", japanese: "パスポートを紛失しました。明日帰国予定なのですが、緊急旅行証を発行できますか？" },
@@ -1355,6 +1461,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '老板在群里画饼',
+    scene_ja: '老板在群里画饼',
     sceneEmoji: '🫓',
     lines: [
       { speaker: "老板", chinese: "只要大家今年再加把劲，公司明年带大家去团建。", pinyin: "zhǐ yào dà jiā jīn nián zài jiā bǎ jìn ， gōng sī míng nián dài dà jiā qù tuán jiàn 。", japanese: "今年みんなでもう一踏ん張りすれば、来年は社員旅行に連れて行くよ。" },
@@ -1367,6 +1474,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '健身房私教推销',
+    scene_ja: '健身房私教推销',
     sceneEmoji: '💪',
     lines: [
       { speaker: "教练", chinese: "美女，看你动作不太标准，要不要试听一下我的私教课？", pinyin: "měi nǚ ， kàn nǐ dòng zuò bú tài biāo zhǔn ， yào bú yào shì tīng yí xià wǒ de sī jiào kè ？", japanese: "そこの方、フォームが少し乱れていますね。私のパーソナルレッスンを体験してみませんか？" },
@@ -1379,6 +1487,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '委婉拒绝加班',
+    scene_ja: '委婉拒绝加班',
     sceneEmoji: '🌙',
     lines: [
       { speaker: "领导", chinese: "小王，这个方案今晚得赶出来，辛苦一下？", pinyin: "xiǎo wáng ， zhè gè fāng àn jīn wǎn děi gǎn chū lái ， xīn kǔ yí xià ？", japanese: "王君、この案を今晩中に仕上げてほしいんだ。悪いね？" },
@@ -1391,6 +1500,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '同事推卸责任',
+    scene_ja: '同事推卸责任',
     sceneEmoji: '🙄',
     lines: [
       { speaker: "A", chinese: "这个错误明明是你负责的部分，为什么要推给我？", pinyin: "zhè gè cuò wù míng míng shì nǐ fù zé de bù fèn ， wèi shén me yào tuī gěi wǒ ？", japanese: "このミスは明らかに君の担当部分なのに、どうして僕のせいにすんだよ？" },
@@ -1403,6 +1513,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '被吐槽食堂难吃',
+    scene_ja: '被吐槽食堂难吃',
     sceneEmoji: '🥣',
     lines: [
       { speaker: "同事", chinese: "这食堂的饭简直难以下咽，老板怎么想的？", pinyin: "zhè shí táng de fàn jiǎn zhí nán yǐ xià yàn ， lǎo bǎn zěn me xiǎng de ？", japanese: "この食堂の飯、マジで食えたもんじゃないな。社長は何を考えてんだ？" },
@@ -1415,6 +1526,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '委婉拒绝老板的画饼',
+    scene_ja: '委婉拒绝老板的画饼',
     sceneEmoji: '🥯',
     lines: [
       { speaker: "老板", chinese: "只要你今年肯努力，明年给你涨薪百分之五十。", pinyin: "zhǐ yào nǐ jīn nián kěn nǔ lì ， míng nián gěi nǐ zhǎng xīn bǎi fēn zhī wǔ shí 。", japanese: "今年頑張れば、来年は給料を50％アップしてあげるよ。" },
@@ -1427,6 +1539,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '职场八卦',
+    scene_ja: '职场八卦',
     sceneEmoji: '🍉',
     lines: [
       { speaker: "同事A", chinese: "听说了吗？财务部的老张要跳槽了。", pinyin: "tīng shuō le ma ？ cái wù bù de lǎo zhāng yào tiào cáo le 。", japanese: "聞いた？財務部の張さんが転職するらしいよ。" },
@@ -1439,6 +1552,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '被要求周末加班',
+    scene_ja: '被要求周末加班',
     sceneEmoji: '😤',
     lines: [
       { speaker: "领导", chinese: "这周有个紧急项目，周末大家克服一下。", pinyin: "zhè zhōu yǒu gè jǐn jí xiàng mù ， zhōu mò dà jiā kè fú yí xià 。", japanese: "今週中に緊急プロジェクトがあるんだ。週末、みんな頑張って。" },
@@ -1451,6 +1565,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '工作群里发错消息',
+    scene_ja: '工作群里发错消息',
     sceneEmoji: '😅',
     lines: [
       { speaker: "你", chinese: "不好意思，刚才那条消息是发错群了，请忽略。", pinyin: "bú hǎo yì si ， gāng cái nà tiáo xiāo xī shì fā cuò qún le ， qǐng hū luè 。", japanese: "すみません、さっきのメッセージは間違えて別のグループに送っちゃいました。無視してください。" },
@@ -1463,6 +1578,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '被同事阴阳怪气',
+    scene_ja: '被同事阴阳怪气',
     sceneEmoji: '😏',
     lines: [
       { speaker: "同事", chinese: "哎呀，你PPT做得真快呀，不愧是卷王呢！", pinyin: "āi yā ， nǐ PPT zuò de zhēn kuài ya ， bú kuì shì juàn wáng ne ！", japanese: "おやおや、PPT的制作が早いね〜。やっぱりキミは努力の人だね！" },
@@ -1475,6 +1591,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '汇报工作时被打断',
+    scene_ja: '汇报工作时被打断',
     sceneEmoji: '🤷',
     lines: [
       { speaker: "你", chinese: "关于这个方案，我们已经做了详细的市场调研，结果显示——", pinyin: "guān yú zhè gè fāng àn ， wǒ men yǐ jīng zuò le xiáng xì de shì chǎng diào yán ， jié guǒ xiǎn shì ——", japanese: "この方案については、すでに詳しい市場調査を行っており、結果は——" },
@@ -1487,6 +1604,7 @@ export const hsk56Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '迟到被领导发现',
+    scene_ja: '迟到被领导发现',
     sceneEmoji: '🕐',
     lines: [
       { speaker: "领导", chinese: "小李，今天又迟到了，这个月第几次了？", pinyin: "xiǎo lǐ ， jīn tiān yòu chí dào le ， zhè gè yuè dì jǐ cì le ？", japanese: "李さん、今日はまた遅刻？今月何度目？" },
