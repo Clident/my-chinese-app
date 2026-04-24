@@ -25,6 +25,7 @@ import {
 } from '@/lib/hsk-fallback-data'
 import { useDialogueStore, getSceneRevealedSet } from '@/lib/store'
 import { useShallow } from 'zustand/react/shallow'
+import { getSpeakerJa } from '@/lib/constants'
 
 // ============================================================
 // 拼音模式切换按钮（语义明确：显示 / 悬停 / 隐藏）
@@ -214,17 +215,24 @@ export function SceneDialogue() {
     }
   }, [sceneKey])
 
-  // 数据层清洗：确保 scene_jp 永远有日语值
+  // 数据层清洗：确保 scene_ja 永远有日语值
   const currentDialogue = dialogue
     ? { ...dialogue, scene_ja: dialogue.scene_ja ?? dialogue.scene }
     : null
+
+  // 开发环境：检测未翻译的 scene_ja（值等于 scene 说明没翻译）
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development' && dialogue && dialogue.scene_ja === dialogue.scene) {
+      console.warn(`[i18n] scene_ja 未翻译: id=${dialogue.scene}, scene="${dialogue.scene}"`)
+    }
+  }, [dialogue])
 
   // keyVocabulary 列表
   const keyWords = currentDialogue?.keyVocabulary?.map(v => v.word) ?? []
   const vocabulary = currentDialogue?.keyVocabulary ?? []
 
   return (
-    <div className="w-full max-w-md mx-auto space-y-4 pb-32" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
+    <div className="w-full max-w-2xl mx-auto space-y-4 pb-32" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
       <Card className="shadow-sm border-none min-h-[60vh] rounded-[2.5rem]" style={{ background: '#fff' }}>
         <CardHeader className="pb-4">
           {/* 进度条（PM反馈：数字激励弱，需视觉化） */}
@@ -381,18 +389,20 @@ export function SceneDialogue() {
                     <span
                       style={{
                         display: 'inline-block',
-                        padding: '2px 8px',
-                        borderRadius: '0.375rem',
-                        background: '#f1f5f9',
-                        color: '#64748b',
-                        fontSize: '10px',
-                        fontWeight: '700',
-                        textTransform: 'uppercase',
-                        letterSpacing: '-0.025em',
+                        padding: '2px 10px',
+                        borderRadius: '9999px',
+                        background: line.speaker === 'A' || line.speaker === '你'
+                          ? '#eef2ff'
+                          : '#f1f5f9',
+                        color: line.speaker === 'A' || line.speaker === '你'
+                          ? '#4338ca'
+                          : '#475569',
+                        fontSize: '11px',
+                        fontWeight: '600',
                         marginBottom: '0.5rem',
                       }}
                     >
-                      {line.speaker}
+                      {getSpeakerJa(currentDialogue?.scene_ja ?? '', line.speaker)}
                     </span>
 
                     {/* 对话主体：RubyLine + 朗读按钮 */}
@@ -461,7 +471,7 @@ export function SceneDialogue() {
 
       {/* 固定底部导航栏 */}
       <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg z-50">
-        <div className="max-w-md mx-auto">
+        <div className="max-w-2xl mx-auto">
           {/* 底部下一场景提示 */}
           <div className="flex justify-between text-xs text-slate-400 mb-2 px-1">
             <span>シーン {currentIndex + 1}</span>
