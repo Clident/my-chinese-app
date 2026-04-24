@@ -58,7 +58,7 @@ function VocabularyPanel({
         <CardHeader className="pb-3 pt-4 px-4 flex flex-row items-center justify-between border-b border-slate-100">
           <div className="flex items-center gap-2">
             <Library className="h-4 w-4 text-indigo-600" />
-            <h3 className="text-base font-bold text-slate-800">重点词汇</h3>
+            <h3 className="text-base font-bold text-slate-800">重要語彙</h3>
             <span className="text-xs text-slate-400 bg-slate-100 px-1.5 py-0.5 rounded-full">
               {vocabulary?.length ?? 0}
             </span>

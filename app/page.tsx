@@ -54,7 +54,7 @@ export default function Home() {
               ● deployed: {deployInfo.version} @ {deployInfo.timestamp}
             </p>
           ) : (
-            <p className="mt-1 text-red-400">● 部署信息加载中...</p>
+            <p className="mt-1 text-red-400">● データを読み込んでいます...</p>
           )}
         </footer>
       </main>
