@@ -65,7 +65,9 @@ export const WordUnit = ({
   const [isHovered, setIsHovered] = useState(false)
 
   const isHanzi = type === 'hanzi'
+  // 标点：底部对齐（与汉字脚尖齐平，槽位A空着撑高保证行高不塌）
   const isPunc = type === 'punc'
+  // 拉丁块（Wi-Fi / HSK4 / 138）：无拼音槽位，需向上对齐与汉字同基准线
   const isLatin = type === 'latin'
   const isSpace = type === 'space'
 
@@ -133,7 +135,13 @@ export const WordUnit = ({
       </div>
 
       {/* ── 槽位B: 内容层 ─────────────────────────────── */}
-      <div className="h-[32px] flex items-center px-[1px]">
+      <div
+        className={cn(
+          'h-[32px] px-[1px]',
+          // 汉字/标点：垂直居中；拉丁无拼音槽位，向上对齐基准线
+          isHanzi || isPunc ? 'flex items-center' : 'flex items-end'
+        )}
+      >
         {isHidden ? (
           <span
             className="text-2xl font-bold tracking-tighter leading-none text-amber-400"
@@ -147,7 +155,7 @@ export const WordUnit = ({
               'text-2xl font-bold leading-none',
               getContentColor(),
             )}
-            style={{ transition: 'color 0.15s ease' }}
+            style={{ transition: 'color 0.15s ease', lineHeight: isLatin ? '1' : undefined }}
           >
             {text}
           </span>

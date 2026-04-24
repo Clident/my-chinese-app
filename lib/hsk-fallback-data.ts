@@ -1629,9 +1629,25 @@ export function getDialoguesByLevel(level: HSKLevel): FallbackDialogue[] {
     default:
       return hsk12Dialogues
   }
-
-
 }
+
+// ============================================================
+// Scene Map — O(1) 查找，替代 findIndex O(n)
+// ============================================================
+
+/** 按 scene（中文）作为 key 的 Map，查找 O(1) */
+export const SCENE_MAP: ReadonlyMap<string, FallbackDialogue> = new Map([
+  ...hsk12Dialogues.map(d => [d.scene, d] as const),
+  ...hsk34Dialogues.map(d => [d.scene, d] as const),
+  ...hsk56Dialogues.map(d => [d.scene, d] as const),
+])
+
+/** 按 scene_ja（日语）作为 key 的 Map */
+export const SCENE_JA_MAP: ReadonlyMap<string, FallbackDialogue> = new Map([
+  ...hsk12Dialogues.map(d => [d.scene_ja, d] as const),
+  ...hsk34Dialogues.map(d => [d.scene_ja, d] as const),
+  ...hsk56Dialogues.map(d => [d.scene_ja, d] as const),
+])
 
 // Get a random dialogue for a specific level
 export function getRandomDialogue(level: HSKLevel): FallbackDialogue {
@@ -1640,3 +1656,23 @@ export function getRandomDialogue(level: HSKLevel): FallbackDialogue {
   const randomIndex = Math.floor(Math.random() * dialogues.length);
   return dialogues[randomIndex];
 }
+
+// ============================================================
+// 内置拼音预解（基于 lines.pinyin）
+// 用途：SentenceRenderer 可按需查表，而非每次调用 pinyin-pro
+// 格式：Record<scene, Record<lineIndex, string[]>>
+// ============================================================
+export const SCENE_PINYIN_MAP: ReadonlyMap<string, Array<string[]>> = new Map([
+  ...hsk12Dialogues.map(d => [
+    d.scene,
+    d.lines.map(l => l.pinyin.split(/\s+/).filter(Boolean))
+  ] as const),
+  ...hsk34Dialogues.map(d => [
+    d.scene,
+    d.lines.map(l => l.pinyin.split(/\s+/).filter(Boolean))
+  ] as const),
+  ...hsk56Dialogues.map(d => [
+    d.scene,
+    d.lines.map(l => l.pinyin.split(/\s+/).filter(Boolean))
+  ] as const),
+])
