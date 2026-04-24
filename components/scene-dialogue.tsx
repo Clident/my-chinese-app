@@ -216,7 +216,7 @@ export function SceneDialogue() {
 
   // 数据层清洗：确保 scene_jp 永远有日语值
   const currentDialogue = dialogue
-    ? { ...dialogue, scene_jp: dialogue.scene_jp ?? dialogue.scene }
+    ? { ...dialogue, scene_ja: dialogue.scene_ja ?? dialogue.scene }
     : null
 
   // keyVocabulary 列表
@@ -304,7 +304,7 @@ export function SceneDialogue() {
             {vocabulary.length > 0 && (
               <button
                 onClick={() => setShowVocabulary(true)}
-                title="重点词汇一览"
+                title="重要語彙一览"
                 style={{
                   display: 'flex', alignItems: 'center', gap: '4px',
                   padding: '5px 10px', borderRadius: '0.75rem',
@@ -493,7 +493,7 @@ export function SceneDialogue() {
           onClick={() => setShowVocabulary(true)}
         >
           <Library className="h-5 w-5" />
-          重点词汇一览 ({vocabulary.length})
+          重要語彙一覧 ({vocabulary.length})
         </Button>
       )}
 
