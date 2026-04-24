@@ -147,7 +147,7 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">
-                    <span className={`text-base flex-shrink-0 ${active ? 'opacity-100' : 'opacity-60'}`}>
+                    <span className={`text-base flex-shrink-0 ${isActive ? 'opacity-100' : 'opacity-60'}`}>
                       {scene.sceneEmoji}
                     </span>
                     <span className="text-sm font-medium truncate leading-tight">
