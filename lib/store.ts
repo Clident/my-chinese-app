@@ -106,6 +106,7 @@ export const useDialogueStore = create<DialogueState>()(
     }),
     {
       name: 'dialogue-store',
+      version: 1,
       partialize: (state) => ({
         revealedWordsMap: state.revealedWordsMap,
         challengeMode: state.challengeMode,

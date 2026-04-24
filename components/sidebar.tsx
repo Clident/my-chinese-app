@@ -167,8 +167,10 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
           })}
         </nav>
 
-        {/* 底部进度统计 */}
-        <div className="px-4 py-3 border-t border-slate-100">
+        {/* Gradient fade at bottom — hint scrollable */}
+        <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
+        {/* Progress stats */}
+        <div className="px-4 py-3 border-t border-slate-100 bg-white">
           <div className="flex items-center justify-between mb-1.5">
             <span className="text-xs text-slate-500">進捗</span>
             <span className="text-xs font-mono text-slate-700">
