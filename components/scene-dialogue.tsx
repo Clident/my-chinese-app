@@ -16,6 +16,7 @@ import {
   MousePointer,
   Target,
   Library,
+  Languages,
 } from 'lucide-react'
 import {
   getDialoguesByLevel,
@@ -26,12 +27,12 @@ import { useDialogueStore, getSceneRevealedSet } from '@/lib/store'
 import { useShallow } from 'zustand/react/shallow'
 
 // ============================================================
-// 拼音模式切换按钮
+// 拼音模式切换按钮（语义明确：显示 / 悬停 / 隐藏）
 // ============================================================
 const MODES: { mode: WordUnitMode; label: string; icon: React.ReactNode }[] = [
-  { mode: 'show',   label: '表示',   icon: <Eye className="h-3.5 w-3.5" /> },
-  { mode: 'hover',  label: 'ホバー', icon: <MousePointer className="h-3.5 w-3.5" /> },
-  { mode: 'hidden', label: '非表示', icon: <EyeOff className="h-3.5 w-3.5" /> },
+  { mode: 'show',   label: '拼音あり', icon: <Eye className="h-3 w-3" /> },
+  { mode: 'hover',  label: 'ホバーで', icon: <MousePointer className="h-3 w-3" /> },
+  { mode: 'hidden', label: '拼音なし', icon: <EyeOff className="h-3 w-3" /> },
 ]
 
 // ============================================================
@@ -131,6 +132,14 @@ export function SceneDialogue() {
   // 词汇面板开关
   const [showVocabulary, setShowVocabulary] = useState(false)
 
+  // 翻译开关（默认关闭 — PM反馈：默认展示太像"答案展示器"）
+  const [showTranslation, setShowTranslation] = useState(false)
+
+  // ── 切换场景时重置翻译状态 ──
+  useEffect(() => {
+    if (currentScene) setShowTranslation(false)
+  }, [currentScene])
+
   // Zustand store — challengeMode 统一管理
   const challengeMode = useDialogueStore(s => s.challengeMode)
 
@@ -218,16 +227,27 @@ export function SceneDialogue() {
     <div className="w-full max-w-md mx-auto space-y-4 pb-32" style={{ background: '#F8FAFC', minHeight: '100vh' }}>
       <Card className="shadow-sm border-none min-h-[60vh] rounded-[2.5rem]" style={{ background: '#fff' }}>
         <CardHeader className="pb-4">
-          {/* 第一层：场景标题 + 进度数字 */}
-          <div className="flex justify-between items-center pb-4 border-b border-gray-100 mb-4">
+          {/* 进度条（PM反馈：数字激励弱，需视觉化） */}
+          <div className="mb-4">
+            <div className="flex justify-between items-center text-xs text-slate-400 mb-1.5">
+              <span>{currentIndex + 1} / {localDialogues.length} シーン</span>
+              <span>{Math.round(((currentIndex + 1) / localDialogues.length) * 100)}%</span>
+            </div>
+            <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
+              <div
+                className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                style={{ width: `${((currentIndex + 1) / localDialogues.length) * 100}%` }}
+              />
+            </div>
+          </div>
+
+          {/* 场景标题 */}
+          <div className="flex justify-between items-center pb-4 border-b border-gray-100">
             <div className="flex items-center gap-3">
-              <span className="text-3xl">{dialogue?.sceneEmoji || '🗣️'}</span>
-              <h2 className="text-xl font-bold text-slate-800">
+              <span className="text-2xl">{dialogue?.sceneEmoji || '🗣️'}</span>
+              <h2 className="text-lg font-bold text-slate-800">
                 {currentDialogue?.scene_jp || currentDialogue?.scene || 'シーンを選択'}
               </h2>
-            </div>
-            <div className="text-indigo-600 font-mono font-bold tracking-tighter">
-              {currentIndex + 1} <span className="text-slate-300 mx-1">/</span> {localDialogues.length}
             </div>
           </div>
 
@@ -261,28 +281,41 @@ export function SceneDialogue() {
               ))}
             </div>
 
+            {/* 翻译开关（默认隐藏，需点击"翻訳"按钮） */}
+            <button
+              onClick={() => setShowTranslation(v => !v)}
+              title="日本語翻訳を表示/非表示"
+              style={{
+                display: 'flex', alignItems: 'center', gap: '4px',
+                padding: '5px 10px', borderRadius: '0.75rem',
+                border: showTranslation ? '1px solid #4f46e5' : '1px solid #e0e7ff',
+                cursor: 'pointer', fontSize: '11px', fontWeight: '600',
+                background: showTranslation ? '#eef2ff' : '#fff',
+                color: showTranslation ? '#4f46e5' : '#64748b',
+                boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
+                transition: 'all 0.15s',
+              }}
+            >
+              <Languages className="h-3 w-3" />
+              <span>翻訳</span>
+            </button>
+
             {/* 词汇表按钮 */}
             {vocabulary.length > 0 && (
               <button
                 onClick={() => setShowVocabulary(true)}
-                title="词汇表"
+                title="重点词汇一览"
                 style={{
-                  display: 'flex',
-                  alignItems: 'center',
-                  gap: '6px',
-                  padding: '6px 12px',
-                  borderRadius: '0.75rem',
-                  border: '1px solid #e0e7ff',
-                  cursor: 'pointer',
-                  fontSize: '12px',
-                  fontWeight: '600',
-                  background: '#eef2ff',
-                  color: '#4f46e5',
+                  display: 'flex', alignItems: 'center', gap: '4px',
+                  padding: '5px 10px', borderRadius: '0.75rem',
+                  border: '1px solid #e0e7ff', cursor: 'pointer',
+                  fontSize: '11px', fontWeight: '600',
+                  background: '#eef2ff', color: '#4f46e5',
                   boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                   transition: 'all 0.15s',
                 }}
               >
-                <Library className="h-3.5 w-3.5" />
+                <Library className="h-3 w-3" />
                 <span>語彙</span>
                 <span className="text-xs opacity-60">{vocabulary.length}</span>
               </button>
@@ -293,43 +326,31 @@ export function SceneDialogue() {
               <div className="flex items-center">
                 <button
                   onClick={toggleChallengeMode}
-                  title={challengeMode ? '挑战モード終了' : '挑戦モード'}
+                  title={challengeMode ? '終了' : '覚えてから試す'}
                   style={{
-                    display: 'flex',
-                    alignItems: 'center',
-                    gap: '6px',
-                    padding: '6px 12px',
-                    borderRadius: '0.75rem',
+                    display: 'flex', alignItems: 'center', gap: '4px',
+                    padding: '5px 10px', borderRadius: '0.75rem',
                     border: challengeMode ? '1px solid #f59e0b' : '1px solid #e5e7eb',
-                    cursor: 'pointer',
-                    fontSize: '12px',
-                    fontWeight: '600',
+                    cursor: 'pointer', fontSize: '11px', fontWeight: '600',
                     background: challengeMode ? '#fef3c7' : '#fff',
                     color: challengeMode ? '#d97706' : '#64748b',
                     boxShadow: '0 1px 2px rgba(0,0,0,0.04)',
                     transition: 'all 0.15s',
                   }}
                 >
-                  <Target className="h-3.5 w-3.5" />
-                  <span>チャレンジ</span>
+                  <Target className="h-3 w-3" />
+                  <span>{challengeMode ? '終了' : '練習'}</span>
                 </button>
                 {challengeMode && (
                   <button
                     onClick={() => sceneKey && useDialogueStore.getState().resetScene(sceneKey)}
                     title="リセット"
                     style={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      width: '28px',
-                      height: '28px',
-                      borderRadius: '0.375rem',
-                      border: '1px solid #e5e7eb',
-                      cursor: 'pointer',
-                      background: '#fff',
-                      color: '#64748b',
-                      transition: 'all 0.15s',
-                      marginLeft: '4px',
+                      display: 'flex', alignItems: 'center', justifyContent: 'center',
+                      width: '26px', height: '26px', borderRadius: '0.375rem',
+                      border: '1px solid #e5e7eb', cursor: 'pointer',
+                      background: '#fff', color: '#64748b',
+                      transition: 'all 0.15s', marginLeft: '4px',
                     }}
                   >
                     🔄
@@ -414,17 +435,20 @@ export function SceneDialogue() {
                       >🔊</button>
                     </div>
 
-                    {/* 日语翻译 */}
-                    <p style={{
-                      marginTop: '1rem',
-                      color: '#94a3b8',
-                      fontSize: '0.8rem',
-                      fontWeight: '300',
-                      borderTop: '1px solid #f1f5f9',
-                      paddingTop: '0.75rem',
-                    }}>
-                      {line.japanese}
-                    </p>
+                    {/* 日语翻译（默认隐藏，需点击"翻訳"按钮） */}
+                    {showTranslation && (
+                      <p style={{
+                        marginTop: '1rem',
+                        color: '#64748b',
+                        fontSize: '0.8rem',
+                        fontWeight: '400',
+                        borderTop: '1px solid #f1f5f9',
+                        paddingTop: '0.75rem',
+                        lineHeight: '1.6',
+                      }}>
+                        {line.japanese}
+                      </p>
+                    )}
                   </div>
                 )
               })}
@@ -436,16 +460,28 @@ export function SceneDialogue() {
       </Card>
 
       {/* 固定底部导航栏 */}
-      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/80 backdrop-blur-md border-t border-slate-200 shadow-lg z-50">
-        <div className="max-w-md mx-auto flex gap-3">
-          <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
-            onClick={goToPrev} disabled={currentIndex === 0}>
-            <ChevronLeft className="h-5 w-5" />前
-          </Button>
-          <Button variant="outline" size="lg" className="flex-1 h-14 text-base gap-2"
-            onClick={goToNext} disabled={currentIndex >= localDialogues.length - 1}>
-            次<ChevronRight className="h-5 w-5" />
-          </Button>
+      <div className="fixed bottom-0 left-0 right-0 p-4 bg-white/90 backdrop-blur-md border-t border-slate-200 shadow-lg z-50">
+        <div className="max-w-md mx-auto">
+          {/* 底部下一场景提示 */}
+          <div className="flex justify-between text-xs text-slate-400 mb-2 px-1">
+            <span>シーン {currentIndex + 1}</span>
+            <span>次へ → {currentIndex < localDialogues.length - 1 ? (localDialogues[currentIndex + 1]?.scene_jp ?? localDialogues[currentIndex + 1]?.scene) : '終了'}</span>
+          </div>
+          <div className="flex gap-3">
+            <Button variant="outline" size="lg" className="flex-1 h-12 text-sm font-medium"
+              onClick={goToPrev} disabled={currentIndex === 0}>
+              <ChevronLeft className="h-4 w-4 mr-1" />前へ
+            </Button>
+            <Button
+              variant={currentIndex >= localDialogues.length - 1 ? 'secondary' : 'default'}
+              size="lg"
+              className={`flex-1 h-12 text-sm font-medium ${currentIndex < localDialogues.length - 1 ? 'bg-indigo-600 hover:bg-indigo-700' : ''}`}
+              onClick={goToNext}
+              disabled={currentIndex >= localDialogues.length - 1}
+            >
+              {currentIndex >= localDialogues.length - 1 ? '終了' : '次へ'}<ChevronRight className="h-4 w-4 ml-1" />
+            </Button>
+          </div>
         </div>
       </div>
 
