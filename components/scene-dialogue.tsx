@@ -142,7 +142,7 @@ export function SceneDialogue() {
   }, [currentScene])
 
   // Zustand store — challengeMode 统一管理
-  const challengeMode = useDialogueStore(s => s.challengeMode)
+  const { challengeMode, failedWords, removeFailedWord, markFailedWordAsMastered, clearFailedWords } = useDialogueStore()
 
   // 当前场景 key
   const sceneKey = dialogue?.scene ?? ''
@@ -156,7 +156,12 @@ export function SceneDialogue() {
     [revealedWordsMap, sceneKey]
   )
 
-  // 切换动画状态
+  const [showFailedWords, setShowFailedWords] = useState(false)
+
+  const goToSceneFromFailed = (sceneKey: string) => {
+    setShowFailedWords(false)
+    useDialogueStore.getState().goToScene(sceneKey)
+  }
   const [isFading, setIsFading] = useState(false)
 
   // ── 加载当前级别的数据（level变化时触发）─
@@ -200,12 +205,13 @@ export function SceneDialogue() {
     }, 150)
   }, [localDialogues])
 
-  // 挑战模式：揭示单词（持久化到 Zustand）
-  const revealWord = useCallback((word: string) => {
+  // 挑战模式：揭示单词（持久化到 Zustand，含 pinyin/sceneJa 用于生词库）
+  const revealWord = useCallback((word: string, pinyin?: string) => {
     if (sceneKey) {
-      useDialogueStore.getState().revealWord(sceneKey, word)
+      const sceneJa = currentDialogue?.scene_ja ?? sceneKey
+      useDialogueStore.getState().revealWord(sceneKey, word, pinyin ?? '', sceneJa)
     }
-  }, [sceneKey])
+  }, [sceneKey, currentDialogue?.scene_ja])
 
   // 切换挑战模式时重置当前场景的揭示状态
   const toggleChallengeMode = useCallback(() => {
@@ -257,6 +263,20 @@ export function SceneDialogue() {
                 {currentDialogue?.scene_ja || currentDialogue?.scene || 'シーンを選択'}
               </h2>
             </div>
+            {/* 苦手感 List 入口 */}
+            <button
+              onClick={() => setShowFailedWords(true)}
+              className="flex items-center gap-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-600 text-xs font-medium transition-colors border border-rose-100"
+              title="苦手詞リスト"
+            >
+              <span>📑</span>
+              <span>苦手詞</span>
+              {failedWords.length > 0 && (
+                <span className="bg-rose-500 text-white text-[10px] font-bold rounded-full w-4 h-4 flex items-center justify-center">
+                  {failedWords.length > 99 ? '99+' : failedWords.length}
+                </span>
+              )}
+            </button>
           </div>
 
           {/* 第二层：功能按钮组 */}
@@ -513,6 +533,116 @@ export function SceneDialogue() {
           vocabulary={vocabulary}
           onClose={() => setShowVocabulary(false)}
         />
+      )}
+
+      {/* 苦手感 List Modal */}
+      {showFailedWords && (
+        <div
+          className="fixed inset-0 z-50 flex items-start justify-center pt-8 px-4"
+          style={{ background: 'rgba(0,0,0,0.45)' }}
+          onClick={(e) => { if (e.target === e.currentTarget) setShowFailedWords(false) }}
+        >
+          <div
+            className="w-full max-w-lg bg-white rounded-3xl shadow-2xl overflow-hidden"
+            style={{ maxHeight: 'calc(100vh - 80px)' }}
+          >
+            {/* Header */}
+            <div className="flex items-center justify-between px-5 py-4 border-b border-slate-100 bg-rose-50">
+              <div className="flex items-center gap-2">
+                <span className="text-xl">📑</span>
+                <h3 className="text-base font-bold text-slate-800">苦手詞リスト</h3>
+                <span className="text-xs text-rose-400 font-medium">
+                  {failedWords.length}件
+                </span>
+              </div>
+              <div className="flex items-center gap-2">
+                {failedWords.length > 0 && (
+                  <button
+                    onClick={clearFailedWords}
+                    className="text-xs text-slate-400 hover:text-slate-600 underline"
+                  >
+                    全消去
+                  </button>
+                )}
+                <button
+                  onClick={() => setShowFailedWords(false)}
+                  className="p-1.5 rounded-xl hover:bg-rose-100 text-slate-400"
+                >
+                  <X className="h-5 w-5" />
+                </button>
+              </div>
+            </div>
+
+            {/* Body */}
+            <div className="overflow-y-auto" style={{ maxHeight: 'calc(100vh - 160px)' }}>
+              {failedWords.length === 0 ? (
+                <div className="flex flex-col items-center justify-center py-16 text-slate-400">
+                  <div className="text-4xl mb-3">🎯</div>
+                  <p className="text-sm">まだ苦手词がありません</p>
+                  <p className="text-xs mt-1">練習モードで単語をタップして追加</p>
+                </div>
+              ) : (
+                <ul className="divide-y divide-slate-100">
+                  {failedWords.map((fw, i) => (
+                    <li key={`${fw.sceneKey}-${fw.word}-${i}`} className="flex items-center gap-3 px-5 py-3.5 hover:bg-slate-50 transition-colors group">
+                      {/* 序号 */}
+                      <span className="text-xs text-slate-300 w-4 flex-shrink-0">{i + 1}</span>
+
+                      {/* 词条主体 */}
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-baseline gap-2">
+                          <span className={`text-base font-bold ${fw.mastered ? 'text-green-600 line-through opacity-60' : 'text-slate-800'}`}>
+                            {fw.word}
+                          </span>
+                          <span className="text-xs text-slate-400 font-mono">{fw.pinyin}</span>
+                        </div>
+                        <div className="text-xs text-slate-400 mt-0.5 truncate">
+                          {fw.sceneJa}
+                        </div>
+                      </div>
+
+                      {/* 操作按钮 */}
+                      <div className="flex items-center gap-1.5 flex-shrink-0">
+                        {/* 跳转到场景 */}
+                        <button
+                          onClick={() => goToSceneFromFailed(fw.sceneKey)}
+                          className="p-1.5 rounded-lg text-slate-300 hover:bg-indigo-50 hover:text-indigo-500 transition-colors"
+                          title={`「${fw.sceneJa}」に戻る`}
+                        >
+                          <Target className="h-3.5 w-3.5" />
+                        </button>
+
+                        {/* 标记为已掌握 */}
+                        <button
+                          onClick={() => markFailedWordAsMastered(fw.word, fw.sceneKey)}
+                          className={`p-1.5 rounded-lg transition-colors ${
+                            fw.mastered
+                              ? 'text-green-500 bg-green-50'
+                              : 'text-slate-300 hover:bg-green-50 hover:text-green-500'
+                          }`}
+                          title={fw.mastered ? '既に掌握済み' : '掌握済みにする'}
+                        >
+                          <svg className="h-3.5 w-3.5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M5 13l4 4L19 7" />
+                          </svg>
+                        </button>
+
+                        {/* 删除 */}
+                        <button
+                          onClick={() => removeFailedWord(fw.word, fw.sceneKey)}
+                          className="p-1.5 rounded-lg text-slate-300 hover:bg-red-50 hover:text-red-400 transition-colors opacity-0 group-hover:opacity-100"
+                          title="削除"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    </li>
+                  ))}
+                </ul>
+              )}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   )

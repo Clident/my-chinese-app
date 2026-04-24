@@ -37,7 +37,8 @@ export interface WordUnitProps {
   challengeState?: ChallengeState
   /** 是否在关键词列表中 */
   isKeyword?: boolean
-  onReveal?: () => void
+  /** 揭示回调：返回 word + pinyin（用于追加到生词库） */
+  onReveal?: (word: string, pinyin?: string) => void
 }
 
 // ============================================================
@@ -93,7 +94,7 @@ export const WordUnit = ({
     return 'text-slate-900'
   }
 
-  const handleClick = isHidden && onReveal ? onReveal : undefined
+  const handleClick = isHidden && onReveal ? () => onReveal(token.text, token.pinyin) : undefined
 
   // ============================================================
   // 空格：最小化渲染

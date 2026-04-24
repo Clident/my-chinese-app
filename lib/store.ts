@@ -13,12 +13,25 @@ const LEVEL_SCENES: Record<HSKLevel, string> = {
 }
 
 // ============================================================
+// 苦手感词条结构
+// ============================================================
+export interface FailedWord {
+  word: string          // 汉字词组（原文）
+  pinyin: string        // 拼音（含声调符号）
+  sceneKey: string      // 场景 key（中文 scene 名）
+  sceneJa: string       // 场景日语名（展示用）
+  timestamp: number     // 揭示时间戳（ms）
+  mastered: boolean     // 是否标记为已掌握
+}
+
+// ============================================================
 // DialogueStore — 原子化状态管理
 //
 // 解决的问题：
 // 1. 揭示状态跨场景持久化（用户切到便利店再回来，进度不丢）
 // 2. challengeMode 开关统一管理（不再散落在 SentenceRenderer 里）
 // 3. navigation 状态集中化（level + scene，sidebar/主内容区共享）
+// 4. 苦手感词收集持久化（凡被揭示的，必是难点）
 // ============================================================
 
 export type HSKLevel = 'HSK1-2' | 'HSK3-4' | 'HSK5-6'
@@ -26,11 +39,14 @@ export type HSKLevel = 'HSK1-2' | 'HSK3-4' | 'HSK5-6'
 interface DialogueState {
   // ── Navigation 状态 ──
   hskLevel: HSKLevel
-  currentScene: string | null   // 当前场景名（dialogue.scene，日语，唯一key）
+  currentScene: string | null
 
   // ── Challenge 状态 ──
   challengeMode: boolean
-  revealedWordsMap: Record<string, string[]>  // scene → [revealed words]
+  revealedWordsMap: Record<string, string[]>
+
+  // ── 苦手感词（生词库）状态 ──
+  failedWords: FailedWord[]
 
   // ── Actions ──
   setHskLevel: (level: HSKLevel) => void
@@ -39,8 +55,14 @@ interface DialogueState {
   goToNextScene: (scenes: string[]) => void
 
   toggleChallengeMode: () => void
-  revealWord: (sceneKey: string, word: string) => void
+  revealWord: (sceneKey: string, word: string, pinyin: string, sceneJa: string) => void
   resetScene: (sceneKey: string) => void
+
+  // ── 苦手感词 Actions ──
+  addFailedWord: (entry: Omit<FailedWord, 'mastered'>) => void
+  removeFailedWord: (word: string, sceneKey: string) => void
+  markFailedWordAsMastered: (word: string, sceneKey: string) => void
+  clearFailedWords: () => void
 }
 
 export const useDialogueStore = create<DialogueState>()(
@@ -53,6 +75,9 @@ export const useDialogueStore = create<DialogueState>()(
       // ── Challenge ──
       challengeMode: false,
       revealedWordsMap: {},
+
+      // ── 苦手感词 ──
+      failedWords: [],
 
       // ── Navigation Actions ──
       setHskLevel: (level) => {
@@ -85,7 +110,7 @@ export const useDialogueStore = create<DialogueState>()(
         set((state) => ({ challengeMode: !state.challengeMode }))
       },
 
-      revealWord: (sceneKey, word) => {
+      revealWord: (sceneKey, word, pinyin, sceneJa) => {
         set((state) => {
           const current = state.revealedWordsMap[sceneKey] ?? []
           if (current.includes(word)) return state
@@ -94,6 +119,15 @@ export const useDialogueStore = create<DialogueState>()(
               ...state.revealedWordsMap,
               [sceneKey]: [...current, word],
             },
+            // 同时记录到苦手感 list
+            failedWords: state.failedWords.some(
+              (fw) => fw.word === word && fw.sceneKey === sceneKey
+            )
+              ? state.failedWords
+              : [
+                  ...state.failedWords,
+                  { word, pinyin, sceneKey, sceneJa, timestamp: Date.now(), mastered: false },
+                ],
           }
         })
       },
@@ -103,14 +137,43 @@ export const useDialogueStore = create<DialogueState>()(
           revealedWordsMap: { ...state.revealedWordsMap, [sceneKey]: [] },
         }))
       },
+
+      // ── 苦手感词 Actions ──
+      addFailedWord: (entry) => {
+        set((state) => {
+          if (state.failedWords.some((fw) => fw.word === entry.word && fw.sceneKey === entry.sceneKey)) {
+            return state
+          }
+          return { failedWords: [...state.failedWords, { ...entry, mastered: false }] }
+        })
+      },
+
+      removeFailedWord: (word, sceneKey) => {
+        set((state) => ({
+          failedWords: state.failedWords.filter((fw) => !(fw.word === word && fw.sceneKey === sceneKey)),
+        }))
+      },
+
+      markFailedWordAsMastered: (word, sceneKey) => {
+        set((state) => ({
+          failedWords: state.failedWords.map((fw) =>
+            fw.word === word && fw.sceneKey === sceneKey ? { ...fw, mastered: true } : fw
+          ),
+        }))
+      },
+
+      clearFailedWords: () => {
+        set({ failedWords: [] })
+      },
     }),
     {
       name: 'dialogue-store',
-      version: 1,
+      version: 2,
       partialize: (state) => ({
         revealedWordsMap: state.revealedWordsMap,
         challengeMode: state.challengeMode,
         hskLevel: state.hskLevel,
+        failedWords: state.failedWords,
         // currentScene 不持久化（纯导航状态）
       }),
     }

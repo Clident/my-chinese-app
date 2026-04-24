@@ -23,8 +23,8 @@ export interface SentenceRendererProps {
   revealedWords?: Set<string>
   /** 是否启用挑战模式 */
   challengeMode?: boolean
-  /** 关键词揭示回调 */
-  onWordReveal?: (word: string) => void
+  /** 关键词揭示回调：返回 word + pinyin */
+  onWordReveal?: (word: string, pinyin?: string) => void
   /** hover 模式下的 hovered index（外部控制，支持多 token 同时 hover） */
   hoveredIndex?: number
 }
@@ -98,7 +98,7 @@ export const SentenceRenderer = ({
             mode={effectiveMode}
             challengeState={challengeState}
             isKeyword={isKeyword}
-            onReveal={isKeyword && word && onWordReveal ? () => onWordReveal(word) : undefined}
+            onReveal={isKeyword && word && onWordReveal ? (w, p) => onWordReveal(w, p) : undefined}
           />
         )
       })}
