@@ -1,5 +1,16 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
+import {
+  hsk12Dialogues,
+  hsk34Dialogues,
+  hsk56Dialogues,
+} from '@/lib/hsk-fallback-data'
+
+const LEVEL_SCENES: Record<HSKLevel, string> = {
+  'HSK1-2': hsk12Dialogues[0]?.scene ?? null,
+  'HSK3-4': hsk34Dialogues[0]?.scene ?? null,
+  'HSK5-6': hsk56Dialogues[0]?.scene ?? null,
+}
 
 // ============================================================
 // DialogueStore — 原子化状态管理
@@ -45,7 +56,8 @@ export const useDialogueStore = create<DialogueState>()(
 
       // ── Navigation Actions ──
       setHskLevel: (level) => {
-        set({ hskLevel: level, currentScene: null })
+        const firstScene = LEVEL_SCENES[level]
+        set({ hskLevel: level, currentScene: firstScene })
       },
 
       goToScene: (scene) => {

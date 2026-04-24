@@ -60,7 +60,7 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
       {/* 移动端遮罩 */}
       {open && (
         <div
-          className="fixed inset-0 bg-black/30 z-30 md:hidden"
+          className="fixed inset-0 bg-black/20 backdrop-blur-sm z-30 md:hidden"
           onClick={onClose}
         />
       )}
