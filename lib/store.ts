@@ -47,6 +47,7 @@ interface DialogueState {
 
   // ── 苦手感词（生词库）状态 ──
   failedWords: FailedWord[]
+  showFailedWords: boolean   // ← 生词库 Modal 开关
 
   // ── Actions ──
   setHskLevel: (level: HSKLevel) => void
@@ -63,6 +64,7 @@ interface DialogueState {
   removeFailedWord: (word: string, sceneKey: string) => void
   markFailedWordAsMastered: (word: string, sceneKey: string) => void
   clearFailedWords: () => void
+  toggleShowFailedWords: () => void
 }
 
 export const useDialogueStore = create<DialogueState>()(
@@ -78,6 +80,7 @@ export const useDialogueStore = create<DialogueState>()(
 
       // ── 苦手感词 ──
       failedWords: [],
+      showFailedWords: false,
 
       // ── Navigation Actions ──
       setHskLevel: (level) => {
@@ -165,6 +168,10 @@ export const useDialogueStore = create<DialogueState>()(
       clearFailedWords: () => {
         set({ failedWords: [] })
       },
+
+      toggleShowFailedWords: () => {
+        set((state) => ({ showFailedWords: !state.showFailedWords }))
+      },
     }),
     {
       name: 'dialogue-store',
@@ -174,7 +181,7 @@ export const useDialogueStore = create<DialogueState>()(
         challengeMode: state.challengeMode,
         hskLevel: state.hskLevel,
         failedWords: state.failedWords,
-        // currentScene 不持久化（纯导航状态）
+        // currentScene / showFailedWords 不持久化（纯 UI 状态）
       }),
     }
   )

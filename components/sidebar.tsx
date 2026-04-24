@@ -31,8 +31,10 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
     hskLevel,
     currentScene,
     revealedWordsMap,
+    failedWords,
     setHskLevel,
     goToScene,
+    toggleShowFailedWords,
   } = useDialogueStore();
 
   const scenes = getDialoguesByLevel(hskLevel);
@@ -51,8 +53,9 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
   };
 
   const totalScenes = scenes.length;
+  // 完成 = 该场景有 mastered 的词
   const completedScenes = scenes.filter(
-    (s) => (revealedWordsMap[s.scene] ?? []).length > 0
+    (s) => failedWords.some((w) => w.sceneKey === s.scene && w.mastered)
   ).length;
 
   return (
@@ -94,6 +97,19 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
 
         {/* 级别切换器 */}
         <div className="p-3 space-y-1">
+          {/* 苦手词按钮 */}
+          {failedWords.length > 0 && (
+            <button
+              onClick={toggleShowFailedWords}
+              className="w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium bg-rose-50 text-rose-600 hover:bg-rose-100 transition-all"
+            >
+              <span>❤️ 苦手詞</span>
+              <span className="text-xs bg-rose-200 text-rose-700 px-1.5 py-0.5 rounded-full">
+                {failedWords.filter((w) => !w.mastered).length}
+              </span>
+            </button>
+          )}
+
           {LEVELS.map((l) => (
             <button
               key={l.id}
@@ -120,7 +136,17 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
         <nav ref={navRef} className="sidebar-scroll flex-1 overflow-y-auto p-2 space-y-0.5">
           {scenes.map((scene) => {
             const isActive = currentScene === scene.scene;
-            const isRead = (revealedWordsMap[scene.scene] ?? []).length > 0;
+            const revealedCount = (revealedWordsMap[scene.scene] ?? []).length;
+            // 三态完成度
+            const masteredCount = failedWords.filter(
+              (w) => w.sceneKey === scene.scene && w.mastered
+            ).length;
+            const status =
+              masteredCount > 0 && masteredCount === revealedCount && revealedCount > 0
+                ? "mastered"   // 全部掌握 → 金牌
+                : revealedCount > 0
+                ? "read"       // 已读（部分掌握）→ 绿勾
+                : "unread";   // 未读 → 灰点
 
             return (
               <button
@@ -136,14 +162,16 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
                   }
                 `}
               >
-                {/* 已读状态指示点 */}
-                <span className={`
-                  w-1.5 h-1.5 rounded-full flex-shrink-0 mt-0.5
-                  ${isRead
-                    ? isActive ? "bg-indigo-300" : "bg-green-500"
-                    : isActive ? "bg-indigo-400" : "bg-slate-300"
-                  }
-                `} />
+                {/* 完成度状态图标 */}
+                <span className="w-4 h-4 flex-shrink-0 flex items-center justify-center">
+                  {status === "mastered" ? (
+                    <span className="text-yellow-400 text-sm leading-none drop-shadow-sm" title="全掌握">★</span>
+                  ) : status === "read" ? (
+                    <span className="text-green-500 text-xs leading-none">✓</span>
+                  ) : (
+                    <span className="w-1.5 h-1.5 rounded-full bg-slate-300 flex-shrink-0" />
+                  )}
+                </span>
 
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-1.5">

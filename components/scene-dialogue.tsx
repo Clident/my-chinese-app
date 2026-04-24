@@ -26,6 +26,7 @@ import {
 import { useDialogueStore, getSceneRevealedSet } from '@/lib/store'
 import { useShallow } from 'zustand/react/shallow'
 import { getSpeakerJa } from '@/lib/constants'
+import { FailedWordsModal } from '@/components/failed-words-modal'
 
 // ============================================================
 // 拼音模式切换按钮（语义明确：显示 / 悬停 / 隐藏）
@@ -644,6 +645,8 @@ export function SceneDialogue() {
           </div>
         </div>
       )}
+      {/* 苦手感リスト Modal */}
+      <FailedWordsModal />
     </div>
   )
 }
