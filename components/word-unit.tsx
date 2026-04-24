@@ -121,9 +121,9 @@ export const WordUnit = ({
         {isHanzi && (
           <span
             className={cn(
-              'text-[10px] font-sans uppercase tracking-tighter',
+              'text-[10px] font-sans uppercase tracking-normal',
               pinyinColor,
-              !showPinyin && 'invisible',
+              !showPinyin && 'opacity-0',
             )}
             style={{ transition: 'color 0.15s ease, opacity 0.15s ease' }}
           >
