@@ -163,6 +163,17 @@ export async function POST(request: Request) {
   return Response.json({ ...getRandomDialogue(level), isFallback: true })
 }
 
+// ================================================================
+// GET — 前端 footer 探测部署信息
+// ================================================================
+export async function GET() {
+  return Response.json({
+    version: process.env.GIT_REV || 'dev',
+    timestamp: new Date().toISOString(),
+    status: 'ok',
+  })
+}
+
 // ── 辅助：提取 Retry-After 秒数 ──────────────────────────────
 function extractRetryAfter(msg: string): number {
   const m = msg.match(/(\d+(?:\.\d+)?)\s*(?:s|seconds?)/i)
