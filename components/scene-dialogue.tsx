@@ -235,7 +235,7 @@ export function SceneDialogue() {
             </div>
             <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
               <div
-                className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+                className="h-full bg-indigo-500 transition-all duration-300"
                 style={{ width: `${((currentIndex + 1) / localDialogues.length) * 100}%` }}
               />
             </div>
@@ -396,7 +396,7 @@ export function SceneDialogue() {
                     </span>
 
                     {/* 对话主体：RubyLine + 朗读按钮 */}
-                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', overflow: 'visible' }}>
+                    <div style={{ display: 'flex', alignItems: 'flex-end', gap: '0.5rem', overflow: 'visible', flexShrink: 1, minWidth: 0, wordBreak: 'break-word' }}>
                       <SentenceRenderer
                         text={line.chinese}
                         mode={pinyinMode}

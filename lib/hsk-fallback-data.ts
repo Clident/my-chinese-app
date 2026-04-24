@@ -124,7 +124,7 @@ export const hsk12Dialogues: FallbackDialogue[] = [
   },
   {
     scene: '天気',
-    scene_ja: '天気',
+    scene_ja: '天気について',
     sceneEmoji: '🌤️',
     lines: [
       { speaker: 'A', chinese: '今天天气怎么样？', pinyin: 'Jī n tiā n tiā n qì zě nme yà ng ?', japanese: '今日の天気はどうですか？' },
