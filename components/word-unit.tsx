@@ -1,19 +1,10 @@
-import React from 'react'
+import React, { useState } from 'react'
 import { Token } from '../lib/tokenizer'
 import { cn } from '../lib/utils'
 
 // ============================================================
-// 声调颜色（与现有 TONE_COLOR 一致，莫兰迪高级色系）
+// 声调颜色（已废弃，保留函数定义避免 import 报错）
 // ============================================================
-export const TONE_COLORS: Record<number, string> = {
-  1: 'text-red-500',    // 一声 ā - rose
-  2: 'text-green-600',  // 二声 á - emerald
-  3: 'text-indigo-600', // 三声 ǎ - indigo
-  4: 'text-amber-600',  // 四声 à - amber
-  0: 'text-slate-400',  // 轻声/非汉字
-}
-
-// 声调字符映射（支持所有元音的声调变体）
 const TONE_MAP: Record<string, number> = {
   'ā': 1, 'ē': 1, 'ī': 1, 'ō': 1, 'ū': 1, 'ǖ': 1,
   'á': 2, 'é': 2, 'í': 2, 'ó': 2, 'ú': 2, 'ǘ': 2,
@@ -21,13 +12,11 @@ const TONE_MAP: Record<string, number> = {
   'à': 4, 'è': 4, 'ì': 4, 'ò': 4, 'ù': 4, 'ǜ': 4,
 }
 
-/** 从带声调符号的拼音中解析声调数字（1-4），找不到返回 0 */
-export function getToneFromPinyin(pinyinStr?: string): number {
+function getToneFromPinyin(pinyinStr?: string): number {
   if (!pinyinStr) return 0
   for (const k of Object.keys(TONE_MAP)) {
     if (pinyinStr.includes(k)) return TONE_MAP[k]
   }
-  // 数字后缀模式 (ni3)
   const m = pinyinStr.match(/(\d)$/)
   if (m) {
     const n = parseInt(m[1])
@@ -46,17 +35,24 @@ export interface WordUnitProps {
   token: Token
   mode: WordUnitMode
   challengeState?: ChallengeState
-  /** 是否在关键词列表中（用于下划线高亮） */
+  /** 是否在关键词列表中 */
   isKeyword?: boolean
   onReveal?: () => void
 }
 
 // ============================================================
 // WordUnit — 三层槽位渲染器
-// 
+//
 // 槽位A (14px): 拼音层 — 汉字显示拼音，标点/拉丁留空（保证高度不塌）
 // 槽位B (32px): 内容层 — 汉字/拉丁/标点统一渲染，挑战模式显示____
 // 槽位C (4px):  装饰层 — 挑战模式下划线（揭示前金色，已揭示蓝色）
+//
+// 颜色策略：
+//   - 默认：全部黑色
+//   - Hover：当前字蓝色高亮 + 显示拼音
+//   - 揭示后：蓝色
+//   - 标点：灰色淡化
+//   - 拉丁：灰色等宽
 // ============================================================
 export const WordUnit = ({
   token,
@@ -66,113 +62,106 @@ export const WordUnit = ({
   onReveal,
 }: WordUnitProps) => {
   const { type, text, pinyin } = token
-  const tone = getToneFromPinyin(pinyin)
-  const toneColor = TONE_COLORS[tone] || TONE_COLORS[0]
+  const [isHovered, setIsHovered] = useState(false)
 
   const isHanzi = type === 'hanzi'
   const isPunc = type === 'punc'
   const isLatin = type === 'latin'
   const isSpace = type === 'space'
 
-  // --- 挑战模式状态 ---
+  // 挑战模式
   const isChallengeMode = mode === 'challenge' || mode === 'hidden'
   const isHidden = isChallengeMode && challengeState === 'hidden' && isHanzi && isKeyword
   const isRevealed = isChallengeMode && challengeState === 'revealed' && isHanzi && isKeyword
 
-  // --- 拼音可见性 ---
-  // show模式: always show | hover模式: show when hovered | hidden模式: always hide
+  // 拼音可见性：show始终显示，hover且hover时显示，challenge且已揭示时显示
   const showPinyin = mode === 'show'
-    || (mode === 'hover' && false) // hover由父组件控制，这里简化为show
-    || (mode === 'hidden' && false)
+    || (mode === 'hover' && isHovered)
     || (mode === 'challenge' && isRevealed)
-  const pinyinColor = isHidden ? 'text-slate-500' : 'text-slate-400'
+  const pinyinColor = isHidden ? 'text-slate-500' : isHovered ? 'text-blue-400' : 'text-slate-300'
 
-  // --- 点击交互 ---
+  // 内容颜色：揭示蓝色，hover高亮蓝色，标点灰色，拉丁灰色
+  const getContentColor = () => {
+    if (isHidden) return '' // ____ 有自己的颜色
+    if (isRevealed) return 'text-blue-500'
+    if (isHovered && isHanzi) return 'text-blue-500'
+    if (isPunc) return 'text-slate-300'
+    if (isLatin) return 'text-slate-500'
+    if (isHanzi) return 'text-slate-900' // 默认黑色
+    return 'text-slate-900'
+  }
+
   const handleClick = isHidden && onReveal ? onReveal : undefined
 
   // ============================================================
-  // 空格：最小化渲染，不占显著高度
+  // 空格：最小化渲染
   // ============================================================
   if (isSpace) {
-    return (
-      <span className="w-1 h-[50px]" aria-hidden="true" />
-    )
+    return <span className="w-1 h-[50px]" aria-hidden="true" />
   }
 
   // ============================================================
   // 三层槽位 Grid Container
-  // gap-y-1 = 4px，加上 row heights: 14 + 32 + 4 = 50px 总高
   // ============================================================
   return (
     <div
       className={cn(
         'grid justify-items-center items-end select-none',
-        'gap-y-1', // 4px between rows
+        'gap-y-1',
         isHidden ? 'cursor-pointer' : 'cursor-default',
+        // hover 高亮：整格可 hover，transition 用在子元素
       )}
-      style={{
-        gridTemplateRows: '14px 32px 4px',
-        width: 'auto',
-        minWidth: '1.5rem',
-      }}
+      style={{ gridTemplateRows: '14px 32px 4px', minWidth: '1.5rem' }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
       onClick={handleClick}
     >
       {/* ── 槽位A: 拼音层 ─────────────────────────────── */}
-      {/* 无论什么 Token 都渲染这个 div，保证 14px 高度 */}
-      <div
-        className="h-[14px] flex items-end overflow-visible whitespace-nowrap leading-none"
-        style={{}}
-      >
+      <div className="h-[14px] flex items-end overflow-visible whitespace-nowrap leading-none">
         {isHanzi && (
           <span
             className={cn(
               'text-[10px] font-sans uppercase tracking-tighter',
               pinyinColor,
-              !showPinyin && 'invisible', // 隐藏时占位不塌
+              !showPinyin && 'invisible',
             )}
-            style={{ transition: 'opacity 0.15s ease' }}
+            style={{ transition: 'color 0.15s ease, opacity 0.15s ease' }}
           >
             {pinyin || ''}
           </span>
         )}
-        {/* 非汉字：空着，高度由 div 本身撑起，标点基准线自然对齐汉字底部 */}
       </div>
 
       {/* ── 槽位B: 内容层 ─────────────────────────────── */}
-      <div
-        className="h-[32px] flex items-center px-[1px]"
-      >
+      <div className="h-[32px] flex items-center px-[1px]">
         {isHidden ? (
-          // 挑战模式未揭示：金色____
-          <span className="text-2xl font-bold text-amber-400 tracking-tighter leading-none">
+          <span
+            className="text-2xl font-bold tracking-tighter leading-none text-amber-400"
+            style={{ transition: 'color 0.2s ease' }}
+          >
             ____
           </span>
         ) : (
           <span
             className={cn(
-              'text-2xl font-bold leading-none transition-colors',
-              // 默认颜色
-              isHanzi && toneColor,
-              // 标点淡化
-              isPunc && 'text-slate-300 font-normal',
-              // 拉丁字符自适应缩小
-              isLatin && 'text-base font-semibold font-mono tracking-normal text-slate-600',
-              // 揭示后蓝色
-              isRevealed && 'text-blue-500',
+              'text-2xl font-bold leading-none',
+              getContentColor(),
             )}
+            style={{ transition: 'color 0.15s ease' }}
           >
             {text}
           </span>
         )}
       </div>
 
-      {/* ── 槽位C: 装饰层 ─────────────────────────────── */}
+      {/* ── 槽位C: 装饰层（挑战模式下划线）────────────── */}
       <div className="w-full flex justify-center px-0.5 h-[4px]">
         {isChallengeMode && isHanzi && isKeyword && (
           <div
             className={cn(
-              'h-[2px] w-full rounded-full transition-all duration-300',
+              'h-[2px] w-full rounded-full',
               isRevealed ? 'bg-blue-300' : 'bg-amber-200',
+              'transition-all duration-300',
             )}
           />
         )}
