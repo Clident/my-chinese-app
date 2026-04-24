@@ -1,6 +1,6 @@
 'use client'
 
-import { useState, useEffect, useCallback } from 'react'
+import { useState, useEffect, useCallback, useMemo } from 'react'
 import { Card, CardContent, CardHeader } from '@/components/ui/card'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
@@ -23,6 +23,7 @@ import {
   type FallbackDialogue,
 } from '@/lib/hsk-fallback-data'
 import { useDialogueStore, getSceneRevealedSet } from '@/lib/store'
+import { useShallow } from 'zustand/react/shallow'
 
 interface DialogueData extends FallbackDialogue {
   isAIGenerated?: boolean
@@ -51,16 +52,21 @@ export function SceneDialogue() {
   // 拼音显示模式
   const [pinyinMode, setPinyinMode] = useState<WordUnitMode>('show')
 
-  // Zustand store — challengeMode + revealedWords 统一管理
   // Zustand store — challengeMode 统一管理
   const challengeMode = useDialogueStore(s => s.challengeMode)
 
   // 当前场景 key（用 dialogue.state 而不是 currentDialogue computed）
   const sceneKey = dialogue?.scene ?? ''
 
-  // Zustand derived: 当前场景的揭示 Set
-  const revealedWordsSet = useDialogueStore(
-    getSceneRevealedSet(sceneKey)
+  // Zustand derived: 用 useShallow 稳定引用，再在组件内用 useMemo 转 Set
+  // ❌ 旧写法: useDialogueStore(getSceneRevealedSet(sceneKey))
+  //    → 每次 render 都创建新函数，Zustand 误判为新订阅 → 无限重渲染 → Error #185
+  const revealedWordsMap = useDialogueStore(
+    useShallow(s => getSceneRevealedSet(sceneKey)(s))
+  )
+  const revealedWordsSet = useMemo(
+    () => new Set(revealedWordsMap?.[sceneKey] ?? []),
+    [revealedWordsMap, sceneKey]
   )
 
   // 解说面板（整体）

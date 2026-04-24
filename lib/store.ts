@@ -108,6 +108,12 @@ export const useDialogueStore = create<DialogueState>()(
 // Selectors
 // ============================================================
 
-/** 获取当前场景的揭示 Set */
-export const getSceneRevealedSet = (sceneKey: string) => (state: DialogueState) =>
-  new Set(state.revealedWordsMap[sceneKey] ?? [])
+/**
+ * 永远返回稳定引用，Zustand 会比较 selector 返回值的引用
+ * → 因为每次都是新 Set {}，比较永远不相等 → 无限重渲染
+ *
+ * ✅ 正确用法：read revealedWordsMap[sceneKey] 数组（引用稳定），
+ *    在组件内用 useMemo 转为 Set。
+ */
+export const getSceneRevealedSet = (_sceneKey: string) => (state: DialogueState) =>
+  state.revealedWordsMap
