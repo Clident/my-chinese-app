@@ -177,3 +177,12 @@ rt {
 .t3 { color: #4f46e5 !important; } /* Indigo-600 */
 .t4 { color: #d97706 !important; } /* Amber-600 */
 .t0 { color: #9ca3af !important; } /* 轻声/未识别 */
+
+/* Sidebar: hide native scrollbar */
+.sidebar-scroll {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE/Edge */
+}
+.sidebar-scroll::-webkit-scrollbar {
+  display: none; /* Chrome/Safari */
+}

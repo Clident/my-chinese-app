@@ -117,7 +117,7 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
         <div className="mx-3 border-t border-slate-100" />
 
         {/* 场景列表 */}
-        <nav ref={navRef} className="flex-1 overflow-y-auto p-2 space-y-0.5">
+        <nav ref={navRef} className="sidebar-scroll flex-1 overflow-y-auto p-2 space-y-0.5">
           {scenes.map((scene) => {
             const isActive = currentScene === scene.scene;
             const isRead = (revealedWordsMap[scene.scene] ?? []).length > 0;
