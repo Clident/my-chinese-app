@@ -6,11 +6,13 @@ import {
   hsk56Dialogues,
 } from '@/lib/hsk-fallback-data'
 
-const LEVEL_SCENES: Record<HSKLevel, string> = {
+// lazy getter — avoids Turbopack module-eval-order issue
+// (Turbopack SSR prerender sometimes accesses module before it's fully initialized)
+const LEVEL_SCENES = (): Record<HSKLevel, string> => ({
   'HSK1-2': hsk12Dialogues[0]?.scene ?? null,
   'HSK3-4': hsk34Dialogues[0]?.scene ?? null,
   'HSK5-6': hsk56Dialogues[0]?.scene ?? null,
-}
+})
 
 // ============================================================
 // 苦手感词条结构
@@ -84,7 +86,7 @@ export const useDialogueStore = create<DialogueState>()(
 
       // ── Navigation Actions ──
       setHskLevel: (level) => {
-        const firstScene = LEVEL_SCENES[level]
+        const firstScene = LEVEL_SCENES()[level]
         set({ hskLevel: level, currentScene: firstScene })
       },
 

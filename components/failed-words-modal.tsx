@@ -1,21 +1,28 @@
 "use client";
 
 import { useDialogueStore } from "@/lib/store";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 
 export function FailedWordsModal() {
   const { showFailedWords, toggleShowFailedWords, failedWords, markFailedWordAsMastered, removeFailedWord, clearFailedWords } =
     useDialogueStore();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
-  // ESC 关闭
+  // ESC 关闭 + 清除确认框
   useEffect(() => {
     if (!showFailedWords) return;
     const handler = (e: KeyboardEvent) => {
-      if (e.key === "Escape") toggleShowFailedWords();
+      if (e.key === "Escape") {
+        if (showClearConfirm) {
+          setShowClearConfirm(false);
+        } else {
+          toggleShowFailedWords();
+        }
+      }
     };
     document.addEventListener("keydown", handler);
     return () => document.removeEventListener("keydown", handler);
-  }, [showFailedWords, toggleShowFailedWords]);
+  }, [showFailedWords, toggleShowFailedWords, showClearConfirm]);
 
   if (!showFailedWords) return null;
 
@@ -43,13 +50,30 @@ export function FailedWordsModal() {
             </p>
           </div>
           <div className="flex items-center gap-2">
-            {failedWords.length > 0 && (
+            {failedWords.length > 0 && !showClearConfirm && (
               <button
-                onClick={clearFailedWords}
+                onClick={() => setShowClearConfirm(true)}
                 className="text-xs text-slate-400 hover:text-red-500 transition-colors px-2 py-1 rounded-lg hover:bg-red-50"
               >
                 全削除
               </button>
+            )}
+            {showClearConfirm && (
+              <div className="flex items-center gap-1.5">
+                <span className="text-xs text-red-500 font-medium">本当に削除しますか？</span>
+                <button
+                  onClick={() => { clearFailedWords(); setShowClearConfirm(false); }}
+                  className="text-xs px-2 py-1 rounded-lg bg-red-500 text-white hover:bg-red-600 transition-colors font-medium"
+                >
+                  はい
+                </button>
+                <button
+                  onClick={() => setShowClearConfirm(false)}
+                  className="text-xs px-2 py-1 rounded-lg bg-slate-100 text-slate-500 hover:bg-slate-200 transition-colors"
+                >
+                  いいえ
+                </button>
+              </div>
             )}
             <button
               onClick={toggleShowFailedWords}
@@ -65,10 +89,16 @@ export function FailedWordsModal() {
         {/* Body */}
         <div className="flex-1 overflow-y-auto p-4 space-y-2">
           {unmastered.length === 0 && mastered.length === 0 && (
-            <div className="text-center py-12 text-slate-400">
-              <div className="text-3xl mb-2">📭</div>
-              <p className="text-sm">まだ記録がありません</p>
-              <p className="text-xs mt-1">挑战模式揭示的词会自动加入这里</p>
+            <div className="text-center py-12">
+              <div className="text-4xl mb-3">📭</div>
+              <p className="text-sm font-medium text-slate-500">苦手な単語はまだありません</p>
+              <p className="text-xs text-slate-400 mt-1.5">練習を始めましょう！</p>
+              <button
+                onClick={toggleShowFailedWords}
+                className="mt-4 text-xs px-4 py-2 rounded-xl bg-indigo-50 text-indigo-600 hover:bg-indigo-100 transition-colors font-medium"
+              >
+                練習画面に戻る
+              </button>
             </div>
           )}
 
@@ -106,7 +136,7 @@ export function FailedWordsModal() {
         {/* Footer hint */}
         <div className="px-5 py-3 border-t border-slate-100 bg-slate-50 flex-shrink-0">
           <p className="text-xs text-slate-400 text-center">
-            揭示した言葉は自動的に追加されます。挑戦モードで覚えていない単語を確認しましょう。
+            挑戦モードで揭示した言葉が自動的に追加されます。全てマスターして 🏆 を目指しましょう！
           </p>
         </div>
       </div>
