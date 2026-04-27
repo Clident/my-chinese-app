@@ -164,6 +164,18 @@ export const useDialogueStore = create<DialogueState>()(
     {
       name: 'dialogue-store',
       version: 2,
+      // SSR-safe storage: 浏览器用 localStorage，SSR 用 no-op
+      storage: createJSONStorage(() => {
+        if (typeof window === 'undefined') {
+          // SSR: 返回 no-op storage
+          return {
+            getItem: () => null,
+            setItem: () => {},
+            removeItem: () => {},
+          }
+        }
+        return localStorage
+      }),
       migrate: (persisted, version) => {
         // v1 → v2: 添加 failedWords 字段
         if (version === 1) {
