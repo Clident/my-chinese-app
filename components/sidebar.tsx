@@ -113,7 +113,10 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
           {LEVELS.map((l) => (
             <button
               key={l.id}
-              onClick={() => setHskLevel(l.id)}
+              onClick={() => {
+                const firstScene = getDialoguesByLevel(l.id)[0]?.scene
+                setHskLevel(l.id, firstScene)
+              }}
               className={`
                 w-full flex items-center justify-between px-3 py-2 rounded-xl text-sm font-medium transition-all
                 ${hskLevel === l.id

@@ -1,18 +1,5 @@
 import { create } from 'zustand'
-import { persist } from 'zustand/middleware'
-import {
-  hsk12Dialogues,
-  hsk34Dialogues,
-  hsk56Dialogues,
-} from '@/lib/hsk-fallback-data'
-
-// lazy getter — avoids Turbopack module-eval-order issue
-// (Turbopack SSR prerender sometimes accesses module before it's fully initialized)
-const LEVEL_SCENES = (): Record<HSKLevel, string> => ({
-  'HSK1-2': hsk12Dialogues[0]?.scene ?? null,
-  'HSK3-4': hsk34Dialogues[0]?.scene ?? null,
-  'HSK5-6': hsk56Dialogues[0]?.scene ?? null,
-})
+import { persist, createJSONStorage } from 'zustand/middleware'
 
 // ============================================================
 // 苦手感词条结构
@@ -52,7 +39,7 @@ interface DialogueState {
   showFailedWords: boolean   // ← 生词库 Modal 开关
 
   // ── Actions ──
-  setHskLevel: (level: HSKLevel) => void
+  setHskLevel: (level: HSKLevel, firstScene?: string) => void
   goToScene: (scene: string) => void
   goToPrevScene: (scenes: string[]) => void
   goToNextScene: (scenes: string[]) => void
@@ -85,9 +72,8 @@ export const useDialogueStore = create<DialogueState>()(
       showFailedWords: false,
 
       // ── Navigation Actions ──
-      setHskLevel: (level) => {
-        const firstScene = LEVEL_SCENES()[level]
-        set({ hskLevel: level, currentScene: firstScene })
+      setHskLevel: (level, firstScene?: string) => {
+        set({ hskLevel: level, currentScene: firstScene ?? null })
       },
 
       goToScene: (scene) => {
@@ -178,6 +164,13 @@ export const useDialogueStore = create<DialogueState>()(
     {
       name: 'dialogue-store',
       version: 2,
+      migrate: (persisted, version) => {
+        // v1 → v2: 添加 failedWords 字段
+        if (version === 1) {
+          return { ...persisted, failedWords: [] }
+        }
+        return persisted
+      },
       partialize: (state) => ({
         revealedWordsMap: state.revealedWordsMap,
         challengeMode: state.challengeMode,
