@@ -186,6 +186,11 @@ export function SceneDialogue() {
     }
   }, [currentScene, localDialogues])
 
+  // 数据层清洗：确保 scene_ja 永远有日语值（必须在 revealWord 之前声明！）
+  const currentDialogue = dialogue
+    ? { ...dialogue, scene_ja: dialogue.scene_ja ?? dialogue.scene }
+    : null
+
   const goToPrev = useCallback(() => {
     if ('speechSynthesis' in window) window.speechSynthesis.cancel()
     setIsFading(true)
@@ -221,11 +226,6 @@ export function SceneDialogue() {
       useDialogueStore.getState().resetScene(sceneKey)
     }
   }, [sceneKey])
-
-  // 数据层清洗：确保 scene_ja 永远有日语值
-  const currentDialogue = dialogue
-    ? { ...dialogue, scene_ja: dialogue.scene_ja ?? dialogue.scene }
-    : null
 
   // 开发环境：检测未翻译的 scene_ja（值等于 scene 说明没翻译）
   useEffect(() => {
@@ -645,8 +645,6 @@ export function SceneDialogue() {
           </div>
         </div>
       )}
-      {/* 苦手感リスト Modal */}
-      <FailedWordsModal />
     </div>
   )
 }
