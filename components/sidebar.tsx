@@ -7,7 +7,13 @@ import {
   hsk56Dialogues,
   type FallbackDialogue,
 } from "@/lib/hsk-fallback-data";
-import { useEffect, useRef } from "react";
+import {
+  CATEGORIES,
+  countByCategory,
+  sceneMatchesCategory,
+  type CategoryId,
+} from "@/lib/constants";
+import { useEffect, useRef, useState } from "react";
 
 const LEVELS: { id: HSKLevel; label: string; sub: string }[] = [
   { id: "HSK1-2", label: "初級", sub: "HSK 1-2" },
@@ -37,8 +43,19 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
     toggleShowFailedWords,
   } = useDialogueStore();
 
+  const [activeCategory, setActiveCategory] = useState<CategoryId>('all');
   const scenes = getDialoguesByLevel(hskLevel);
   const navRef = useRef<HTMLElement>(null);
+
+  // 切换级别时重置分类
+  useEffect(() => {
+    setActiveCategory('all');
+  }, [hskLevel]);
+
+  // 过滤场景
+  const filteredScenes = scenes.filter((s) =>
+    sceneMatchesCategory(s.scene_ja || s.scene, activeCategory)
+  );
 
   // 自动滚动到当前选中的场景
   useEffect(() => {
@@ -133,11 +150,48 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
           ))}
         </div>
 
+        {/* Filter Chips */}
+        <div className="px-3 py-2 flex gap-1.5 overflow-x-auto no-scrollbar">
+          {CATEGORIES.map((cat) => {
+            const count = countByCategory(scenes, cat.id);
+            const disabled = count === 0;
+            const isActive = activeCategory === cat.id;
+            return (
+              <button
+                key={cat.id}
+                onClick={() => !disabled && setActiveCategory(isActive ? 'all' : cat.id)}
+                disabled={disabled}
+                className={`
+                  flex-shrink-0 px-2.5 py-1 rounded-full text-xs font-medium border transition-all
+                  ${isActive
+                    ? cat.activeClass
+                    : `${cat.chipClass} opacity-50 cursor-not-allowed`
+                  }
+                  ${!disabled && !isActive ? 'hover:opacity-80 cursor-pointer' : ''}
+                `}
+                title={disabled ? 'このレベルにはまだありません' : cat.label}
+              >
+                {cat.label}
+                {cat.id !== 'all' && count > 0 && (
+                  <span className={`ml-1 text-[10px] ${isActive ? 'opacity-75' : 'text-current opacity-50'}`}>
+                    {count}
+                  </span>
+                )}
+              </button>
+            );
+          })}
+        </div>
+
         <div className="mx-3 border-t border-slate-100" />
 
         {/* 场景列表 */}
         <nav ref={navRef} className="sidebar-scroll flex-1 overflow-y-auto p-2 space-y-0.5">
-          {scenes.map((scene) => {
+          {filteredScenes.length === 0 && (
+            <div className="px-3 py-8 text-center text-xs text-slate-400">
+              この分類にシーンがありません
+            </div>
+          )}
+          {filteredScenes.map((scene) => {
             const isActive = currentScene === scene.scene;
             const revealedCount = (revealedWordsMap[scene.scene] ?? []).length;
             // 三态完成度
@@ -200,12 +254,14 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
 
         {/* Gradient fade at bottom — hint scrollable */}
         <div className="absolute bottom-0 left-0 right-0 h-8 bg-gradient-to-t from-white to-transparent pointer-events-none z-10" />
-        {/* Progress stats */}
+        {/* Progress stats — 当前级别完成数 + 百分比 */}
         <div className="px-4 py-3 border-t border-slate-100 bg-white">
           <div className="flex items-center justify-between mb-1.5">
-            <span className="text-xs text-slate-500">進捗</span>
-            <span className="text-xs font-mono text-slate-700">
-              {completedScenes}/{totalScenes}
+            <span className="text-xs text-slate-500">
+              シーン {completedScenes}
+            </span>
+            <span className="text-xs font-mono text-indigo-600 font-semibold">
+              {totalScenes > 0 ? Math.round((completedScenes / totalScenes) * 100) : 0}%
             </span>
           </div>
           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">

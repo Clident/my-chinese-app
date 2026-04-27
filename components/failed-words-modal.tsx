@@ -113,6 +113,7 @@ export function FailedWordsModal() {
                   onMaster={() => markFailedWordAsMastered(fw.word, fw.sceneKey)}
                   onRemove={() => removeFailedWord(fw.word, fw.sceneKey)}
                   onJump={() => {
+                    useDialogueStore.getState().setHighlightedWord(fw.word);
                     toggleShowFailedWords();
                     useDialogueStore.getState().goToScene(fw.sceneKey);
                   }}
@@ -132,6 +133,7 @@ export function FailedWordsModal() {
                   onMaster={() => {}}
                   onRemove={() => removeFailedWord(fw.word, fw.sceneKey)}
                   onJump={() => {
+                    useDialogueStore.getState().setHighlightedWord(fw.word);
                     toggleShowFailedWords();
                     useDialogueStore.getState().goToScene(fw.sceneKey);
                   }}

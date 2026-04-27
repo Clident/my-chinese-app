@@ -27,6 +27,8 @@ export interface SentenceRendererProps {
   onWordReveal?: (word: string, pinyin?: string) => void
   /** hover 模式下的 hovered index（外部控制，支持多 token 同时 hover） */
   hoveredIndex?: number
+  /** 跳转高亮词 */
+  highlightedWord?: string | null
 }
 
 export const SentenceRenderer = ({
@@ -37,6 +39,7 @@ export const SentenceRenderer = ({
   challengeMode = false,
   onWordReveal,
   hoveredIndex,
+  highlightedWord,
 }: SentenceRendererProps) => {
   // 分词
   const tokens = useMemo(() => tokenize(text), [text])
@@ -99,6 +102,7 @@ export const SentenceRenderer = ({
             challengeState={challengeState}
             isKeyword={isKeyword}
             onReveal={isKeyword && word && onWordReveal ? (w, p) => onWordReveal(w, p) : undefined}
+            highlightedWord={highlightedWord}
           />
         )
       })}

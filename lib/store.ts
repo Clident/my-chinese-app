@@ -38,6 +38,9 @@ interface DialogueState {
   failedWords: FailedWord[]
   showFailedWords: boolean   // ← 生词库 Modal 开关
 
+  // ── Highlight state ──
+  highlightedWord: string | null  // 跳转后高亮目标词（1.5s 后清除）
+
   // ── Actions ──
   setHskLevel: (level: HSKLevel, firstScene?: string) => void
   goToScene: (scene: string) => void
@@ -54,6 +57,7 @@ interface DialogueState {
   markFailedWordAsMastered: (word: string, sceneKey: string) => void
   clearFailedWords: () => void
   toggleShowFailedWords: () => void
+  setHighlightedWord: (word: string | null) => void
 }
 
 export const useDialogueStore = create<DialogueState>()(
@@ -70,6 +74,9 @@ export const useDialogueStore = create<DialogueState>()(
       // ── 苦手感词 ──
       failedWords: [],
       showFailedWords: false,
+
+      // ── Highlight ──
+      highlightedWord: null,
 
       // ── Navigation Actions ──
       setHskLevel: (level, firstScene?: string) => {
@@ -159,6 +166,10 @@ export const useDialogueStore = create<DialogueState>()(
 
       toggleShowFailedWords: () => {
         set((state) => ({ showFailedWords: !state.showFailedWords }))
+      },
+
+      setHighlightedWord: (word) => {
+        set({ highlightedWord: word })
       },
     }),
     {

@@ -1,4 +1,4 @@
-import React, { useState } from 'react'
+import React, { useState, useEffect } from 'react'
 import { Token } from '../lib/tokenizer'
 import { cn } from '../lib/utils'
 
@@ -39,6 +39,8 @@ export interface WordUnitProps {
   isKeyword?: boolean
   /** 揭示回调：返回 word + pinyin（用于追加到生词库） */
   onReveal?: (word: string, pinyin?: string) => void
+  /** 跳转高亮的词（跳转后该词闪一下） */
+  highlightedWord?: string | null
 }
 
 // ============================================================
@@ -61,9 +63,20 @@ export const WordUnit = ({
   challengeState,
   isKeyword = false,
   onReveal,
+  highlightedWord,
 }: WordUnitProps) => {
   const { type, text, pinyin } = token
   const [isHovered, setIsHovered] = useState(false)
+  const [isPulsing, setIsPulsing] = useState(false)
+
+  // highlightedWord 变化时触发黄色闪烁（1.5s）
+  useEffect(() => {
+    if (!highlightedWord || type !== 'hanzi') return
+    if (!highlightedWord.includes(text)) return
+    setIsPulsing(true)
+    const t = setTimeout(() => setIsPulsing(false), 1500)
+    return () => clearTimeout(t)
+  }, [highlightedWord, text, type])
 
   const isHanzi = type === 'hanzi'
   // 标点：底部对齐（与汉字脚尖齐平，槽位A空着撑高保证行高不塌）
@@ -112,6 +125,7 @@ export const WordUnit = ({
         'grid justify-items-center items-end select-none',
         'gap-y-1',
         isHidden ? 'cursor-pointer' : 'cursor-default',
+        isPulsing && 'animate-yellow-pulse',
         // hover 高亮：整格可 hover，transition 用在子元素
       )}
       style={{ gridTemplateRows: '14px 32px 4px', minWidth: '1.5rem' }}

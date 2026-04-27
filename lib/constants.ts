@@ -153,3 +153,84 @@ export function getSpeakerJa(sceneJa: string, speaker: string): string {
   const sceneMap = SPEAKER_MAP[sceneJa] ?? SPEAKER_MAP['DEFAULT']
   return sceneMap[speaker] ?? SPEAKER_MAP['DEFAULT'][speaker] ?? speaker
 }
+
+// ============================================================
+// Filter Chip 分类系统 — 关键词动态匹配
+// ============================================================
+
+export type CategoryId = 'all' | 'urgent' | 'travel' | 'work' | 'life'
+
+export interface CategoryDef {
+  id: CategoryId
+  label: string
+  icon: string
+  // 匹配关键词（scene_ja 或 scene 字段含任意一个即匹配）
+  keywords: string[]
+  // Tailwind 颜色
+  chipClass: string
+  activeClass: string
+}
+
+export const CATEGORIES: CategoryDef[] = [
+  {
+    id: 'all',
+    label: '全部',
+    icon: '',
+    keywords: [],
+    chipClass: 'bg-slate-50 text-slate-600 border-slate-200',
+    activeClass: 'bg-indigo-600 text-white border-indigo-600',
+  },
+  {
+    id: 'urgent',
+    label: '🚨 緊急',
+    icon: '🚨',
+    keywords: ['丢', '被盗', '坏了', '事故', '医生', '薬', '投诉', '警察', '警察官', '消防', '急救', '保険', 'パスポ', '丢失', '被偷', '迷子', '小偷', '急救'],
+    chipClass: 'bg-red-50 text-red-600 border-red-200',
+    activeClass: 'bg-red-500 text-white border-red-500',
+  },
+  {
+    id: 'travel',
+    label: '✈️ 旅行',
+    icon: '✈️',
+    keywords: ['空港', '机场', '値機', 'チェックイン', '保安検査', '手荷物', '搭乗', '入国', '出境', '税関', '免税', '旅行', '観光', 'ガイド', '新幹線', '高速鉄道', '地下鉄', 'タクシー', 'バス', '電車', '切符', '予約', 'ホテル', '民宿', '泊まる'],
+    chipClass: 'bg-blue-50 text-blue-600 border-blue-200',
+    activeClass: 'bg-blue-500 text-white border-blue-500',
+  },
+  {
+    id: 'work',
+    label: '💼 職能',
+    icon: '💼',
+    keywords: ['面接', '加班', '老板', '上司', '同僚', '同僚', '部下', '会議', 'プレゼン', 'PPT', '報告書', '契約', '出勤', '遅刻', '缺席', '辞职', '退職', '出差', '报销', '客户', '交渉', '社食', '飲み会', '飲み会', '下班'],
+    chipClass: 'bg-indigo-50 text-indigo-600 border-indigo-200',
+    activeClass: 'bg-indigo-500 text-white border-indigo-500',
+  },
+  {
+    id: 'life',
+    label: '❤️ 生活',
+    icon: '❤️',
+    keywords: ['告白', 'プロポーズ', '喧嘩', '別れ', '仲直', 'お見合い', '結婚', '恋愛', '、理发', '美容院', 'カット', 'カラー', '超市', '買い物', 'ネット', '配達', '家賃', '契約更新', '退去', '引っ越', 'エアコン', '水道', '電気'],
+    chipClass: 'bg-pink-50 text-pink-600 border-pink-200',
+    activeClass: 'bg-pink-500 text-white border-pink-500',
+  },
+]
+
+/**
+ * 判断一个场景(scene_ja)是否匹配某个分类
+ */
+export function sceneMatchesCategory(sceneJa: string, catId: CategoryId): boolean {
+  if (catId === 'all') return true
+  const cat = CATEGORIES.find((c) => c.id === catId)
+  if (!cat || cat.keywords.length === 0) return true
+  return cat.keywords.some((kw) => sceneJa.includes(kw))
+}
+
+/**
+ * 计算某级别下各分类的数量（用于 gray-out 无内容的 chip）
+ */
+export function countByCategory(
+  scenes: { scene_ja: string; scene: string }[],
+  catId: CategoryId
+): number {
+  if (catId === 'all') return scenes.length
+  return scenes.filter((s) => sceneMatchesCategory(s.scene_ja || s.scene, catId)).length
+}

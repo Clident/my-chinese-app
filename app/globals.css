@@ -186,3 +186,17 @@ rt {
 .sidebar-scroll::-webkit-scrollbar {
   display: none; /* Chrome/Safari */
 }
+
+/* 跳转高亮黄色闪烁 */
+@keyframes yellow-pulse {
+  0%   { background-color: transparent; }
+  20%  { background-color: #fef08a; }   /* yellow-200 */
+  60%  { background-color: #fef08a; }
+  100% { background-color: transparent; }
+}
+.animate-yellow-pulse {
+  animation: yellow-pulse 1.5s ease-out forwards;
+  border-radius: 4px;
+  padding: 2px 1px;
+  margin: -2px -1px;
+}

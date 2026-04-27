@@ -140,10 +140,12 @@ export function SceneDialogue() {
   // ── 切换场景时重置翻译状态 ──
   useEffect(() => {
     if (currentScene) setShowTranslation(false)
-  }, [currentScene])
+    // 清除跳转高亮
+    setHighlightedWord(null)
+  }, [currentScene, setHighlightedWord])
 
   // Zustand store — challengeMode 统一管理
-  const { challengeMode, failedWords, removeFailedWord, markFailedWordAsMastered, clearFailedWords } = useDialogueStore()
+  const { challengeMode, failedWords, removeFailedWord, markFailedWordAsMastered, clearFailedWords, highlightedWord, setHighlightedWord } = useDialogueStore()
 
   // 当前场景 key
   const sceneKey = dialogue?.scene ?? ''
@@ -435,6 +437,7 @@ export function SceneDialogue() {
                         challengeMode={challengeMode}
                         revealedWords={revealedWordsSet}
                         onWordReveal={revealWord}
+                        highlightedWord={highlightedWord}
                       />
 
                       {/* 朗读按钮 */}
