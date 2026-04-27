@@ -260,13 +260,22 @@ export const Sidebar = ({ open, onClose }: SidebarProps) => {
             <span className="text-xs text-slate-500">
               シーン {completedScenes}
             </span>
-            <span className="text-xs font-mono text-indigo-600 font-semibold">
+            <span className={`text-xs font-mono font-semibold ${
+              totalScenes > 0 && completedScenes === totalScenes
+                ? 'text-amber-500'
+                : 'text-indigo-600'
+            }`}>
               {totalScenes > 0 ? Math.round((completedScenes / totalScenes) * 100) : 0}%
+              {totalScenes > 0 && completedScenes === totalScenes && ' ★'}
             </span>
           </div>
           <div className="h-1.5 bg-slate-100 rounded-full overflow-hidden">
             <div
-              className="h-full bg-indigo-500 rounded-full transition-all duration-300"
+              className={`h-full rounded-full transition-all duration-300 ${
+                totalScenes > 0 && completedScenes === totalScenes
+                  ? 'bg-amber-400'
+                  : 'bg-indigo-500'
+              }`}
               style={{
                 width: totalScenes > 0 ? `${(completedScenes / totalScenes) * 100}%` : "0%",
               }}

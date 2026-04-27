@@ -25,7 +25,7 @@ import {
 } from '@/lib/hsk-fallback-data'
 import { useDialogueStore, getSceneRevealedSet } from '@/lib/store'
 import { useShallow } from 'zustand/react/shallow'
-import { getSpeakerJa } from '@/lib/constants'
+import { getSpeakerJa, getRelatedScenes } from '@/lib/constants'
 import { FailedWordsModal } from '@/components/failed-words-modal'
 
 // ============================================================
@@ -145,7 +145,7 @@ export function SceneDialogue() {
   }, [currentScene, setHighlightedWord])
 
   // Zustand store — challengeMode 统一管理
-  const { challengeMode, failedWords, removeFailedWord, markFailedWordAsMastered, clearFailedWords, highlightedWord, setHighlightedWord } = useDialogueStore()
+  const { challengeMode, failedWords, removeFailedWord, markFailedWordAsMastered, clearFailedWords, highlightedWord, setHighlightedWord, goToScene } = useDialogueStore()
 
   // 当前场景 key
   const sceneKey = dialogue?.scene ?? ''
@@ -518,6 +518,35 @@ export function SceneDialogue() {
           </div>
         </div>
       </div>
+
+      {/* 関連シーン（Scene Chain） */}
+      {dialogue && (() => {
+        const allKeys = useMemo(() => new Set(localDialogues.map(d => d.scene)), [localDialogues])
+        const related = getRelatedScenes(dialogue.scene, allKeys)
+        if (related.length === 0) return null
+        return (
+          <div className="flex items-center gap-2 flex-wrap">
+            <span className="text-xs text-slate-400 shrink-0">🔗 関連</span>
+            {related.map((rScene) => {
+              const rDialogue = localDialogues.find(d => d.scene === rScene)
+              if (!rDialogue) return null
+              return (
+                <button
+                  key={rScene}
+                  onClick={() => {
+                    goToScene(rScene)
+                    setHighlightedWord(null)
+                  }}
+                  className="inline-flex items-center gap-1 px-2.5 py-1 text-xs rounded-full border border-slate-200 bg-white hover:bg-indigo-50 hover:border-indigo-300 text-slate-600 hover:text-indigo-600 transition-colors"
+                >
+                  <span>{rDialogue.sceneEmoji}</span>
+                  <span>{rDialogue.scene_ja || rDialogue.scene}</span>
+                </button>
+              )
+            })}
+          </div>
+        )
+      })()}
 
       {/* 词汇表按钮（卡片底部） */}
       {dialogue && vocabulary.length > 0 && (
