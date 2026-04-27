@@ -112,6 +112,10 @@ export function FailedWordsModal() {
                   fw={fw}
                   onMaster={() => markFailedWordAsMastered(fw.word, fw.sceneKey)}
                   onRemove={() => removeFailedWord(fw.word, fw.sceneKey)}
+                  onJump={() => {
+                    toggleShowFailedWords();
+                    useDialogueStore.getState().goToScene(fw.sceneKey);
+                  }}
                 />
               ))}
             </>
@@ -127,6 +131,10 @@ export function FailedWordsModal() {
                   fw={fw}
                   onMaster={() => {}}
                   onRemove={() => removeFailedWord(fw.word, fw.sceneKey)}
+                  onJump={() => {
+                    toggleShowFailedWords();
+                    useDialogueStore.getState().goToScene(fw.sceneKey);
+                  }}
                 />
               ))}
             </>
@@ -148,30 +156,32 @@ function WordCard({
   fw,
   onMaster,
   onRemove,
+  onJump,
 }: {
   fw: import("@/lib/store").FailedWord;
   onMaster: () => void;
   onRemove: () => void;
+  onJump: () => void;
 }) {
   const isMastered = fw.mastered;
 
   return (
     <div
       className={`
-        flex items-start gap-3 px-4 py-3 rounded-xl border transition-all
+        flex items-start gap-2 px-4 py-3 rounded-xl border transition-all
         ${isMastered ? "border-green-200 bg-green-50 opacity-60" : "border-slate-100 bg-white hover:border-indigo-200 hover:shadow-sm"}
       `}
     >
-      {/* Word + Pinyin */}
+      {/* Word + Pinyin + scene */}
       <div className="flex-1 min-w-0">
-        <div className="flex items-baseline gap-2">
-          <span className={`text-lg font-bold ${isMastered ? "text-green-700" : "text-slate-800"}`}>
+        <div className="flex items-baseline gap-2 flex-wrap">
+          <span className={`text-lg font-bold leading-tight ${isMastered ? "text-green-700" : "text-slate-800"}`}>
             {fw.word}
           </span>
-          <span className="text-xs text-slate-400 font-mono">{fw.pinyin}</span>
+          <span className="text-xs text-slate-400 font-mono leading-tight">{fw.pinyin}</span>
         </div>
-        <div className="flex items-center gap-1.5 mt-1">
-          <span className="text-[10px] px-1.5 py-0.5 bg-slate-100 text-slate-500 rounded">
+        <div className="flex items-center gap-1.5 mt-0.5 flex-wrap">
+          <span className="text-[10px] px-1.5 py-0.5 bg-indigo-50 text-indigo-500 rounded font-medium">
             {fw.sceneJa}
           </span>
           <span className="text-[10px] text-slate-300">
@@ -182,6 +192,15 @@ function WordCard({
 
       {/* Actions */}
       <div className="flex items-center gap-1 flex-shrink-0">
+        {!isMastered && (
+          <button
+            onClick={onJump}
+            title={`「${fw.sceneJa}」のシーンに戻る`}
+            className="text-xs px-2 py-1 rounded-lg bg-indigo-100 text-indigo-600 hover:bg-indigo-200 transition-colors font-medium"
+          >
+            📍 シーンへ
+          </button>
+        )}
         {!isMastered && (
           <button
             onClick={onMaster}
